@@ -1,0 +1,58 @@
+[
+    {
+        "name": "manage_all",
+        "description": "Full management access"
+    },
+    {
+        "name": "manage_admins",
+        "description": "Can create, and read admins"
+    },
+    {
+        "name": "manage_users",
+        "description": "Can create, read, edit, and delete users"
+    },
+    {
+        "name": "manage_vendors",
+        "description": "Can create, read, edit, and delete vendors"
+    },
+    {
+        "name": "manage_users_partial",
+        "description": "Can create, and read users"
+    },
+    {
+        "name": "manage_vendors_partial",
+        "description": "Can create, and read vendors"
+    },
+    {
+        "name": "view_reports",
+        "description": "Can view system reports"
+    },
+    {
+        "name": "manage_content",
+        "description": "Can create and manage content"
+    },
+    {
+        "name": "manage_finance",
+        "description": "Can access financial systems"
+    },
+    {
+        "name": "manage_support",
+        "description": "Can handle support tickets"
+    },
+    {
+        "name": "manage_hr",
+        "description": "Can manage human resources"
+    },
+    {
+        "name": "manage_it",
+        "description": "Can manage IT infrastructure"
+    },
+    {
+        "name": "ensure_compliance",
+        "description": "Can enforce compliance rules"
+    },
+    {
+        "name": "vendor_portal_access",
+        "description": "Limited vendor access"
+    }
+]

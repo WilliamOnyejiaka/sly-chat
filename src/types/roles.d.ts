@@ -1,0 +1,15 @@
+
+const enum Roles {
+    SUPER_ADMIN,
+    ADMIN,
+    MANAGER,
+    CONTENT_ADMIN,
+    MODERATOR,
+    SUPPORT_ADMIN,
+    FINANCE_ADMIN,
+    HR_ADMIN,
+    IT_ADMIN,
+    COMPLIANCE_ADMIN,
+    VENDOR,
+    USER,
+}

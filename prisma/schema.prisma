@@ -1,0 +1,464 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Vendor {
+  id             Int                    @id @default(autoincrement())
+  firstName      String                 @db.VarChar(15)
+  lastName       String                 @db.VarChar(15)
+  password       String
+  email          String                 @unique @db.VarChar(50)
+  verified       Boolean?               @default(false)
+  active         Boolean                @default(false)
+  isOauth        Boolean                @default(false)
+  oAuthDetails   String?
+  phoneNumber    String                 @unique
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+  profilePicture VendorProfilePicture[]
+  storeDetails   StoreDetails[]
+
+  @@index([email])
+  @@index([phoneNumber])
+}
+
+model VendorProfilePicture {
+  id        Int      @id @default(autoincrement())
+  mimeType  String
+  imageUrl  String
+  publicId  String
+  size      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  vendor    Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  vendorId  Int      @unique
+
+  @@index([publicId])
+  @@index([vendorId])
+}
+
+model StoreDetails {
+  id                Int                 @id @default(autoincrement())
+  name              String              @unique
+  address           String
+  city              String
+  description       String
+  tagLine           String
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  vendor            Vendor              @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  vendorId          Int                 @unique
+  storeLogo         StoreLogo[]
+  firstStoreBanner  FirstStoreBanner[]
+  secondStoreBanner SecondStoreBanner[]
+  Product           Product[]
+  Inventory         Inventory[]
+
+  @@index([name])
+  @@index([vendorId])
+}
+
+model StoreLogo {
+  id        Int          @id @default(autoincrement())
+  mimeType  String
+  imageUrl  String
+  publicId  String
+  size      Int
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  store     StoreDetails @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  storeId   Int          @unique
+
+  @@index([publicId])
+  @@index([storeId])
+}
+
+model FirstStoreBanner {
+  id        Int          @id @default(autoincrement())
+  mimeType  String
+  imageUrl  String
+  publicId  String
+  size      Int
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  store     StoreDetails @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  storeId   Int          @unique
+
+  @@index([publicId])
+  @@index([storeId])
+}
+
+model SecondStoreBanner {
+  id        Int          @id @default(autoincrement())
+  mimeType  String
+  imageUrl  String
+  publicId  String
+  size      Int
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  store     StoreDetails @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  storeId   Int          @unique
+
+  @@index([storeId])
+  @@index([publicId])
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  CONTENT_ADMIN
+  MANAGER
+  VENDOR
+  USER
+  MODERATOR
+  SUPPORT_ADMIN
+  FINANCE_ADMIN
+  HR_ADMIN
+  IT_ADMIN
+  COMPLIANCE_ADMIN
+}
+
+model Role {
+  id             Int              @id @default(autoincrement())
+  name           String           @unique
+  description    String
+  level          Int
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  RolePermission RolePermission[]
+  Admin          Admin[]
+
+  @@index([name])
+}
+
+model Permission {
+  id              Int               @id @default(autoincrement())
+  name            String            @unique
+  description     String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  RolePermission  RolePermission[]
+  adminPermission AdminPermission[]
+
+  @@index([name])
+}
+
+model RolePermission {
+  id           Int        @id @default(autoincrement())
+  roleId       Int
+  permissionId Int
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId]) // Prevent duplicate role-permission pairs
+  @@index([permissionId])
+  @@index([roleId])
+}
+
+model Admin {
+  id                Int                   @id @default(autoincrement())
+  firstName         String                @db.VarChar(15)
+  lastName          String                @db.VarChar(15)
+  password          String
+  email             String                @unique @db.VarChar(50)
+  phoneNumber       String?               @unique
+  active            Boolean               @default(false)
+  verified          Boolean               @default(false)
+  roleId            Int?
+  role              Role?                 @relation(fields: [roleId], references: [id], onDelete: SetNull)
+  createdBy         Int                   @default(0)
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  profilePicture    AdminProfilePicture[]
+  directPermissions AdminPermission[]
+  Category          Category[]
+
+  @@index([email])
+  @@index([phoneNumber])
+  @@index([roleId])
+}
+
+model AdminProfilePicture {
+  id        Int      @id @default(autoincrement())
+  mimeType  String
+  imageUrl  String
+  publicId  String
+  size      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  admin     Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  adminId   Int      @unique
+
+  @@index([publicId])
+  @@index([adminId])
+}
+
+model AdminPermission {
+  id           Int        @id @default(autoincrement())
+  adminId      Int
+  permissionId Int
+  admin        Admin      @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([adminId, permissionId]) // Prevent duplicate admin-permission pairs
+  @@index([adminId])
+  @@index([permissionId])
+}
+
+model Customer {
+  id                 Int                  @id @default(autoincrement())
+  firstName          String
+  lastName           String
+  email              String               @unique
+  password           String
+  phoneNumber        String               @unique
+  verified           Boolean              @default(false)
+  active             Boolean              @default(true)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  Address            CustomerAddress[]
+  CustomerProfilePic CustomerProfilePic[]
+
+  @@index([email])
+  @@index([phoneNumber])
+}
+
+model CustomerAddress {
+  id         Int      @id @default(autoincrement())
+  street     String
+  city       String
+  zip        String
+  customerId Int      @unique
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([customerId])
+}
+
+model CustomerProfilePic {
+  id         Int      @id @default(autoincrement())
+  mimeType   String
+  imageUrl   String
+  publicId   String
+  size       Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customerId Int      @unique
+
+  @@index([publicId])
+  @@index([customerId])
+}
+
+model Category {
+  id            Int             @id @default(autoincrement())
+  name          String          @unique
+  priority      Int
+  active        Boolean         @default(true)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  adminId       Int?
+  admin         Admin?          @relation(fields: [adminId], references: [id], onDelete: SetNull)
+  SubCategory   SubCategory[]
+  CategoryImage CategoryImage[]
+  Product       Product[]
+
+  @@index([name])
+  @@index([adminId])
+}
+
+model SubCategory {
+  id               Int                @id @default(autoincrement())
+  name             String             @unique
+  priority         Int
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  categoryId       Int
+  category         Category           @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  SubSubCategory   SubSubCategory[]
+  SubCategoryImage SubCategoryImage[]
+  Product          Product[]
+
+  @@index([name])
+  @@index([categoryId])
+}
+
+model SubSubCategory {
+  id                  Int                   @id @default(autoincrement())
+  name                String                @unique
+  priority            Int
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  subCategoryId       Int
+  subCategory         SubCategory           @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
+  SubSubCategoryImage SubSubCategoryImage[]
+
+  @@index([name])
+  @@index([subCategoryId])
+}
+
+model SubSubCategoryImage {
+  id               Int            @id @default(autoincrement())
+  mimeType         String
+  imageUrl         String
+  publicId         String
+  size             Int
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  subSubCategory   SubSubCategory @relation(fields: [subSubCategoryId], references: [id], onDelete: Cascade)
+  subSubCategoryId Int            @unique
+
+  @@index([publicId])
+  @@index([subSubCategoryId])
+}
+
+model SubCategoryImage {
+  id            Int         @id @default(autoincrement())
+  mimeType      String
+  imageUrl      String
+  publicId      String
+  size          Int
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  subCategory   SubCategory @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
+  subCategoryId Int         @unique
+
+  @@index([publicId])
+  @@index([subCategoryId])
+}
+
+model CategoryImage {
+  id         Int      @id @default(autoincrement())
+  mimeType   String
+  imageUrl   String
+  publicId   String
+  size       Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId Int      @unique
+
+  @@index([publicId])
+  @@index([categoryId])
+}
+
+model Brand {
+  id         Int          @id @default(autoincrement())
+  name       String
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  BrandImage BrandImage[]
+
+  @@index([name])
+}
+
+model BrandImage {
+  id        Int      @id @default(autoincrement())
+  mimeType  String
+  imageUrl  String
+  publicId  String
+  size      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  brand     Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  brandId   Int      @unique
+
+  @@index([publicId])
+  @@index([brandId])
+}
+
+model AdBanner {
+  id            Int             @id @default(autoincrement())
+  title         String
+  description   String
+  cta           String
+  link          String
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  AdBannerImage AdBannerImage[]
+
+  @@index([title])
+}
+
+model AdBannerImage {
+  id         Int      @id @default(autoincrement())
+  mimeType   String
+  imageUrl   String
+  publicId   String
+  size       Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  adBannerId Int      @unique
+  adBanner   AdBanner @relation(fields: [adBannerId], references: [id], onDelete: Cascade)
+
+  @@index([adBannerId])
+  @@index([publicId])
+}
+
+model ProductImage {
+  id        Int      @id @default(autoincrement())
+  mimeType  String
+  imageUrl  String
+  publicId  String
+  size      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([publicId])
+}
+
+model Product {
+  id             Int            @id @default(autoincrement())
+  name           String
+  description    String?        @db.Text
+  price          Decimal        @db.Decimal(10, 2)
+  discountPrice  Decimal?       @db.Decimal(10, 2)
+  isAvailable    Boolean        @default(true)
+  soldCount      Int            @default(0)
+  attributes     Json?
+  stock          Int            @default(1)
+  additionalInfo Json?
+  metaData       Json?
+  averageRating  Float          @default(0)
+  reviewCount    Int            @default(0)
+  isFeatured     Boolean        @default(false)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  storeId        Int
+  store          StoreDetails   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  categoryId     Int?
+  category       Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  subcategoryId  Int?
+  subcategory    SubCategory?   @relation(fields: [subcategoryId], references: [id], onDelete: SetNull)
+  productImage   ProductImage[]
+  inventory      Inventory[]
+
+  @@index([name])
+  @@index([categoryId])
+  @@index([storeId])
+}
+
+model Inventory {
+  id                Int          @id @default(autoincrement())
+  stock             Int          @default(0)
+  soldCount         Int          @default(0)
+  lowStockThreshold Int          @default(10)
+  productId         Int
+  product           Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  storeId           Int
+  store             StoreDetails @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@index([productId])
+  @@index([storeId])
+}

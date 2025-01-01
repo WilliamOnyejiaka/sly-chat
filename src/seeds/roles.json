@@ -1,0 +1,57 @@
+[
+    {
+        "name": "SUPER_ADMIN",
+        "description": "Full access to all resources",
+        "level": 1
+    },
+    {
+        "name": "ADMIN",
+        "description": "Administrative access with limitations",
+        "level": 2
+    },
+    {
+        "name": "CONTENT_ADMIN",
+        "description": "Manages content creation and moderation",
+        "level": 3
+    },
+    {
+        "name": "FINANCE_ADMIN",
+        "description": "Oversees financial operations",
+        "level": 3
+    },
+    {
+        "name": "HR_ADMIN",
+        "description": "Manages human resources",
+        "level": 3
+    },
+    {
+        "name": "IT_ADMIN",
+        "description": "Handles IT and system-related tasks",
+        "level": 3
+    },
+    {
+        "name": "COMPLIANCE_ADMIN",
+        "description": "Ensures compliance with policies",
+        "level": 3
+    },
+    {
+        "name": "MANAGER",
+        "description": "Oversees specific teams or operations",
+        "level": 4
+    },
+    {
+        "name": "MODERATOR",
+        "description": "Manages community and content moderation",
+        "level": 5
+    },
+    {
+        "name": "VENDOR",
+        "description": "External vendors with limited access",
+        "level": 6
+    },
+    {
+        "name": "USER",
+        "description": "General user role with minimal privileges",
+        "level": 7
+    }
+]
