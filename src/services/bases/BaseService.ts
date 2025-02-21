@@ -37,7 +37,7 @@ export default class BaseService<T extends Repo = Repo> {
     }
 
     protected async getAllItems(message200: string) {
-        const repoResult = await this.repo!.getAll();
+        const repoResult = await this.repo!.getAllWithFilter();
 
         if (repoResult.error) {
             return this.responseData(repoResult.type, true, repoResult.message!);

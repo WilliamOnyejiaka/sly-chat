@@ -133,7 +133,18 @@ export default class Repo implements Repository {
         }
     }
 
-    public async getAll(filter: any = {}) {
+    public async getAll(where: any) {
+        try {
+            const items = await (prisma[this.tblName] as any).findMany({
+                where: where
+            });
+            return this.repoResponse(false, 200, null, items);
+        } catch (error) {
+            return this.handleDatabaseError(error);
+        }
+    }
+
+    public async getAllWithFilter(filter: any = {}) {
         try {
             const items = await (prisma[this.tblName] as any).findMany(filter);
             return this.repoResponse(false, 200, null, items);
@@ -152,6 +163,8 @@ export default class Repo implements Repository {
     }
 
     protected handleDatabaseError(error: any) {
+        console.log(error);
+
 
         if (error.code === "P2002") {
             // Unique constraint violation

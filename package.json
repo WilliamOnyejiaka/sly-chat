@@ -6,10 +6,8 @@
   "scripts": {
     "start": "node dist/server.js",
     "dev": "nodemon src/server.ts",
-    "build": "tsc -p . && npm run copy-views && npm run copy-seeds",
-    "copy-views": "cp -R src/views dist/views",
-    "copy-seeds": "cp -R src/seeds dist/seeds",
-    "change": "npx prisma generate && npx prisma migrate dev --name init --create-only",
+    "build": "tsc -p .",
+    "change": "npx prisma generate",
     "migrate": "npx prisma migrate deploy",
     "db-reset": "npx prisma migrate reset --force",
     "format": "npx prisma format",
@@ -20,7 +18,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "^6.0.1",
+    "@prisma/client": "^6.4.1",
     "cloudinary": "^2.5.1",
     "commander": "^12.1.0",
     "cookie-session": "^2.1.0",
@@ -37,6 +35,7 @@
     "jsonwebtoken": "^9.0.2",
     "libphonenumber-js": "^1.11.12",
     "mime-types": "^2.1.35",
+    "mongodb": "^6.13.1",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "mysql2": "^3.11.3",
@@ -74,7 +73,7 @@
     "@types/twilio": "^3.19.3",
     "@types/winston": "^2.4.4",
     "nodemon": "^3.1.7",
-    "prisma": "^6.0.1",
+    "prisma": "^6.4.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3"
   }

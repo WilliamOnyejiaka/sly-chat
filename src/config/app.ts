@@ -7,6 +7,7 @@ import http from 'http';
 import { Server } from 'socket.io';
 import { chat } from "../handlers";
 import { ISocket } from "../types";
+import { user } from "../routes";
 
 
 function createApp() {
@@ -19,15 +20,6 @@ function createApp() {
     app.use(cors());
     app.use(express.json());
     app.use(morgan("combined", { stream }));
-
-    // app.use(secureApi); TODO: uncomment this
-
-    app.post("/test2", async (req: Request, res: Response) => {
-        res.status(200).json({
-            'error': false,
-            'message': "result"
-        });
-    });
 
     const chatNamespace = io.of("/chat");
 
@@ -44,6 +36,17 @@ function createApp() {
     });
 
     chat.initialize(chatNamespace);
+
+    app.use(secureApi);
+    
+    app.use("/api/v1/user", user);
+
+    app.post("/test2", async (req: Request, res: Response) => {
+        res.status(200).json({
+            'error': false,
+            'message': "result"
+        });
+    });
 
     app.use(handleMulterErrors);
 

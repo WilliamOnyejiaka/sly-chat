@@ -1,8 +1,8 @@
 import { body, header, param, query } from "express-validator";
-import { emailValidator, numberValidator, phoneNumberValidator, zipCodeValidator } from "../../validators";
-import constants, { HttpStatus } from "../../constants";
-import UserRepo from "../../repos/bases/UserRepo";
-import Repo from "../../repos/bases/Repo";
+import { emailValidator, numberValidator, phoneNumberValidator, zipCodeValidator } from "../validators";
+import constants, { HttpStatus } from "../constants";
+import UserRepo from "../repos/bases/UserRepo";
+import Repo from "../repos/bases/Repo";
 
 const errorDetails = (message: string, statusCode: number) => {
     return JSON.stringify({
@@ -135,4 +135,3 @@ export const pageQueryIsValid = query('page').custom(validateQueryNumber('page')
 export const pageSizeQueryIsValid = query('pageSize').custom(validateQueryNumber('pageSize'));
 export const queryIsValidNumber = (queryName: string) => query(queryName).custom(validateQueryNumber(queryName));
 export const bodyBooleanIsValid = (bodyName: string) => body(bodyName).custom(isValidBoolean(`${bodyName} must be a boolean`));
-    

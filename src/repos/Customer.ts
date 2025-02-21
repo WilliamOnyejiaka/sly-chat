@@ -9,12 +9,6 @@ export default class Customer extends UserRepo {
     }
 
     public override async insert(data: any) {
-        const insertData = {
-            ...data.customerData,
-            Address: {
-                create: data.addressData
-            }
-        };
-        return await super.insert(insertData);
+        return await super.insert(data);
     }
 }

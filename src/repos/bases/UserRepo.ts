@@ -24,9 +24,7 @@ export default class UserRepo extends Repo {
             include: {
                 [this.imageRelation]: {
                     select: {
-                        imageUrl: true,
-                        publicId: true,
-                        mimeType: true
+                        imageUrl: true
                     },
                 }
             }
@@ -41,8 +39,8 @@ export default class UserRepo extends Repo {
         return await this.getUserProfile(userEmail);
     }
 
-    public async getAll(filter?: any): Promise<{ error: boolean; message: string | null; type: number; data: any; } | { error: boolean; message: string | undefined; type: number; data: {}; }> {
-        return await super.getAll({
+    public async getAllWithFilter(filter?: any): Promise<{ error: boolean; message: string | null; type: number; data: any; } | { error: boolean; message: string | undefined; type: number; data: {}; }> {
+        return await super.getAllWithFilter({
             include: {
                 [this.imageRelation]: {
                     select: {

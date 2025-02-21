@@ -1,5 +1,5 @@
 import { adminAuthorization, validateBody } from "..";
-import { pageQueryIsValid, pageSizeQueryIsValid, paramNumberIsValid } from "./validators";
+import { pageQueryIsValid, pageSizeQueryIsValid, paramNumberIsValid } from "../validators";
 
 export const anyAuth = adminAuthorization(['any']);
 export const adminAuth = adminAuthorization(['manage_all', 'manage_vendor']);

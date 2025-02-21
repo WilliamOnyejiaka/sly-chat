@@ -13,9 +13,23 @@ export default class UserService<T extends UserRepo, U extends BaseCache, V exte
     protected readonly imageService: ImageService = new ImageService();
     protected readonly storedSalt: string = env("storedSalt")!;
 
-    public constructor(repo: T, cache: U, protected readonly profilePicRepo: V, protected readonly imageFolderName: string) {
+    public constructor(repo: T, cache: U, protected readonly profilePicRepo: V) {
         super(repo);
         this.cache = cache;
+    }
+
+    public async createUser(userData: {
+        firstName: string,
+        lastName: string,
+        email: string,
+        verified: boolean,
+        active: boolean,
+        userId: number
+    }) {
+        const repoResult = await this.repo!.insert(userData);
+        const repoResultError = super.handleRepoError(repoResult);
+        if (repoResultError) return repoResultError;
+        return super.responseData(201, false, "User has been created successfully", repoResult.data);
     }
 
     protected sanitizeUserImageItems(items: any[]) {
@@ -74,7 +88,7 @@ export default class UserService<T extends UserRepo, U extends BaseCache, V exte
     }
 
     public async getAllUsers() {
-        const repoResult = await this.repo!.getAll();
+        const repoResult = await this.repo!.getAllWithFilter();
         const errorResponse = this.handleRepoError(repoResult);
         if (errorResponse) return errorResponse;
 
@@ -98,30 +112,6 @@ export default class UserService<T extends UserRepo, U extends BaseCache, V exte
             data: repoResult.data,
             pagination
         });
-    }
-
-    public async uploadProfilePicture(image: Express.Multer.File, userId: number) {
-        const repoResult = await this.repo!.getUserProfileWithId(userId);
-        const repoResultError = this.handleRepoError(repoResult);
-        if (repoResultError) {
-            if (!(await this.imageService.deleteFiles([image]))) return repoResultError;
-            return super.responseData(HttpStatus.INTERNAL_SERVER_ERROR, true, http(HttpStatus.INTERNAL_SERVER_ERROR.toString())!);
-        }
-
-        const userProfile = repoResult.data;
-        const hasProfilePic = userProfile[this.repo!.imageRelation].length > 0;
-        if (hasProfilePic) {
-            if (!(await this.imageService.deleteFiles([image]))) return super.responseData(400, true, "This user already has a profile picture");
-            return super.responseData(HttpStatus.INTERNAL_SERVER_ERROR, true, http(HttpStatus.INTERNAL_SERVER_ERROR.toString())!);
-        }
-
-        const serviceResult = await this.imageService.uploadImage<V>(
-            image,
-            userId,
-            this.profilePicRepo,
-            this.imageFolderName
-        );
-        return serviceResult;
     }
 
     private async toggleActiveStatus(userId: number, activate: boolean = true) {

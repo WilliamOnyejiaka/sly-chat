@@ -1,12 +1,11 @@
-
-import { Admin, Customer, Vendor } from "../../services";
+import { Customer, Vendor } from "../../services";
 import { UserType } from "../../types/enums";
 import BaseFacade from "./BaseFacade";
 
 export default class BaseUserFacade extends BaseFacade {
 
     protected readonly customerService: Customer = new Customer();
-    protected readonly adminService: Admin = new Admin();
+    protected readonly adminService = new Vendor();
     protected readonly vendorService: Vendor = new Vendor();
 
     protected getUserService(user: UserType) {
@@ -16,6 +15,12 @@ export default class BaseUserFacade extends BaseFacade {
             [UserType.Customer]: this.customerService,
         };
         return services[user] || null;
+    }
+
+    public async createUser(userData: any, user: UserType) {
+        const service = this.getUserService(user);
+        if (!service) return this.service.responseData(500, true, "Invalid user");
+        return await service.createUser(userData);
     }
 
     public async getUserProfileWithId(userId: number, user: UserType) {
@@ -28,13 +33,6 @@ export default class BaseUserFacade extends BaseFacade {
         const service = this.getUserService(user);
         if (!service) return this.service.responseData(500, true, "Invalid user");
         return await service.getUserProfileWithEmail(userEmail);
-    }
-
-
-    public async uploadProfilePicture(image: Express.Multer.File, userId: number, user: UserType) {
-        const service = this.getUserService(user);
-        if (!service) return this.service.responseData(500, true, "Invalid user");
-        return await service.uploadProfilePicture(image, userId);
     }
 
     public async deleteUser(userId: number, user: UserType) {

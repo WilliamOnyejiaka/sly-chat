@@ -4,9 +4,3 @@ export enum UserType {
     Vendor = "vendor",
     Customer = "customer",
 };
-
-export enum CategoryType {
-    Main = "category",
-    SubMain = "subCategory",
-    Sub = "subSubCategory"
-};
