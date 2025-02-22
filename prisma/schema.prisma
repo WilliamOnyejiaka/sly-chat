@@ -74,8 +74,8 @@ model Message {
   text      String
   timestamp DateTime @default(now())
   read      Boolean  @default(false)
-  chatId    String   @db.ObjectId
-  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  chatId    String?  @db.ObjectId
+  chat      Chat?    @relation(fields: [chatId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

@@ -181,9 +181,10 @@ chat.register("sendMessage", (socket: ISocket) => async (data: any) => {
 
         let chat = repoResult.data;
 
+
         let newMessage;
 
-        if (chat) {
+        if (!chat) {
             console.log(`💬 Creating new chat for room ${room}`);
 
             const newChat = {
@@ -203,11 +204,10 @@ chat.register("sendMessage", (socket: ISocket) => async (data: any) => {
             const newChatResult = await chatRepo.insertChatWithMessage(newChat, { senderId, text });
             const newChatResultError = handleRepoError(newChatResult);
             console.log(newChatResultError);
-            
+
             if (newChatResultError) return socket.emit('appError', newChatResultError);
 
             chat = newChatResult.data; // Get the newly created chat
-
             newMessage = chat.messages[0]; // First message in the chat
             console.log(newMessage);
 

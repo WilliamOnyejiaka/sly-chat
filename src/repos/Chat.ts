@@ -19,15 +19,64 @@ export default class Chat extends Repo {
         }
     }
 
+    // public async insertChatWithMessage(newChat: any, newMessage: any) {
+    //     try {
+    //         const newItem = await prisma.chat.create({
+    //             data: {
+    //                 sellerId: newChat.sellerId,
+    //                 productId: newChat.productId,
+    //                 productImageUrl: newChat.productImageUrl,
+    //                 storeLogoUrl: newChat.storeLogoUrl,
+    //                 storeName: newChat.storeName,
+    //                 buyerImgUrl: newChat.buyerImgUrl,
+    //                 buyerId: newChat.buyerId,
+    //                 buyerName: newChat.buyerName,
+    //                 productName: newChat.productName,
+    //                 productPrice: newChat.productPrice,
+    //                 messages: {
+    //                     create: {
+    //                         text: newMessage.text,
+    //                         senderId: newMessage.senderId
+    //                     },
+    //                 },
+    //             },
+    //             include: {
+    //                 messages: {
+    //                     select: {
+    //                         senderId: true,
+    //                         text: true,
+    //                         timestamp: true,
+    //                         read: true,
+    //                         chatId: true
+    //                     }
+    //                 }
+    //             }
+    //         });
+    //         return this.repoResponse(false, 201, null, newItem);
+    //     } catch (error) {
+    //         return this.handleDatabaseError(error);
+    //     }
+    // }
+
     public async insertChatWithMessage(newChat: any, newMessage: any) {
         try {
             const newItem = await prisma.chat.create({
                 data: {
-                    ...newChat,
+                    sellerId: newChat.sellerId,
+                    productId: newChat.productId,
+                    productImageUrl: newChat.productImageUrl,
+                    storeLogoUrl: newChat.storeLogoUrl,
+                    storeName: newChat.storeName,
+                    buyerImgUrl: newChat.buyerImgUrl,
+                    buyerId: newChat.buyerId,
+                    buyerName: newChat.buyerName,
+                    productName: newChat.productName,
+                    productPrice: newChat.productPrice,
                     messages: {
-                        create: [
-                            ...newMessage
-                        ],
+                        create: {
+                            text: newMessage.text,
+                            senderId: newMessage.senderId
+                        },
                     },
                 },
                 include: {
@@ -49,9 +98,10 @@ export default class Chat extends Repo {
     }
 
 
+
     public async getChatWithMessages(where: any) {
         try {
-            const items = await prisma.chat.findMany({
+            const items = await prisma.chat.findFirst({
                 where: where,
                 include: {
                     messages: {
