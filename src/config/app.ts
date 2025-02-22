@@ -5,7 +5,7 @@ import { validateJWT, validateUser, handleMulterErrors, secureApi, redisClientMi
 import cors from "cors";
 import http from 'http';
 import { Server } from 'socket.io';
-import { chat } from "../handlers";
+import { chat } from "../events";
 import { ISocket } from "../types";
 import { user } from "../routes";
 
@@ -29,7 +29,7 @@ function createApp() {
 
 
         // console.log(userId);
-        console.log(socket.handshake.headers['yz']);
+        // console.log(socket.handshake.headers['yz']);
 
         // next(new Error("Hello Error"));
         next();

@@ -1,3 +1,3 @@
-import chat from "./chat";
+import ChatHandler from "./ChatHandler";
 
-export { chat };
+export { ChatHandler };

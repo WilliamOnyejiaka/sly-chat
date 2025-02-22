@@ -97,6 +97,52 @@ export default class Chat extends Repo {
         }
     }
 
+    public async getSellerChatsWithMessages(sellerId: any) {
+        try {
+            const items = await prisma.chat.findMany({
+                where: {
+                    sellerId: sellerId
+                },
+                include: {
+                    messages: {
+                        select: {
+                            senderId: true,
+                            text: true,
+                            timestamp: true,
+                            read: true
+                        }
+                    }
+                }
+            });
+            return this.repoResponse(false, 200, null, items);
+        } catch (error) {
+            return this.handleDatabaseError(error);
+        }
+    }
+
+    public async getBuyerChatsWithMessages(buyerId: any) {
+        try {
+            const items = await prisma.chat.findMany({
+                where: {
+                    buyerId: buyerId
+                },
+                include: {
+                    messages: {
+                        select: {
+                            senderId: true,
+                            text: true,
+                            timestamp: true,
+                            read: true
+                        }
+                    }
+                }
+            });
+            return this.repoResponse(false, 200, null, items);
+        } catch (error) {
+            return this.handleDatabaseError(error);
+        }
+    }
+
 
 
     public async getChatWithMessages(where: any) {
