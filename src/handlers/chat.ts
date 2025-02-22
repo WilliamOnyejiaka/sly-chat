@@ -33,38 +33,37 @@ chat.register("joinChat", (socket: ISocket) => async (data: any) => {
     try {
         socket.join(room);
 
-        const repoResult = await chatRepo.getAll({ productId, sellerId, buyerId });
+        const repoResult = await chatRepo.getChatWithMessages({ productId, sellerId, buyerId });
         const repoResultError = handleRepoError(repoResult);
         if (repoResultError) socket.emit('appError', repoResultError);
         const chat = repoResult.data;
 
         if (chat) {
-            // console.log(
-            //     `📜 Chat found for room ${room}. Messages: ${repoResultlength}`
-            // )
 
-            // Mark messages as read if the user is the recipient
-            // repoResult.messages.forEach(msg => {
-            //     if (msg.senderId !== userId) {
-            //         msg.read = true
-            //     }
-            // });
+            const messages = chat.messages;
+            if (messages.length != 0) {
+                const notSenderId = messages[0].senderId == sellerId ? buyerId : sellerId;
 
+                // Mark messages as read if the user is the recipient
+                const markMessagesAsReadResult = await message.markMessagesAsRead(chat.id, notSenderId);
+                const markMessagesAsReadResultError = handleRepoError(markMessagesAsReadResult);
+                if (markMessagesAsReadResultError) return socket.emit('appError', markMessagesAsReadResultError);
 
-            // Include the additional fields when sending the chat history
-            // socket.emit('loadMessages', {
-            //     productImageUrl: repoResult.productImageUrl,
-            //     storeLogoUrl: repoResult.storeLogoUrl,
-            //     buyerImgUrl: repoResult.buyerImgUrl,
-            //     productPrice: repoResult.productPrice,
-            //     productName: repoResult.productName,
-            //     buyerName: repoResult.buyerName,
-            //     storeName: repoResult.storeName,
-            //     messages: repoResult.messages
-            // })
-            socket.to(room).emit('updateReadReceipts', {
-                'message': chat
-            });
+                //Include the additional fields when sending the chat history
+                socket.emit('loadMessages', {
+                    productImageUrl: chat.productImageUrl,
+                    storeLogoUrl: chat.storeLogoUrl,
+                    buyerImgUrl: chat.buyerImgUrl,
+                    productPrice: chat.productPrice,
+                    productName: chat.productName,
+                    buyerName: chat.buyerName,
+                    storeName: chat.storeName,
+                    messages: chat.messages
+                });
+                socket.to(room).emit('updateReadReceipts', {
+                    'message': chat
+                });
+            }
         } else {
             console.log(`⚠️ No chat history found for room ${room}`)
         }
@@ -77,80 +76,6 @@ chat.register("joinChat", (socket: ISocket) => async (data: any) => {
         });
     }
 });
-
-// chat.register("sendMessage", (socket: ISocket) => async (data: any) => {
-//     const {
-//         productId,
-//         sellerId,
-//         buyerId,
-//         senderId,
-//         text,
-//         storeName,
-//         buyerName,
-//         storeLogoUrl,
-//         buyerImgUrl,
-//         productPrice,
-//         productName,
-//         productImageUrl
-//     } = data;
-//     const room = `chat_${productId}_${sellerId}_${buyerId}`;
-
-//     console.log(
-//         `📩 User ${senderId} sending message to room ${room}: "${text}"`
-//     )
-
-//     try {
-//         let newMessage;
-
-//         const repoResult = await chatRepo.getChatWithMessages({ productId, sellerId, buyerId });
-//         const repoResultError = handleRepoError(repoResult);
-//         if (repoResultError) socket.emit('appError', repoResultError);
-//         const chat = repoResult.data;
-
-//         if (!chat) {
-//             console.log(`💬 Creating new chat for room ${room}`);
-//             const newChat = {
-//                 productId,
-//                 sellerId,
-//                 buyerId,
-//                 buyerImgUrl,
-//                 productPrice,
-//                 productName,
-//                 storeName,
-//                 buyerName,
-//                 storeLogoUrl,
-//                 productImageUrl,
-//             }
-
-//             const newChatResult = await chatRepo.insertChatWithMessage(newChat, newMessage);
-//             const newChatResultError = handleRepoError(newChatResult);
-//             if (newChatResultError) socket.emit('appError', repoResultError);
-//             newMessage = newChatResult.data.messages[0];
-//         } else {
-//             console.log(`🟡 Adding message to existing chat for room ${room}`);
-//             const createMessageResult = await message.insert(newMessage);
-//             const createMessageResultError = handleRepoError(createMessageResult);
-//             if (createMessageResultError) socket.emit('appError', createMessageResultError);
-//         }
-
-//         // Mark all existing messages as read except for the current sender's message
-//         const markMessagesAsReadResult = await message.markMessagesAsRead(chat.id, senderId);
-//         const markMessagesAsReadResultError = handleRepoError(markMessagesAsReadResult);
-//         if (markMessagesAsReadResultError) socket.emit('appError', markMessagesAsReadResultError);
-
-//         socket.to(room).emit('receiveMessage', newMessage)
-//         console.log(`✅ Message sent successfully to room ${room}`)
-//     } catch (error) {
-//         console.error(`❌ Error sending message in room ${room}:`, error);
-
-//         socket.emit('appError', {
-//             error: true,
-//             message: "Something went wrong",
-//             code: 500
-//         });
-//     }
-// });
-
 
 chat.register("sendMessage", (socket: ISocket) => async (data: any) => {
     console.log(data);
@@ -225,7 +150,11 @@ chat.register("sendMessage", (socket: ISocket) => async (data: any) => {
         if (markMessagesAsReadResultError) return socket.emit('appError', markMessagesAsReadResultError);
 
         // Emit new message event to the room
-        socket.to(room).emit('receiveMessage', newMessage);
+        socket.to(room).emit('receiveMessage', {
+            error: false,
+            data: newMessage,
+            statusCode: 200
+        });
         console.log(`✅ Message sent successfully to room ${room}`);
     } catch (error) {
         console.error(`❌ Error sending message in room ${room}:`, error);
@@ -233,9 +162,65 @@ chat.register("sendMessage", (socket: ISocket) => async (data: any) => {
         socket.emit('appError', {
             error: true,
             message: "Something went wrong",
-            code: 500
+            statusCode: 500
         });
     }
+});
+
+chat.register("markAsRead", (socket: ISocket) => async (data: any) => {
+    const { productId, sellerId, buyerId, userId } = data;
+    const room = `chat_${productId}_${sellerId}_${buyerId}`
+    console.log(
+        `👀 User ${userId} marking messages as read in room ${room}`
+    )
+
+    const repoResult = await chatRepo.getChatWithMessages({ productId, sellerId, buyerId });
+    const repoResultError = handleRepoError(repoResult);
+    if (repoResultError) socket.emit('appError', repoResultError);
+    const chat = repoResult.data;
+
+    if (chat) {
+        const messages = chat.messages;
+        if (messages.length != 0) {
+            const notSenderId = messages[0].senderId == sellerId ? buyerId : sellerId;
+            // Mark messages as read if the user is the recipient
+            const markMessagesAsReadResult = await message.markMessagesAsRead(chat.id, notSenderId);
+            const markMessagesAsReadResultError = handleRepoError(markMessagesAsReadResult);
+            if (markMessagesAsReadResultError) return socket.emit('appError', markMessagesAsReadResultError);
+            socket.to(room).emit('updateReadReceipts', chat.messages)
+            console.log(`✅ Messages marked as read in room ${room}`)
+        }
+    } else {
+        console.log(`⚠️ No chat found for room ${room} to mark as read`)
+    }
+});
+
+chat.register("deleteMessage", (socket: ISocket) => async (data: any) => {
+    const { productId, sellerId, buyerId, messageId } = data;
+    const room = `chat_${productId}_${sellerId}_${buyerId}`;
+    console.log(`🗑️ Deleting message ${messageId} in room ${room}`)
+
+    const repoResult = await message.deleteWithId(messageId);
+    const repoResultError = handleRepoError(repoResult);
+    if (repoResultError) socket.emit('appError', repoResultError);
+    socket.to(room).emit('messageDeleted', messageId);// Emit message deletion event
+    console.log(
+        `✅ Message ${messageId} deleted successfully from room ${room}`
+    );
+});
+
+chat.register("typing", (socket: ISocket) => async (data: any) => {
+    const { productId, sellerId, buyerId, senderId } = data;
+
+    const room = `chat_${productId}_${sellerId}_${buyerId}`
+    console.log(`✍️ User ${senderId} is typing in room ${room}`)
+    socket.to(room).emit('userTyping', senderId)
+});
+
+
+
+chat.register("disconnect", (socket: ISocket) => (data: any) => {
+    console.log("User disconnected: ", socket.id);
 });
 
 chat.register("testing", (socket: ISocket) => (data: any) => {

@@ -19,18 +19,20 @@ export default class Message extends Repo {
         }
     }
 
-    public async markMessagesAsRead(chatId: string, senderId: string) {
+    public async markMessagesAsRead(chatId: string, notSenderId: string) {
         try {
             const updatedMessages = await prisma.message.updateMany({
                 where: {
                     chatId: chatId,
-                    senderId: { not: senderId }, // Messages from the other user
-                    read: false, // Only update unread messages
+                    senderId: notSenderId,
+                    read: false,
                 },
                 data: {
                     read: true,
                 },
             });
+
+            console.log(updatedMessages);
 
             return this.repoResponse(false, 201, null, updatedMessages);
         } catch (error) {

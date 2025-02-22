@@ -163,9 +163,6 @@ export default class Repo implements Repository {
     }
 
     protected handleDatabaseError(error: any) {
-        console.log(error);
-
-
         if (error.code === "P2002") {
             // Unique constraint violation
             logger.error(`Unique constraint violation error for the ${this.tblName} table`);
