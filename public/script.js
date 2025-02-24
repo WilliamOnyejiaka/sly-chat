@@ -4,10 +4,10 @@ const sendBtn = document.querySelector("#send-btn");
 const displayMsg = document.querySelector("#display-msg");
 const msg = document.querySelector("#msg");
 
-const socket = io('http://localhost:3000/chat', {
+const socket = io('http://localhost:4000/chat', {
     auth: {
-        userId: 2
-    }
+        token: "jwt"
+    },
 });
 
 socket.on('connect_error', (data) => {

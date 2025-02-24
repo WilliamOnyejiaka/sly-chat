@@ -5,9 +5,9 @@ import { validateJWT, validateUser, handleMulterErrors, secureApi, redisClientMi
 import cors from "cors";
 import http from 'http';
 import { Server } from 'socket.io';
-import { chat } from "../events";
+import { chat, presence } from "../events";
 import { ISocket } from "../types";
-import { user } from "../routes";
+import { user, chat as chatRoute } from "../routes";
 
 
 function createApp() {
@@ -22,24 +22,31 @@ function createApp() {
     app.use(morgan("combined", { stream }));
 
     const chatNamespace = io.of("/chat");
+    const presenceNamespace = io.of('/presence');
 
-    chatNamespace.use((socket: ISocket, next: (err?: any) => void) => {
-        const userId = socket.handshake.auth?.userId || socket.handshake.headers?.userId;
+    // chatNamespace.use((socket: ISocket, next: (err?: any) => void) => {
+    //     const userId = socket.handshake.auth.token || socket.handshake.headers['tokens'];
+    //     // const userId = socket.handshake;
 
 
 
-        // console.log(userId);
-        // console.log(socket.handshake.headers['yz']);
+    //     console.log(userId);
+    //     // console.log(socket.handshake.headers['yz']);
 
-        // next(new Error("Hello Error"));
-        next();
-    });
+    //     // next(new Error("Hello Error"));
+    //     next();
+    // });
+
+    chatNamespace.use(validateJWT(["customer", "vendor"], env("tokenSecret")!));
+    presenceNamespace.use(validateJWT(["customer", "vendor", "admin"], env("tokenSecret")!));
 
     chat.initialize(chatNamespace);
+    presence.initialize(presenceNamespace);
 
     app.use(secureApi);
-    
+
     app.use("/api/v1/user", user);
+    app.use("/api/v1/chat", chatRoute);
 
     app.post("/test2", async (req: Request, res: Response) => {
         res.status(200).json({

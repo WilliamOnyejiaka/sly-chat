@@ -4,6 +4,16 @@ import Repo from "./bases/Repo";
 
 export default class Chat extends Repo {
 
+    private messageSelect = {
+        senderId: true,
+        text: true,
+        timestamp: true,
+        read: true,
+        recipientOnline: true,
+        chatId: true,
+        senderType: true
+    };
+
     public constructor() {
         super('chat');
     }
@@ -19,49 +29,11 @@ export default class Chat extends Repo {
         }
     }
 
-    // public async insertChatWithMessage(newChat: any, newMessage: any) {
-    //     try {
-    //         const newItem = await prisma.chat.create({
-    //             data: {
-    //                 sellerId: newChat.sellerId,
-    //                 productId: newChat.productId,
-    //                 productImageUrl: newChat.productImageUrl,
-    //                 storeLogoUrl: newChat.storeLogoUrl,
-    //                 storeName: newChat.storeName,
-    //                 buyerImgUrl: newChat.buyerImgUrl,
-    //                 buyerId: newChat.buyerId,
-    //                 buyerName: newChat.buyerName,
-    //                 productName: newChat.productName,
-    //                 productPrice: newChat.productPrice,
-    //                 messages: {
-    //                     create: {
-    //                         text: newMessage.text,
-    //                         senderId: newMessage.senderId
-    //                     },
-    //                 },
-    //             },
-    //             include: {
-    //                 messages: {
-    //                     select: {
-    //                         senderId: true,
-    //                         text: true,
-    //                         timestamp: true,
-    //                         read: true,
-    //                         chatId: true
-    //                     }
-    //                 }
-    //             }
-    //         });
-    //         return this.repoResponse(false, 201, null, newItem);
-    //     } catch (error) {
-    //         return this.handleDatabaseError(error);
-    //     }
-    // }
-
     public async insertChatWithMessage(newChat: any, newMessage: any) {
         try {
             const newItem = await prisma.chat.create({
                 data: {
+                    publicId: newChat.publicId,
                     sellerId: newChat.sellerId,
                     productId: newChat.productId,
                     productImageUrl: newChat.productImageUrl,
@@ -75,24 +47,22 @@ export default class Chat extends Repo {
                     messages: {
                         create: {
                             text: newMessage.text,
-                            senderId: newMessage.senderId
+                            senderId: newMessage.senderId,
+                            recipientOnline: newMessage.recipientOnline,
+                            senderType: newMessage.senderType
                         },
                     },
                 },
                 include: {
                     messages: {
-                        select: {
-                            senderId: true,
-                            text: true,
-                            timestamp: true,
-                            read: true,
-                            chatId: true
-                        }
+                        select: this.messageSelect
                     }
                 }
             });
             return this.repoResponse(false, 201, null, newItem);
         } catch (error) {
+            console.log(error);
+
             return this.handleDatabaseError(error);
         }
     }
@@ -105,12 +75,7 @@ export default class Chat extends Repo {
                 },
                 include: {
                     messages: {
-                        select: {
-                            senderId: true,
-                            text: true,
-                            timestamp: true,
-                            read: true
-                        }
+                        select: this.messageSelect
                     }
                 }
             });
@@ -128,22 +93,16 @@ export default class Chat extends Repo {
                 },
                 include: {
                     messages: {
-                        select: {
-                            senderId: true,
-                            text: true,
-                            timestamp: true,
-                            read: true
-                        }
+                        select: this.messageSelect
                     }
                 }
-            });
+            }); 
             return this.repoResponse(false, 200, null, items);
         } catch (error) {
             return this.handleDatabaseError(error);
         }
     }
-
-
+    
 
     public async getChatWithMessages(where: any) {
         try {
@@ -151,12 +110,7 @@ export default class Chat extends Repo {
                 where: where,
                 include: {
                     messages: {
-                        select: {
-                            senderId: true,
-                            text: true,
-                            timestamp: true,
-                            read: true
-                        }
+                        select: this.messageSelect
                     }
                 }
             });

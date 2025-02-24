@@ -5,6 +5,8 @@ import ImageService from "./Image";
 import Vendor from "./Vendor";
 import Customer from "./Customer";
 import Cloudinary from "./Cloudinary";
+import Chat from "./Chat";
+import Message from "./Message";
 
 export {
     Token,
@@ -13,5 +15,7 @@ export {
     ImageService,
     Cloudinary,
     Customer,
-    Vendor
+    Vendor,
+    Chat,
+    Message
 };

@@ -2,18 +2,15 @@ import { Request, Response, NextFunction } from 'express';
 import { Token } from '../services';
 import { http } from '../constants';
 import { TokenBlackList } from '../cache';
+import { ISocket } from '../types';
 
-const validateJWT = (types: string[], tokenSecret: string, neededData: string[] = ['data']) => async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.headers.authorization || req.headers.authorization.indexOf('Bearer ') === -1) {
-        res.status(401).json({ error: true, message: 'Missing Bearer Authorization Header' });
-        return;
-    }
-
-    const token = req.headers.authorization.split(' ')[1];
+const validateJWT = (types: string[], tokenSecret: string, neededData: string[] = ['data']) => async (socket: ISocket, next: (err?: any) => void) => {
+    const token = socket.handshake.auth.token || socket.handshake.headers['token'];
     if (!token) {
-        res.status(401).json({
+        socket.emit('appError', {
             error: true,
-            message: "Token missing"
+            message: "Token missing",
+            statusCode: 401
         });
         return;
     }
@@ -21,17 +18,19 @@ const validateJWT = (types: string[], tokenSecret: string, neededData: string[] 
     const isBlacklistedResult = await cache.get(token);
 
     if (isBlacklistedResult.error) {
-        res.status(500).json({
+        socket.emit('appError', {
             error: true,
-            message: http('500')!
+            message: http('500')!,
+            statusCode: 500
         });
         return;
     }
 
     if (isBlacklistedResult.data) {
-        res.status(401).json({
+        socket.emit('appError', {
             error: true,
-            message: "Token is invalid"
+            message: "Token is invalid",
+            statusCode: 401
         });
         return;
     }
@@ -40,16 +39,20 @@ const validateJWT = (types: string[], tokenSecret: string, neededData: string[] 
 
     if (tokenValidationResult.error) {
         const statusCode = tokenValidationResult.message == http("401") ? 401 : 400;
-        res.status(statusCode).json({
+        socket.emit('appError', {
             error: true,
-            message: tokenValidationResult.message
+            message: tokenValidationResult.message,
+            statusCode: statusCode
         });
         return;
     }
 
+    socket.locals = {};
     for (let item of neededData) {
-        res.locals[item] = tokenValidationResult.data[item];
+        socket.locals[item] = tokenValidationResult.data[item];
     }
+    socket.locals['userType'] = tokenValidationResult.data['types'][0];
+    
     next();
 }
 

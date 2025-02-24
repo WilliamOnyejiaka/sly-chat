@@ -10,6 +10,7 @@ chat.register("markAsRead", ChatHandler.markAsRead.bind(ChatHandler));
 chat.register("deleteMessage", ChatHandler.deleteMessage.bind(ChatHandler));
 chat.register("typing", ChatHandler.typing.bind(ChatHandler));
 chat.register("getUserChats", ChatHandler.getUserChats.bind(ChatHandler));
+chat.register("joinRooms", ChatHandler.joinRooms.bind(ChatHandler));
 chat.register("disconnect", ChatHandler.disconnect.bind(ChatHandler));
 
 chat.register("testing", (socket: ISocket) => (data: any) => {

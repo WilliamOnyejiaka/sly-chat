@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import prisma from ".";
 import Repo from "./bases/Repo";
+import { UserType } from "../types/enums";
 
 export default class Message extends Repo {
 
@@ -19,25 +20,39 @@ export default class Message extends Repo {
         }
     }
 
-    public async markMessagesAsRead(chatId: string, notSenderId: string) {
+    public async markMessagesAsRead(chatId: string, userType: string) {
         try {
             const updatedMessages = await prisma.message.updateMany({
                 where: {
                     chatId: chatId,
-                    senderId: notSenderId,
+                    senderType: { not: userType },
                     read: false,
                 },
                 data: {
                     read: true,
                 },
             });
-
-            console.log(updatedMessages);
-
             return this.repoResponse(false, 201, null, updatedMessages);
         } catch (error) {
             return this.handleDatabaseError(error);
         }
     }
 
+    public async updateOfflineMessages(chatIds: string[], userId: string, userType: UserType) {
+        try {
+            const updatedMessages = await prisma.message.updateMany({
+                where: {
+                    chatId: { in: chatIds },
+                    senderType: { not: userType },
+                    recipientOnline: false,
+                },
+                data: {
+                    recipientOnline: true,
+                },
+            });
+            return this.repoResponse(false, 201, null, updatedMessages);
+        } catch (error) {
+            return this.handleDatabaseError(error);
+        }
+    }
 }

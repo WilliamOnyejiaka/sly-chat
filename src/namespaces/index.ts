@@ -1,3 +1,4 @@
 import Chat from "./Chat";
+import Presence from "./Presence";
 
-export { Chat };
+export { Chat, Presence };
