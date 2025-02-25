@@ -9,7 +9,6 @@ import { chat, presence } from "../events";
 import { ISocket } from "../types";
 import { user, chat as chatRoute } from "../routes";
 
-
 function createApp() {
     const app: Application = express();
     const server = http.createServer(app);
@@ -40,8 +39,8 @@ function createApp() {
     chatNamespace.use(validateJWT(["customer", "vendor"], env("tokenSecret")!));
     presenceNamespace.use(validateJWT(["customer", "vendor", "admin"], env("tokenSecret")!));
 
-    chat.initialize(chatNamespace);
-    presence.initialize(presenceNamespace);
+    chat.initialize(chatNamespace, io);
+    presence.initialize(presenceNamespace, io);
 
     app.use(secureApi);
 

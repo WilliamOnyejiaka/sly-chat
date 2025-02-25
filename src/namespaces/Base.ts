@@ -1,15 +1,14 @@
-import { Namespace } from "socket.io";
+import { Namespace, Server } from "socket.io";
 import { ISocket } from "../types";
 
 export default class Base {
 
     public namespace?: Namespace;
     protected eventHandlers: Record<string, Function> = {};
+    protected io?: Server;
+    private onConnectionCallback?: (io: Server, socket: ISocket) => void;
 
-
-    public constructor() {
-
-    }
+    public constructor() { }
 
     public register(event: string, handler: Function) {
         this.eventHandlers[event] = handler;
@@ -17,19 +16,23 @@ export default class Base {
 
     private initializeEventHandlers(socket: ISocket) {
         for (const [event, handler] of Object.entries(this.eventHandlers)) {
-            socket.on(event, handler(socket));
+            socket.on(event, (...args) => handler(this.io!, socket, ...args));
         }
     }
 
-    public initialize(namespace: Namespace) {
-        this.namespace = namespace;
-        // Handle connections
-        this.namespace.on("connection", (socket: ISocket) => {
-            this.onConnection(socket);
-            this.initializeEventHandlers(socket);
-        });
+    public onConnection(callback: (io: Server, socket: ISocket) => void) {
+        this.onConnectionCallback = callback;
     }
 
-    protected async onConnection(socket: ISocket) {
+    public initialize(namespace: Namespace, io: Server) {
+        this.namespace = namespace;
+        this.io = io;
+
+        this.namespace.on("connection", (socket: ISocket) => {
+            if (this.onConnectionCallback) {
+                this.onConnectionCallback(io, socket);
+            }
+            this.initializeEventHandlers(socket);
+        });
     }
 }

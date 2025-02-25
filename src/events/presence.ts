@@ -4,7 +4,7 @@ import { ISocket } from "../types";
 
 const presence = new Presence();
 
-presence.register("userIsOnline", PresenceHandler.userIsOnline.bind(PresenceHandler));
+presence.onConnection(PresenceHandler.onConnection.bind(PresenceHandler));
 presence.register("disconnect", PresenceHandler.disconnect.bind(PresenceHandler));
 
 export default presence;
