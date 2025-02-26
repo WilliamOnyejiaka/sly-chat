@@ -26,12 +26,12 @@ export default class Cloudinary extends BaseService {
             uploadResult = await cloudinary.uploader.upload(filePath, { resource_type: "auto", folder: folder });
         } catch (error: any) {
             logger.error(`Error uploading file: ${error.message}`, { filePath, imageFolder });
-            return super.responseData(500, true, http('500')!);
+            return super.httpResponseData(500, true, http('500')!);
         }
 
         const url = this.getUrl(uploadResult.public_id);
 
-        return super.responseData(201, false, null, {
+        return super.httpResponseData(201, false, null, {
             imageData: uploadResult,
             url
         });
@@ -45,13 +45,13 @@ export default class Cloudinary extends BaseService {
             });
             const url = this.getUrl(uploadResult.public_id);
 
-            return super.responseData(201, false, null, {
+            return super.httpResponseData(201, false, null, {
                 imageData: uploadResult,
                 url
             });
         } catch (error: any) {
             logger.error(`Error updating file: ${error.message}`, { filePath });
-            return super.responseData(500, true, http('500')!);
+            return super.httpResponseData(500, true, http('500')!);
         }
     }
 
@@ -70,12 +70,12 @@ export default class Cloudinary extends BaseService {
         try {
             const response = await cloudinary.uploader.destroy(publicID, options);
             if (response.result == "ok") {
-                return super.responseData(200, false, "File has been deleted")
+                return super.httpResponseData(200, false, "File has been deleted")
             }
-            return super.responseData(404, true, "File not found");
+            return super.httpResponseData(404, true, "File not found");
         } catch (error: any) {
             logger.error(`Error deleting file: ${error.message}`);
-            return super.responseData(500, true, http('500')!);
+            return super.httpResponseData(500, true, http('500')!);
         }
     }
 }

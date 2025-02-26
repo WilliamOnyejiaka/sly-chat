@@ -53,7 +53,6 @@ model CustomerProfilePic {
 
 model Chat {
   id              String    @id @default(auto()) @map("_id") @db.ObjectId
-  publicId        String
   productId       String
   sellerId        String
   buyerId         String
@@ -72,7 +71,7 @@ model Chat {
 model Message {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
   senderId        String
-  senderType    String
+  senderType      String
   text            String
   timestamp       DateTime @default(now())
   read            Boolean  @default(false)

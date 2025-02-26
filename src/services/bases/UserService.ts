@@ -27,9 +27,9 @@ export default class UserService<T extends UserRepo, U extends BaseCache, V exte
         userId: number
     }) {
         const repoResult = await this.repo!.insert(userData);
-        const repoResultError = super.handleRepoError(repoResult);
+        const repoResultError = super.httpHandleRepoError(repoResult);
         if (repoResultError) return repoResultError;
-        return super.responseData(201, false, "User has been created successfully", repoResult.data);
+        return super.httpResponseData(201, false, "User has been created successfully", repoResult.data);
     }
 
     protected sanitizeUserImageItems(items: any[]) {
@@ -43,19 +43,19 @@ export default class UserService<T extends UserRepo, U extends BaseCache, V exte
     public async emailExists(email: string) {
         const emailExists = await this.repo!.getUserProfileWithEmail(email);
 
-        const errorResponse = this.handleRepoError(emailExists);
+        const errorResponse = this.httpHandleRepoError(emailExists);
         if (errorResponse) return errorResponse;
 
         const statusCode = emailExists.data ? HttpStatus.BAD_REQUEST : HttpStatus.OK;
         const error: boolean = !!emailExists.data;
 
-        return this.responseData(statusCode, error, error ? constants("service400Email")! : null);
+        return this.httpResponseData(statusCode, error, error ? constants("service400Email")! : null);
     }
 
     public async getUserProfileWithId(userId: number) {
         const repoResult = await this.repo!.getUserProfileWithId(userId);
 
-        const errorResponse = super.handleRepoError(repoResult);
+        const errorResponse = super.httpHandleRepoError(repoResult);
         if (errorResponse) return errorResponse;
 
         const statusCode = repoResult.data ? HttpStatus.OK : HttpStatus.NOT_FOUND;
@@ -64,15 +64,15 @@ export default class UserService<T extends UserRepo, U extends BaseCache, V exte
 
         if (user) {
             this.sanitizeUserImageItems([user]);
-            return super.responseData(statusCode, error, constants('200User')!, user);
+            return super.httpResponseData(statusCode, error, constants('200User')!, user);
         }
 
-        return super.responseData(statusCode, error, constants('404User')!, repoResult.data);
+        return super.httpResponseData(statusCode, error, constants('404User')!, repoResult.data);
     }
 
     public async getUserProfileWithEmail(email: string) {
         const repoResult = await this.repo!.getUserProfileWithEmail(email);
-        const errorResponse = super.handleRepoError(repoResult);
+        const errorResponse = super.httpHandleRepoError(repoResult);
         if (errorResponse) return errorResponse;
 
         const statusCode = repoResult.data ? HttpStatus.OK : HttpStatus.NOT_FOUND;
@@ -81,26 +81,26 @@ export default class UserService<T extends UserRepo, U extends BaseCache, V exte
 
         if (user) {
             this.sanitizeUserImageItems([user]);
-            return super.responseData(statusCode, error, constants('200User')!, user);
+            return super.httpResponseData(statusCode, error, constants('200User')!, user);
         }
 
-        return super.responseData(statusCode, error, constants('404User')!, user);
+        return super.httpResponseData(statusCode, error, constants('404User')!, user);
     }
 
     public async getAllUsers() {
         const repoResult = await this.repo!.getAllWithFilter();
-        const errorResponse = this.handleRepoError(repoResult);
+        const errorResponse = this.httpHandleRepoError(repoResult);
         if (errorResponse) return errorResponse;
 
         this.sanitizeUserImageItems(repoResult.data);
-        return super.responseData(HttpStatus.OK, false, constants('200Users')!, repoResult.data);
+        return super.httpResponseData(HttpStatus.OK, false, constants('200Users')!, repoResult.data);
     }
 
     public async paginateUsers(page: number, pageSize: number) {
         const skip = (page - 1) * pageSize;  // Calculate the offset
         const take = pageSize;  // Limit the number of records
         const repoResult = await this.repo!.paginate(skip, take);
-        const errorResponse = this.handleRepoError(repoResult);
+        const errorResponse = this.httpHandleRepoError(repoResult);
         if (errorResponse) return errorResponse;
 
         const totalRecords = repoResult.data.totalItems;
@@ -108,7 +108,7 @@ export default class UserService<T extends UserRepo, U extends BaseCache, V exte
 
         this.sanitizeUserImageItems(repoResult.data.items);
 
-        return super.responseData(HttpStatus.OK, false, constants('200Users')!, {
+        return super.httpResponseData(HttpStatus.OK, false, constants('200Users')!, {
             data: repoResult.data,
             pagination
         });
@@ -116,11 +116,11 @@ export default class UserService<T extends UserRepo, U extends BaseCache, V exte
 
     private async toggleActiveStatus(userId: number, activate: boolean = true) {
         const repoResult = activate ? await this.repo!.updateActiveStatus(userId, true) : await this.repo!.updateActiveStatus(userId, false);
-        const errorResponse = this.handleRepoError(repoResult);
+        const errorResponse = this.httpHandleRepoError(repoResult);
         if (errorResponse) return errorResponse;
         //Cache here
         const message = activate ? "Vendor was activated successfully" : "Vendor was deactivated successfully";
-        return super.responseData(200, false, message, repoResult.data);
+        return super.httpResponseData(200, false, message, repoResult.data);
     }
 
     public async activateUser(userId: number) {
@@ -133,11 +133,11 @@ export default class UserService<T extends UserRepo, U extends BaseCache, V exte
 
     public async deleteUser(userId: number) {
         const profileRepoResult = await this.repo!.getUserProfileWithId(userId);
-        const profileRepoResultError = super.handleRepoError(profileRepoResult);
+        const profileRepoResultError = super.httpHandleRepoError(profileRepoResult);
         if (profileRepoResultError) return profileRepoResultError;
 
         const userProfile = profileRepoResult.data;
-        if (!userProfile) return super.responseData(404, true, "User was not found");
+        if (!userProfile) return super.httpResponseData(404, true, "User was not found");
 
         const profilePictureDetails = userProfile[this.repo!.imageRelation].length > 0 ? userProfile[this.repo!.imageRelation][0] : null;
 
@@ -149,14 +149,14 @@ export default class UserService<T extends UserRepo, U extends BaseCache, V exte
         }
 
         const repoResult = await this.repo!.deleteWithId(userId);
-        const repoResultError = super.handleRepoError(repoResult);
+        const repoResultError = super.httpHandleRepoError(repoResult);
         if (repoResultError) return repoResultError;
 
         const deleted = await this.cache.delete(String(userId));
 
         return deleted ?
-            super.responseData(200, false, "User was deleted successfully") :
-            super.responseData(500, true, http('500')!);
+            super.httpResponseData(200, false, "User was deleted successfully") :
+            super.httpResponseData(500, true, http('500')!);
     }
 
 }

@@ -23,19 +23,6 @@ function createApp() {
     const chatNamespace = io.of("/chat");
     const presenceNamespace = io.of('/presence');
 
-    // chatNamespace.use((socket: ISocket, next: (err?: any) => void) => {
-    //     const userId = socket.handshake.auth.token || socket.handshake.headers['tokens'];
-    //     // const userId = socket.handshake;
-
-
-
-    //     console.log(userId);
-    //     // console.log(socket.handshake.headers['yz']);
-
-    //     // next(new Error("Hello Error"));
-    //     next();
-    // });
-
     chatNamespace.use(validateJWT(["customer", "vendor"], env("tokenSecret")!));
     presenceNamespace.use(validateJWT(["customer", "vendor", "admin"], env("tokenSecret")!));
 

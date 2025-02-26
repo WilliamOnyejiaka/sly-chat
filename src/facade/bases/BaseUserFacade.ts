@@ -19,25 +19,25 @@ export default class BaseUserFacade extends BaseFacade {
 
     public async createUser(userData: any, user: UserType) {
         const service = this.getUserService(user);
-        if (!service) return this.service.responseData(500, true, "Invalid user");
+        if (!service) return this.service.httpResponseData(500, true, "Invalid user");
         return await service.createUser(userData);
     }
 
     public async getUserProfileWithId(userId: number, user: UserType) {
         const service = this.getUserService(user);
-        if (!service) return this.service.responseData(500, true, "Invalid user");
+        if (!service) return this.service.httpResponseData(500, true, "Invalid user");
         return await service.getUserProfileWithId(userId);
     }
 
     public async getUserProfileWithEmail(userEmail: string, user: UserType) {
         const service = this.getUserService(user);
-        if (!service) return this.service.responseData(500, true, "Invalid user");
+        if (!service) return this.service.httpResponseData(500, true, "Invalid user");
         return await service.getUserProfileWithEmail(userEmail);
     }
 
     public async deleteUser(userId: number, user: UserType) {
         const service = this.getUserService(user);
-        if (!service) return this.service.responseData(500, true, "Invalid user");
+        if (!service) return this.service.httpResponseData(500, true, "Invalid user");
         return await service.deleteUser(userId);
     }
 }

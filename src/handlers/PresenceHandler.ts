@@ -2,7 +2,7 @@ import { Server } from "socket.io";
 import { OnlineCustomer, OnlineVendor } from "../cache";
 import { Chat as ChatRepo } from "./../repos";
 import { ISocket } from "../types";
-import { UserType } from "../types/enums";
+import { Namespace, UserType } from "../types/enums";
 import Handler from "./Handler";
 
 
@@ -50,6 +50,8 @@ export default class PresenceHandler {
             });
             return;
         }
+
+        io.of(Namespace.PRESENCE).emit("userIsOnline", Handler.responseData(200, false, "User is online"));
     }
 
     public static async disconnect(io: Server, socket: ISocket, data: any) {
@@ -66,7 +68,7 @@ export default class PresenceHandler {
                 });
                 return;
             }
-            const repoResult = userType == UserType.Customer ? await PresenceHandler.chatRepo.getBuyerChatsWithMessages(userId) : await PresenceHandler.chatRepo.getSellerChatsWithMessages(userId);
+            const repoResult = userType == UserType.Customer ? await PresenceHandler.chatRepo.getCustomerChatsWithMessages(userId) : await PresenceHandler.chatRepo.getVendorChatsWithMessages(userId);
             const repoResultError = Handler.handleRepoError(repoResult);
             if (repoResultError) {
                 socket.emit('appError', repoResultError);

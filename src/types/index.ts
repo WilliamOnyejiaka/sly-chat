@@ -16,3 +16,13 @@ export interface UploadResult {
 export interface ISocket extends Socket {
     locals?: any
 }
+
+export type ServiceData = { error: boolean, message: string | null, statusCode: number, data: any };
+export type ServiceResult = {
+    json: {
+        error: boolean,
+        message: string | null,
+        data: any
+    },
+    statusCode: number
+};

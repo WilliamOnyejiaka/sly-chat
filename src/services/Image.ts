@@ -46,7 +46,7 @@ export default class ImageService extends BaseService {
         const result = await compressImage(image);
 
         if (result.error) {
-            return super.responseData(
+            return super.httpResponseData(
                 500,
                 true,
                 http("500")!,
@@ -55,13 +55,13 @@ export default class ImageService extends BaseService {
 
         const deleted = await this.deleteFiles([image]);
         if (deleted) {
-            return super.responseData(500, true, http('500')!);
+            return super.httpResponseData(500, true, http('500')!);
         }
 
         const uploadResult = await this.cloudinary.uploadImage(result.outputPath!, imageFolder);
         const deletedCompressedImage = await this.deleteFiles([result.outputPath!]);
         if (deletedCompressedImage) {
-            return super.responseData(500, true, http('500')!);
+            return super.httpResponseData(500, true, http('500')!);
         }
         return uploadResult;
     }
@@ -139,12 +139,12 @@ export default class ImageService extends BaseService {
         const imageExists = await repo.getImage(parentId);
         if (imageExists.error) {
             await this.deleteFiles([image]);
-            return super.responseData(imageExists.type, true, imageExists.message!);
+            return super.httpResponseData(imageExists.type, true, imageExists.message!);
         }
 
         if (imageExists.data) {
             await this.deleteFiles([image]);
-            return super.responseData(400, true, "A record with this data already exists.");
+            return super.httpResponseData(400, true, "A record with this data already exists.");
         }
 
         const uploadResult = await this.processAndUpload(image, imageFolder);
@@ -162,13 +162,13 @@ export default class ImageService extends BaseService {
         }); // ! TODO: Incase this fails delete from cloudinary
 
         return !repoResult.error ?
-            super.responseData(
+            super.httpResponseData(
                 201,
                 false,
                 "Image was uploaded successfully",
                 { imageUrl: uploadResult.json.data.url }
             ) :
-            super.responseData(repoResult.type, true, repoResult.message as string);
+            super.httpResponseData(repoResult.type, true, repoResult.message as string);
     }
 
     public async deleteCloudinaryImage(publicID: string) {

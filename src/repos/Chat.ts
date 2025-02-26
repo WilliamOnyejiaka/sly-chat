@@ -33,7 +33,6 @@ export default class Chat extends Repo {
         try {
             const newItem = await prisma.chat.create({
                 data: {
-                    publicId: newChat.publicId,
                     sellerId: newChat.sellerId,
                     productId: newChat.productId,
                     productImageUrl: newChat.productImageUrl,
@@ -67,11 +66,11 @@ export default class Chat extends Repo {
         }
     }
 
-    public async getSellerChatsWithMessages(sellerId: any) {
+    public async getVendorChatsWithMessages(userId: any) {
         try {
             const items = await prisma.chat.findMany({
                 where: {
-                    sellerId: sellerId
+                    sellerId: userId
                 },
                 include: {
                     messages: {
@@ -85,24 +84,24 @@ export default class Chat extends Repo {
         }
     }
 
-    public async getBuyerChatsWithMessages(buyerId: any) {
+    public async getCustomerChatsWithMessages(userId: any) {
         try {
             const items = await prisma.chat.findMany({
                 where: {
-                    buyerId: buyerId
+                    buyerId: userId
                 },
                 include: {
                     messages: {
                         select: this.messageSelect
                     }
                 }
-            }); 
+            });
             return this.repoResponse(false, 200, null, items);
         } catch (error) {
             return this.handleDatabaseError(error);
         }
     }
-    
+
 
     public async getChatWithMessages(where: any) {
         try {

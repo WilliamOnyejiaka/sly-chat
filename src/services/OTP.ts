@@ -58,33 +58,33 @@ export default class OTP extends BaseService {
             const statusCode: number = sentOTP ? 200 : 500;
             const message: string = sentOTP ? "OTP has been sent successfully" : http("500")!;
 
-            return super.responseData(statusCode, error, message);
+            return super.httpResponseData(statusCode, error, message);
         }
-        return super.responseData(500, true, constants("failedCache")!);
+        return super.httpResponseData(500, true, constants("failedCache")!);
     }
 
     public async confirmOTP(otpCode: string) {
         const cacheResult = await this.cache.get(this.email);
 
         if (cacheResult.error) {
-            return super.responseData(500, cacheResult.error, http("500")!);
+            return super.httpResponseData(500, cacheResult.error, http("500")!);
         }
 
         if (!cacheResult.otpCode) {
-            return super.responseData(404, true, "OTP code was no found");
+            return super.httpResponseData(404, true, "OTP code was no found");
         }
 
         const validOTPCode = cacheResult.otpCode === otpCode;
         const message = validOTPCode ? "Email has been verified successfully" : "Invalid otp";
         const statusCode = validOTPCode ? 200 : 401;
         const error = statusCode == 200;
-        return super.responseData(statusCode, !error, message);
+        return super.httpResponseData(statusCode, !error, message);
     }
 
     public async deleteOTP() {
         const deleted: boolean = await this.cache.delete(this.email);
         const message: string | null = deleted ? null : http("500")!;
         const statusCode: number = deleted ? 500 : 200;
-        return super.responseData(statusCode, !deleted, message);
+        return super.httpResponseData(statusCode, !deleted, message);
     }
 }
