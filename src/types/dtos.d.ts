@@ -88,3 +88,43 @@ export interface CustomerDto {
     address?: CustomerAddressDto
 }
 
+export interface TransactionChat {
+    id?: string
+    productId: string,
+    vendorId: number,
+    customerId: number,
+    customerProfilePic: string,
+    productPrice: string,
+    productName: string,
+    storeName: string,
+    customerName: string,
+    storeLogoUrl: string,
+    productImageUrl: string,
+};
+
+
+// export interface Message {
+//     id?: string,
+//     senderId: number,
+//     senderType: any,
+//     text: string,
+//     timestamp?: DateTime,
+//     read?: boolean,
+//     recipientOnline: boolean,
+//     chatId: string,
+//     createdAt?: DateTime,
+//     updatedAt?: DateTime
+// }
+
+export interface TransactionMessage {
+    id?: string;
+    senderId: number;
+    senderType: any; // Enum values TODO: change this
+    text: string;
+    timestamp?: Date;
+    read?: boolean;
+    recipientOnline: boolean;
+    chatId?: string | null;
+    createdAt?: Date;
+    updatedAt?: Date;
+};

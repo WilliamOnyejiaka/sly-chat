@@ -3,6 +3,7 @@ import { Chat as ChatRepo } from "../repos";
 import { CustomerCache } from "../cache";
 import BaseService from "./bases/BaseService";
 import { ServiceResultDataType, UserType } from "../types/enums";
+import { TransactionChat, TransactionMessage } from "../types/dtos";
 
 export default class Chat extends BaseService<ChatRepo> {
 
@@ -10,23 +11,30 @@ export default class Chat extends BaseService<ChatRepo> {
         super(new ChatRepo())
     }
 
-    public async getUserChats(userId: string, userType: UserType) {
+    public async createChatWithMessage(newChat: TransactionChat, newMessage: TransactionMessage, dataType: ServiceResultDataType) {
+        const newChatResult = await this.repo!.insertChatWithMessage(newChat, newMessage);
+        const newChatResultError = super.handleRepoError(dataType, newChatResult);
+        if (newChatResultError) return newChatResultError;
+        return super.responseData(dataType, 201, false, "Chat has been created successfully", newChatResult.data);
+    }
+
+    public async getUserChats(userId: number, userType: UserType, dataType: ServiceResultDataType) {
         const repoResult = await (userType == UserType.Customer ? this.repo!.getCustomerChatsWithMessages(userId) : this.repo!.getVendorChatsWithMessages(userId));
-        const repoResultError = super.httpHandleRepoError(reportError);
+        const repoResultError = super.handleRepoError(dataType, repoResult);
         if (repoResultError) return repoResultError;
 
-        return super.httpResponseData(200, false, "Chats has been retrieved successfully", repoResult.data);
+        return super.responseData(dataType, 200, false, "Chats has been retrieved successfully", repoResult.data);
     }
 
-    public async getChat(publicId: string) {
-        const repoResult = await this.repo!.getChatWithMessages({ publicId })
-        const repoResultError = super.httpHandleRepoError(reportError);
+    public async getChat(chatId: string, dataType: ServiceResultDataType) {
+        const repoResult = await this.repo!.getChatWithMessages({ id: chatId })
+        const repoResultError = super.handleRepoError(dataType, repoResult);
         if (repoResultError) return repoResultError;
 
-        return super.httpResponseData(200, false, "Chats has been retrieved successfully", repoResult.data);
+        return super.responseData(dataType, 200, false, "Chats has been retrieved successfully", repoResult.data);
     }
 
-    public async getUserChatsWithMessages(userId: string, userType: UserType, dataType: ServiceResultDataType) {
+    public async getUserChatsWithMessages(userId: number, userType: UserType, dataType: ServiceResultDataType) {
         const repoResult = userType === UserType.Customer
             ? await this.repo!.getCustomerChatsWithMessages(userId)
             : await this.repo!.getVendorChatsWithMessages(userId);

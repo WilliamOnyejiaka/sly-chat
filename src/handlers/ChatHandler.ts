@@ -5,7 +5,9 @@ import { Namespace, UserType } from "../types/enums";
 import { Chat as ChatRepo, Message } from "./../repos";
 import Handler from "./Handler";
 import { v4 as uuidv4 } from 'uuid';
-import { Chat } from "../services/sockets";
+import { ChatManagementFacade } from "../facade";
+import { TransactionChat, TransactionMessage } from "../types/dtos";
+import { SenderType } from "@prisma/client";
 
 export default class ChatHandler {
 
@@ -13,49 +15,36 @@ export default class ChatHandler {
     private static messageRepo = new Message();
     private static readonly onlineCustomer: OnlineCustomer = new OnlineCustomer();
     private static readonly onlineVendor: OnlineVendor = new OnlineVendor();
-    private static readonly chatService = new Chat();
-
-    private static async getRecipientOnlineStatus(userType: UserType, recipientId: string) {
-        const recipientOnlineCache = await (userType === UserType.Customer
-            ? ChatHandler.onlineVendor
-            : ChatHandler.onlineCustomer).get(recipientId);
-        return recipientOnlineCache?.data ? JSON.parse(recipientOnlineCache.data) : null;
-    }
-
-    private static async getUserOnlineStatus(userType: UserType, recipientId: string) {
-        const recipientOnlineCache = await (userType === UserType.Vendor
-            ? ChatHandler.onlineVendor
-            : ChatHandler.onlineCustomer).get(recipientId);
-        return recipientOnlineCache?.data ? JSON.parse(recipientOnlineCache.data) : null;
-    }
+    private static readonly facade: ChatManagementFacade = new ChatManagementFacade();
 
     public static async onConnection(io: Server, socket: ISocket) {
         console.log("User connected: ", socket.id);
-        const userId = String(socket.locals.data.id);
+        const userId = Number(socket.locals.data.id);
         const userType = socket.locals.userType;
         console.log(`User id ${userId} , user type ${userType}`);
 
-        const onlineCacheUpdated = await ChatHandler.chatService.updateOnlineCache(userId, userType, socket);
+        const onlineCacheUpdated = await ChatHandler.facade.updateOnlineCache(String(userId), userType, socket);
         if (onlineCacheUpdated.error) {
             socket.emit('appError', onlineCacheUpdated);
             socket.disconnect(true);
             return;
         }
 
-        const getUserChatsAndOfflineMessages = await ChatHandler.chatService.getUserChatsAndOfflineMessages(userId, userType);
+        const getUserChatsAndOfflineMessages = await ChatHandler.facade.getUserChatsAndOfflineMessages(userId, userType);
         if (getUserChatsAndOfflineMessages.error) {
             socket.emit('appError', getUserChatsAndOfflineMessages);
             return;
         }
-
-        console.log(getUserChatsAndOfflineMessages.data);
-
-
+        console.log("✅ User offline messages has been retrieved");
+        
         const rooms = getUserChatsAndOfflineMessages.data.rooms;
         const offlineMessages = getUserChatsAndOfflineMessages.data.offlineMessages;
         const chat = getUserChatsAndOfflineMessages.data.chat;
 
+        console.log("🚧 Joining rooms...");
         if (rooms) socket.join(rooms);
+        console.log("✅ Rooms has been joint");
+
 
         io.of(Namespace.CHAT).to(rooms).emit("userIsOnline", Handler.responseData(200, false, "User is online"));
         socket.emit('offlineMessages', Handler.responseData(200, false, "Offline messages has been sent successfully", offlineMessages));
@@ -63,8 +52,9 @@ export default class ChatHandler {
     }
 
     public static async joinRooms(io: Server, socket: ISocket, data: any) {
-        const userId = String(socket.locals.data.id);
+        const userId = socket.locals.data.id;
         const userType = socket.locals.userType;
+        const senderType = (userType as string).toUpperCase();
         const message = "Chats has been sent successfully";
 
         if (userType == UserType.Customer) {
@@ -105,6 +95,7 @@ export default class ChatHandler {
     public static async joinChat(io: Server, socket: ISocket, data: any) {
         const userId = socket.locals.data.id;
         const userType = socket.locals.userType;
+        const senderType = (userType as string).toUpperCase();
 
         const { recipientId, chatId } = data;
 
@@ -125,7 +116,7 @@ export default class ChatHandler {
                 const notSenderId = messages[0].senderId == userId ? recipientId : userId;
 
                 // Mark messages as read if the user is the recipient
-                const markMessagesAsReadResult = await this.messageRepo.markMessagesAsRead(chat.id, notSenderId);
+                const markMessagesAsReadResult = await this.messageRepo.markMessagesAsRead(chat.id, senderType);
                 const markMessagesAsReadResultError = Handler.handleRepoError(markMessagesAsReadResult);
                 if (markMessagesAsReadResultError) {
                     socket.emit('appError', markMessagesAsReadResultError);
@@ -140,9 +131,141 @@ export default class ChatHandler {
         }
     }
 
+    // public static async sendMessage(io: Server, socket: ISocket, data: any) {
+    //     const userId = Number(socket.locals.data.id);
+    //     const userType = socket.locals.userType;
+    //     const senderType = (userType as string).toUpperCase();
+
+    //     let {
+    //         recipientId,
+    //         productId,
+    //         chatId,
+    //         text,
+    //         storeName,
+    //         customerName,
+    //         storeLogoUrl,
+    //         customerProfilePic,
+    //         productPrice,
+    //         productName,
+    //         productImageUrl
+    //     } = data;
+
+    //     if (!recipientId || !text) {
+    //         socket.emit('appError', { error: true, message: "Invalid data provided", statusCode: 400 });
+    //         return;
+    //     }
+
+    //     let customerId, vendorId;
+    //     if (userType == UserType.Customer) {
+    //         vendorId = recipientId;
+    //         customerId = userId;
+    //     } else if (userType == UserType.Vendor) {
+    //         customerId = recipientId;
+    //         vendorId = userId;
+    //     } else {
+    //         socket.emit('appError', {
+    //             error: true,
+    //             message: "Unauthorized user",
+    //             statusCode: 401
+    //         });
+    //         return;
+    //     }
+
+    //     const recipientOnlineData = await ChatHandler.facade.getRecipientOnlineStatus(userType, recipientId);
+    //     const recipientOnline = !!recipientOnlineData;
+
+    //     let newMessage;
+    //     let chat;
+    //     if (!chatId) {
+    //         console.log(`💬 Creating new chat for room `);
+
+    //         const newChat: TransactionChat = {
+    //             productId: productId as string,
+    //             vendorId,
+    //             customerId,
+    //             customerProfilePic,
+    //             productPrice,
+    //             productName,
+    //             storeName,
+    //             customerName,
+    //             storeLogoUrl,
+    //             productImageUrl,
+    //         };
+
+    //         // Create new chat with first message
+    //         const newChatResult = await ChatHandler.chatRepo.insertChatWithMessage(newChat, { senderId: userId, text, recipientOnline, senderType });
+    //         const newChatResultError = Handler.handleRepoError(newChatResult);
+
+    //         if (newChatResultError) {
+    //             socket.emit('appError', newChatResultError);
+    //             return;
+    //         }
+
+    //         chat = newChatResult.data; // Get the newly created chat
+    //         newMessage = chat.messages[0]; // First message in the chat
+    //         socket.join(chatId);
+    //         console.log(`New chat has been created`);
+
+    //         if (recipientOnlineData) {
+    //             const recipientSocketId = recipientOnlineData.chatSocketId;
+
+
+    //             console.log('Online data: ', recipientOnlineData);
+
+    //             socket.to(recipientSocketId).emit('newChat', { error: false, data: chat, statusCode: 200 });
+    //             // presenceNamespace.to(recipientSocketId).emit('newChat', { error: false, data: newMessage, statusCode: 200 });
+    //             console.log(`✅ Message sent directly to user ${recipientId} via socket ${recipientSocketId}`);
+    //         }
+    //     } else {
+    //         console.log(`📩 User ${userId} sending message to room ${chatId}: "${text}"`);
+
+    //         const repoResult = await ChatHandler.chatRepo.getChatWithMessages({ id: chatId });
+    //         const repoResultError = Handler.handleRepoError(repoResult);
+    //         if (repoResultError) {
+    //             socket.emit('appError', repoResultError);
+    //             return;
+    //         }
+
+    //         console.log(`🟡 Adding message to existing chat for room ${chatId}`);
+    //         chat = repoResult.data;
+    //         if (chat) {
+    //             newMessage = await ChatHandler.messageRepo.insert({ senderId: userId, text, chatId: chat.id, recipientOnline, senderType });
+    //             const createMessageResultError = Handler.handleRepoError(newMessage);
+    //             if (createMessageResultError) {
+    //                 socket.emit('appError', createMessageResultError);
+    //                 return;
+    //             }
+
+    //             // Mark all existing messages as read except for the sender's own messages
+    //             const markMessagesAsReadResult = await ChatHandler.messageRepo.markMessagesAsRead(chat.id, senderType);
+    //             const markMessagesAsReadResultError = Handler.handleRepoError(markMessagesAsReadResult);
+    //             if (markMessagesAsReadResultError) {
+    //                 socket.emit('appError', markMessagesAsReadResultError);
+    //                 return;
+    //             }
+    //         } else {
+    //             socket.emit('appError', {
+    //                 error: true,
+    //                 message: "Chat was not found",
+    //                 statusCode: 404
+    //             });
+    //         }
+
+    //         // Emit new message event to the room
+    //         io.of(Namespace.CHAT).to(chatId).emit('receiveMessage', {
+    //             error: false,
+    //             data: newMessage,
+    //             statusCode: 200
+    //         });
+    //         console.log(`✅ Message sent successfully to room ${chatId}`);
+    //         return;
+    //     }
+    // }
+
     public static async sendMessage(io: Server, socket: ISocket, data: any) {
-        const userId = String(socket.locals.data.id);
+        const userId = Number(socket.locals.data.id);
         const userType = socket.locals.userType;
+        const senderType = (userType as string).toUpperCase();
 
         let {
             recipientId,
@@ -150,26 +273,26 @@ export default class ChatHandler {
             chatId,
             text,
             storeName,
-            buyerName,
+            customerName,
             storeLogoUrl,
-            buyerImgUrl,
+            customerProfilePic,
             productPrice,
             productName,
             productImageUrl
         } = data;
 
         if (!recipientId || !text) {
-            socket.emit('appError', { error: true, message: "Invalid data provided", statusCode: 400 });
+            socket.emit('appError', Handler.responseData(400, true, "Invalid data provided"));
             return;
         }
 
-        let buyerId, sellerId;
+        let customerId, vendorId;
         if (userType == UserType.Customer) {
-            sellerId = recipientId;
-            buyerId = userId;
+            vendorId = recipientId;
+            customerId = userId;
         } else if (userType == UserType.Vendor) {
-            buyerId = recipientId;
-            sellerId = userId;
+            customerId = recipientId;
+            vendorId = userId;
         } else {
             socket.emit('appError', {
                 error: true,
@@ -179,98 +302,87 @@ export default class ChatHandler {
             return;
         }
 
-        const recipientOnlineData = await ChatHandler.getRecipientOnlineStatus(userType, recipientId);
+        const statusResult = await ChatHandler.facade.getRecipientOnlineStatus(userType, recipientId);
+        if (statusResult.error) {
+            socket.emit('appError', statusResult);
+            return;
+        }
+
+        const recipientOnlineData = statusResult.data;
         const recipientOnline = !!recipientOnlineData;
 
-        let newMessage;
         let chat;
         if (!chatId) {
             console.log(`💬 Creating new chat for room `);
 
-            const newChat = {
-                productId,
-                sellerId,
-                buyerId,
-                buyerImgUrl,
+            const newChat: TransactionChat = {
+                productId: productId as string,
+                vendorId,
+                customerId,
+                customerProfilePic,
                 productPrice,
                 productName,
                 storeName,
-                buyerName,
+                customerName,
                 storeLogoUrl,
                 productImageUrl,
             };
+            const newMessage: TransactionMessage = { senderId: userId, text, recipientOnline, senderType };
 
             // Create new chat with first message
-            const newChatResult = await ChatHandler.chatRepo.insertChatWithMessage(newChat, { senderId: userId, text, recipientOnline, senderType: userType });
-            const newChatResultError = Handler.handleRepoError(newChatResult);
-
-            if (newChatResultError) {
-                socket.emit('appError', newChatResultError);
+            const newChatResult = await ChatHandler.facade.createChatWithMessage(newChat, newMessage);
+            if (newChatResult.error) {
+                socket.emit('appError', newChatResult);
                 return;
             }
 
             chat = newChatResult.data; // Get the newly created chat
-            newMessage = chat.messages[0]; // First message in the chat
+            chatId = chat.id;
             socket.join(chatId);
-            console.log(`New chat has been created`);
+            console.log(`✅ New chat has been created`);
 
             if (recipientOnlineData) {
                 const recipientSocketId = recipientOnlineData.chatSocketId;
-
-
-                console.log('Online data: ', recipientOnlineData);
-
-                socket.to(recipientSocketId).emit('newChat', { error: false, data: newMessage, statusCode: 200 });
-                // presenceNamespace.to(recipientSocketId).emit('newChat', { error: false, data: newMessage, statusCode: 200 });
+                io.sockets.sockets.get(recipientSocketId)?.join(chatId); //💬 Forcing the the recipient to join the room 
+                socket.to(recipientSocketId).emit('newChat', Handler.responseData(200, false, chat));
                 console.log(`✅ Message sent directly to user ${recipientId} via socket ${recipientSocketId}`);
+                return;
             }
         } else {
             console.log(`📩 User ${userId} sending message to room ${chatId}: "${text}"`);
 
-            const repoResult = await ChatHandler.chatRepo.getChatWithMessages({ id: chatId });
-            const repoResultError = Handler.handleRepoError(repoResult);
-            if (repoResultError) {
-                socket.emit('appError', repoResultError);
+            const chatResult = await ChatHandler.facade.socketGetChat(chatId);
+            if (chatResult.error) {
+                socket.emit('appError', chatResult);
                 return;
             }
 
             console.log(`🟡 Adding message to existing chat for room ${chatId}`);
-            chat = repoResult.data;
+            chat = chatResult.data;
             if (chat) {
-                newMessage = await ChatHandler.messageRepo.insert({ senderId: userId, text, chatId: chat.id, recipientOnline, senderType: userType });
-                const createMessageResultError = Handler.handleRepoError(newMessage);
-                if (createMessageResultError) {
-                    socket.emit('appError', createMessageResultError);
+                const newMessage = await ChatHandler.facade.socketCreateMessage(userId, text, chatId, recipientOnline, senderType);
+                if (newMessage.error) {
+                    socket.emit('appError', newMessage);
                     return;
                 }
 
                 // Mark all existing messages as read except for the sender's own messages
-                const markMessagesAsReadResult = await ChatHandler.messageRepo.markMessagesAsRead(chat.id, userId);
-                const markMessagesAsReadResultError = Handler.handleRepoError(markMessagesAsReadResult);
-                if (markMessagesAsReadResultError) {
-                    socket.emit('appError', markMessagesAsReadResultError);
+                const markMessagesAsReadResult = await ChatHandler.facade.socketMarkMessageAsRead(chat.id, senderType);
+                if (markMessagesAsReadResult.error) {
+                    socket.emit('appError', markMessagesAsReadResult);
                     return;
                 }
-            } else {
-                socket.emit('appError', {
-                    error: true,
-                    message: "Chat was not found",
-                    statusCode: 404
-                });
-            }
 
-            // Emit new message event to the room
-            io.of(Namespace.CHAT).to(chatId).emit('receiveMessage', {
-                error: false,
-                data: newMessage,
-                statusCode: 200
-            });
-            console.log(`✅ Message sent successfully to room ${chatId}`);
-            return;
+                // Emit new message event to the room
+                io.of(Namespace.CHAT).to(chatId).emit('receiveMessage', Handler.responseData(200, false, null, newMessage));
+                console.log(`✅ Message sent successfully to room ${chatId}`);
+                return;
+            } else {
+                socket.emit('appError', Handler.responseData(404, true, "Chat was not found"));
+                return;
+            }
         }
     }
-
-
 
     public static async markAsRead(io: Server, socket: ISocket, data: any) {
         const userId = String(socket.locals.data.id);
@@ -338,7 +450,7 @@ export default class ChatHandler {
     }
 
     public static async getUserChats(io: Server, socket: ISocket, data: any) {
-        const userId = String(socket.locals.data.id);
+        const userId = Number(socket.locals.data.id);
         const userType = socket.locals.userType;
 
         const message = "Chats has been sent successfully";
@@ -377,10 +489,10 @@ export default class ChatHandler {
 
     public static async disconnect(io: Server, socket: ISocket, data: any) {
         try {
-            const userId = String(socket.locals.data.id);
+            const userId = Number(socket.locals.data.id);
             const userType = socket.locals.userType;
 
-            const unsuccessful = await (userType == UserType.Customer ? ChatHandler.onlineCustomer : ChatHandler.onlineVendor).delete(userId);
+            const unsuccessful = await (userType == UserType.Customer ? ChatHandler.onlineCustomer : ChatHandler.onlineVendor).delete(String(userId));
             if (!unsuccessful) {
                 socket.emit('appError', {
                     error: true,

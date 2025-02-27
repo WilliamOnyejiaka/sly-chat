@@ -25,7 +25,7 @@ export default class Message extends Repo {
             const updatedMessages = await prisma.message.updateMany({
                 where: {
                     chatId: chatId,
-                    senderType: { not: userType },
+                    senderType: { not: userType as any },
                     read: false,
                 },
                 data: {
@@ -38,12 +38,12 @@ export default class Message extends Repo {
         }
     }
 
-    public async updateOfflineMessages(chatIds: string[], userId: string, userType: UserType) {
+    public async updateOfflineMessages(chatIds: string[], userType: string) {
         try {
             const updatedMessages = await prisma.message.updateMany({
                 where: {
                     chatId: { in: chatIds },
-                    senderType: { not: userType },
+                    senderType: { not: userType as any},
                     recipientOnline: false,
                 },
                 data: {

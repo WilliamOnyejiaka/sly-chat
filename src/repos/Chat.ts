@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import prisma from ".";
 import Repo from "./bases/Repo";
+import { TransactionChat } from "../types/dtos";
 
 export default class Chat extends Repo {
 
@@ -11,7 +12,8 @@ export default class Chat extends Repo {
         read: true,
         recipientOnline: true,
         chatId: true,
-        senderType: true
+        senderType: true,
+        messageImages: true
     };
 
     public constructor() {
@@ -29,18 +31,18 @@ export default class Chat extends Repo {
         }
     }
 
-    public async insertChatWithMessage(newChat: any, newMessage: any) {
+    public async insertChatWithMessage(newChat: TransactionChat, newMessage: any) {
         try {
             const newItem = await prisma.chat.create({
                 data: {
-                    sellerId: newChat.sellerId,
+                    vendorId: newChat.vendorId,
                     productId: newChat.productId,
                     productImageUrl: newChat.productImageUrl,
                     storeLogoUrl: newChat.storeLogoUrl,
                     storeName: newChat.storeName,
-                    buyerImgUrl: newChat.buyerImgUrl,
-                    buyerId: newChat.buyerId,
-                    buyerName: newChat.buyerName,
+                    customerProfilePic: newChat.customerProfilePic,
+                    customerId: newChat.customerId,
+                    customerName: newChat.customerName,
                     productName: newChat.productName,
                     productPrice: newChat.productPrice,
                     messages: {
@@ -66,11 +68,11 @@ export default class Chat extends Repo {
         }
     }
 
-    public async getVendorChatsWithMessages(userId: any) {
+    public async getVendorChatsWithMessages(userId: number) {
         try {
             const items = await prisma.chat.findMany({
                 where: {
-                    sellerId: userId
+                    vendorId: userId
                 },
                 include: {
                     messages: {
@@ -84,11 +86,11 @@ export default class Chat extends Repo {
         }
     }
 
-    public async getCustomerChatsWithMessages(userId: any) {
+    public async getCustomerChatsWithMessages(userId: number) {
         try {
             const items = await prisma.chat.findMany({
                 where: {
-                    buyerId: userId
+                    customerId: userId
                 },
                 include: {
                     messages: {

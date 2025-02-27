@@ -3,6 +3,7 @@ import { validationResult } from "express-validator";
 import Controller from "./bases/Controller";
 import { ChatManagementFacade } from "../facade";
 import { UserType } from "../types/enums";
+import { ServiceResult } from "../types";
 
 export default class Chat {
 
@@ -18,7 +19,7 @@ export default class Chat {
 
         const userId = res.locals.data.id;
         const userType = res.locals.data.userType;
-        const facadeResult = await Chat.facade.getUserChats(userId, userType);
+        const facadeResult = await Chat.facade.httpGetUserChats(userId, userType);
         Controller.response(res, facadeResult);
     }
 
@@ -31,8 +32,8 @@ export default class Chat {
         }
 
         const chatId = req.params.chatId;
-        const facadeResult = await Chat.facade.getChat(chatId);
-        Controller.response(res, facadeResult);
+        const facadeResult = await Chat.facade.httpGetChat(chatId);
+        Controller.response(res, facadeResult as ServiceResult);
     }
 
     public static async deleteMessage(req: Request, res: Response) {

@@ -45,30 +45,30 @@ export default class Chat extends Base {
         return super.responseData(200, false);
     }
 
-    public async getUserChatsAndOfflineMessages(userId: string, userType: UserType): Promise<ServiceData> {
-        const repoResult = userType === UserType.Customer
-            ? await this.chatRepo.getCustomerChatsWithMessages(userId)
-            : await this.chatRepo.getVendorChatsWithMessages(userId);
+    // public async getUserChatsAndOfflineMessages(userId: string, userType: UserType): Promise<ServiceData> {
+    //     const repoResult = userType === UserType.Customer
+    //         ? await this.chatRepo.getCustomerChatsWithMessages(userId)
+    //         : await this.chatRepo.getVendorChatsWithMessages(userId);
 
-        const repoResultError = super.handleRepoError(repoResult);
-        if (repoResultError) return repoResultError;
+    //     const repoResultError = super.handleRepoError(repoResult);
+    //     if (repoResultError) return repoResultError;
 
-        const chat = repoResult.data;
-        let offlineMessages = chat.flatMap((item: any) => item.messages.filter((message: any) => message.recipientOnline === false));
+    //     const chat = repoResult.data;
+    //     let offlineMessages = chat.flatMap((item: any) => item.messages.filter((message: any) => message.recipientOnline === false));
 
-        const chatIds = offlineMessages.map((item: any) => item.chatId);
-        const updateOfflineMessagesRepoResult = await this.messageRepo.updateOfflineMessages(chatIds, userId, userType);
-        const updateOfflineMessagesRepoResultError = super.handleRepoError(updateOfflineMessagesRepoResult);
-        if (updateOfflineMessagesRepoResultError) return updateOfflineMessagesRepoResultError;
+    //     const chatIds = offlineMessages.map((item: any) => item.chatId);
+    //     const updateOfflineMessagesRepoResult = await this.messageRepo.updateOfflineMessages(chatIds, userId, userType);
+    //     const updateOfflineMessagesRepoResultError = super.handleRepoError(updateOfflineMessagesRepoResult);
+    //     if (updateOfflineMessagesRepoResultError) return updateOfflineMessagesRepoResultError;
 
-        offlineMessages = offlineMessages.map((item: any) => {
-            item.recipientOnline = true;
-            return item;
-        });
+    //     offlineMessages = offlineMessages.map((item: any) => {
+    //         item.recipientOnline = true;
+    //         return item;
+    //     });
 
-        const rooms = chat.length > 0 ? chat.map((item: any) => item.id) : null;
-        return super.responseData(200, false, null, { chat, offlineMessages, rooms });
-    }
+    //     const rooms = chat.length > 0 ? chat.map((item: any) => item.id) : null;
+    //     return super.responseData(200, false, null, { chat, offlineMessages, rooms });
+    // }
 
     public async getChatWithMessages(id: string): Promise<ServiceData> {
         const repoResult = await this.chatRepo.getChatWithMessages({ id });

@@ -51,33 +51,48 @@ model CustomerProfilePic {
   Customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 }
 
+enum SenderType {
+  VENDOR
+  CUSTOMER
+}
+
 model Chat {
-  id              String    @id @default(auto()) @map("_id") @db.ObjectId
-  productId       String
-  sellerId        String
-  buyerId         String
-  productImageUrl String
-  productPrice    String
-  productName     String
-  storeLogoUrl    String
-  buyerImgUrl     String
-  buyerName       String
-  storeName       String
-  messages        Message[]
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id                 String    @id @default(auto()) @map("_id") @db.ObjectId
+  productId          String
+  vendorId           Int
+  customerId         Int
+  productImageUrl    String
+  productPrice       String
+  productName        String
+  storeLogoUrl       String
+  customerProfilePic String
+  customerName       String
+  storeName          String
+  messages           Message[]
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 }
 
 model Message {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  senderId        String
-  senderType      String
+  id              String         @id @default(auto()) @map("_id") @db.ObjectId
+  senderId        Int
+  senderType      SenderType
   text            String
-  timestamp       DateTime @default(now())
-  read            Boolean  @default(false)
-  recipientOnline Boolean  @default(true)
-  chatId          String?  @db.ObjectId
-  chat            Chat?    @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  timestamp       DateTime       @default(now())
+  read            Boolean        @default(false)
+  recipientOnline Boolean        @default(true)
+  chatId          String?        @db.ObjectId
+  chat            Chat?          @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  messageImages   MessageImage[]
+}
+
+model MessageImage {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  imageUrl  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  messageId String   @unique @db.ObjectId
+  Message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
 }

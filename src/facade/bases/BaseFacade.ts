@@ -5,10 +5,9 @@ import { ServiceData, ServiceResult } from "../../types";
 
 export default class BaseFacade {
 
-    protected readonly service: BaseService = new BaseService();
+    public readonly service: BaseService = new BaseService();
 
     public constructor(protected invalidTypeMessage: string = "Invalid type") {
-
     }
 
     protected handleSocketFacadeResultError(servicesResult: ServiceData) {
