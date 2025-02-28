@@ -43,4 +43,11 @@ export default class Chat extends BaseService<ChatRepo> {
         if (repoResultError) return repoResultError;
         return super.responseData(dataType, 200, false, "Chats and messages has been retrieved successfully", repoResult.data);
     }
+
+    public async getChatIds(userId: number,userType: UserType,dataType: ServiceResultDataType){
+        const repoResult = await this.repo!.getChatIds(userId,userType);
+        const repoResultError = super.handleRepoError(dataType, repoResult);
+        if (repoResultError) return repoResultError;
+        return super.responseData(dataType, 200, false, "Chat ids has been retrieved successfully", repoResult.data);
+    }
 }

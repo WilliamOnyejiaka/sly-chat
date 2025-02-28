@@ -38,9 +38,16 @@ export default class ChatManagementFacade extends BaseFacade {
         return await this.chatService.getChat(chatId, ServiceResultDataType.SOCKET) as ServiceData;
     }
 
-    public async deleteMessage(messageId: string) {
-        return await this.messageService.deleteMessage(messageId);
+    public async deleteMessage(messageId: string, dataType: ServiceResultDataType) {
+        return await this.messageService.deleteMessage(messageId, dataType);
+    }
 
+    public async httpDeleteMessage(messageId: string) {
+        return await this.deleteMessage(messageId, ServiceResultDataType.HTTP) as ServiceResult;
+    }
+
+    public async socketDeleteMessage(messageId: string) {
+        return await this.deleteMessage(messageId, ServiceResultDataType.SOCKET) as ServiceData;
     }
 
     public async getUserChatsAndOfflineMessages(userId: number, userType: UserType): Promise<ServiceData> {
@@ -122,7 +129,7 @@ export default class ChatManagementFacade extends BaseFacade {
         return (await this.messageService.markMessagesAsRead(chatId, senderType, dataType));
     }
 
-    public async socketMarkMessageAsRead(chatId: string, senderType: any): Promise<ServiceData> {
+    public async socketMarkMessagesAsRead(chatId: string, senderType: any): Promise<ServiceData> {
         return (await this.markMessagesAsRead(chatId, senderType, ServiceResultDataType.SOCKET)) as ServiceData;
     }
 }

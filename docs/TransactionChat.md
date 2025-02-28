@@ -2,6 +2,9 @@
 
 This document provides an extensive explanation of all the events supported in the chat system. The system uses **Socket.io** for real-time communication and follows a **namespace-based structure** to manage different types of connections.
 
+## **Production Url**
+https://sly-chat.onrender.com
+
 ## **Overview**
 
 The chat system is designed to facilitate real-time messaging between **customers** and **vendors** in an eCommerce platform.  
@@ -129,18 +132,7 @@ A user joins a chat room with another user. This allows them to receive real-tim
 
 ```json
 {
-  "productId": "12345",
-  "userType": "customer",
-  "text": "Are you crazy?",
-  "storeName": "Tech Haven",
-  "customerName": "John Doe",
-  "storeLogoUrl": "https://example.com/store-logo.png",
-  "chatIds": "1770ddc5-429c-4bdf-ae87-249da802d6c0",
-  "customerProfilePic": "https://example.com/buyer-profile.jpg",
-  "productPrice": "299",
-  "productName": "Wireless Headphones",
-  "recipientId": 2,
-  "productImageUrl": "https://example.com/product-image.jpg"
+  "chatId": "67c04c9f108c8c9aa29b1d11"
 }
 ```
 
@@ -149,34 +141,379 @@ A user joins a chat room with another user. This allows them to receive real-tim
 - Fetch the chat from the database.
 - Mark previous unread messages as **read**.
 - Emit **"loadMessages"** to the user with chat history.
-- Notify other users in the room with **"updateReadReceipts"**.
 
 ### **Example Response:**
 
-#### **Success Response (Messages Loaded)**
+#### **loadMessages emit**
 
 ```json
 {
-  "error": false,
-  "message": "Chats have been loaded",
   "statusCode": 200,
-  "data": { ...chatDetails }
-}
-```
-
-#### **Error Response (Chat Not Found)**
-
-```json
-{
-  "error": true,
-  "message": "Chat was not found",
-  "statusCode": 404
+  "error": false,
+  "message": "Chats has been loaded",
+  "data": {
+    "id": "67c04c9f108c8c9aa29b1d11",
+    "productId": "12345",
+    "vendorId": 2,
+    "customerId": 2,
+    "productImageUrl": "https://example.com/product-image.jpg",
+    "productPrice": "299.99",
+    "productName": "Wireless Headphones",
+    "storeLogoUrl": "https://example.com/store-logo.png",
+    "customerProfilePic": "https://example.com/buyer-profile.jpg",
+    "customerName": "John Doe",
+    "storeName": "Tech Haven",
+    "createdAt": "2025-02-27T11:29:35.099Z",
+    "updatedAt": "2025-02-27T11:29:35.099Z",
+    "messages": [
+      {
+        "senderId": 2,
+        "text": "Are you crazy?",
+        "timestamp": "2025-02-27T11:29:35.099Z",
+        "read": true,
+        "recipientOnline": true,
+        "chatId": "67c04c9f108c8c9aa29b1d11",
+        "senderType": "CUSTOMER",
+        "messageImages": []
+      },
+      {
+        "senderId": 2,
+        "text": "Are you crazy?",
+        "timestamp": "2025-02-27T11:41:34.161Z",
+        "read": true,
+        "recipientOnline": true,
+        "chatId": "67c04c9f108c8c9aa29b1d11",
+        "senderType": "VENDOR",
+        "messageImages": []
+      },
+      {
+        "senderId": 2,
+        "text": "Are you crazy?",
+        "timestamp": "2025-02-27T11:42:17.134Z",
+        "read": true,
+        "recipientOnline": true,
+        "chatId": "67c04c9f108c8c9aa29b1d11",
+        "senderType": "CUSTOMER",
+        "messageImages": []
+      },
+      {
+        "senderId": 2,
+        "text": "Hello",
+        "timestamp": "2025-02-27T11:44:47.287Z",
+        "read": true,
+        "recipientOnline": true,
+        "chatId": "67c04c9f108c8c9aa29b1d11",
+        "senderType": "VENDOR",
+        "messageImages": []
+      },
+      {
+        "senderId": 2,
+        "text": "Hello",
+        "timestamp": "2025-02-27T12:38:36.425Z",
+        "read": true,
+        "recipientOnline": true,
+        "chatId": "67c04c9f108c8c9aa29b1d11",
+        "senderType": "VENDOR",
+        "messageImages": []
+      }
+    ]
+  }
 }
 ```
 
 ---
 
-# **3. Send Message**
+# **3. Join Rooms**
+
+### **Event Name:** `joinRooms`
+
+### **Emitted By:** Client
+
+### **Received By:** Server
+
+### **Description:**
+
+Make the user to join every room that the user is in. This allows them to receive real-time messages for all the chats that they are in.
+
+1. No payload required
+2. Emits `"userChats"`, which sends all the user chats and messages to the client.
+
+### **Example Response:**
+
+#### **userChats**
+
+```json
+{
+  "statusCode": 200,
+  "error": false,
+  "message": "Chats has been sent successfully",
+  "data": [
+    {
+      "id": "67c04c9f108c8c9aa29b1d11",
+      "productId": "12345",
+      "vendorId": 2,
+      "customerId": 2,
+      "productImageUrl": "https://example.com/product-image.jpg",
+      "productPrice": "299.99",
+      "productName": "Wireless Headphones",
+      "storeLogoUrl": "https://example.com/store-logo.png",
+      "customerProfilePic": "https://example.com/buyer-profile.jpg",
+      "customerName": "John Doe",
+      "storeName": "Tech Haven",
+      "createdAt": "2025-02-27T11:29:35.099Z",
+      "updatedAt": "2025-02-27T11:29:35.099Z",
+      "messages": [
+        {
+          "senderId": 2,
+          "text": "Are you crazy?",
+          "timestamp": "2025-02-27T11:29:35.099Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c04c9f108c8c9aa29b1d11",
+          "senderType": "CUSTOMER",
+          "messageImages": []
+        },
+        {
+          "senderId": 2,
+          "text": "Are you crazy?",
+          "timestamp": "2025-02-27T11:41:34.161Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c04c9f108c8c9aa29b1d11",
+          "senderType": "VENDOR",
+          "messageImages": []
+        },
+        {
+          "senderId": 2,
+          "text": "Are you crazy?",
+          "timestamp": "2025-02-27T11:42:17.134Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c04c9f108c8c9aa29b1d11",
+          "senderType": "CUSTOMER",
+          "messageImages": []
+        },
+        {
+          "senderId": 2,
+          "text": "Hello",
+          "timestamp": "2025-02-27T11:44:47.287Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c04c9f108c8c9aa29b1d11",
+          "senderType": "VENDOR",
+          "messageImages": []
+        },
+        {
+          "senderId": 2,
+          "text": "Hello",
+          "timestamp": "2025-02-27T12:38:36.425Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c04c9f108c8c9aa29b1d11",
+          "senderType": "VENDOR",
+          "messageImages": []
+        }
+      ]
+    },
+    {
+      "id": "67c05ca677b0838ae7417fe8",
+      "productId": "12345",
+      "vendorId": 2,
+      "customerId": 2,
+      "productImageUrl": "https://example.com/product-image.jpg",
+      "productPrice": "299.99",
+      "productName": "Wireless Headphones",
+      "storeLogoUrl": "https://example.com/store-logo.png",
+      "customerProfilePic": "https://example.com/buyer-profile.jpg",
+      "customerName": "John Doe",
+      "storeName": "Tech Haven",
+      "createdAt": "2025-02-27T12:37:58.704Z",
+      "updatedAt": "2025-02-27T12:37:58.704Z",
+      "messages": [
+        {
+          "senderId": 2,
+          "text": "Hello vendor",
+          "timestamp": "2025-02-27T12:37:58.704Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c05ca677b0838ae7417fe8",
+          "senderType": "CUSTOMER",
+          "messageImages": []
+        }
+      ]
+    },
+    {
+      "id": "67c06957e729a9fd4b70409e",
+      "productId": "12345",
+      "vendorId": 2,
+      "customerId": 2,
+      "productImageUrl": "https://example.com/product-image.jpg",
+      "productPrice": "299",
+      "productName": "Wireless Headphones",
+      "storeLogoUrl": "https://example.com/store-logo.png",
+      "customerProfilePic": "https://example.com/buyer-profile.jpg",
+      "customerName": "John Doe",
+      "storeName": "Tech Haven",
+      "createdAt": "2025-02-27T13:32:07.536Z",
+      "updatedAt": "2025-02-27T13:32:07.536Z",
+      "messages": [
+        {
+          "senderId": 2,
+          "text": "Hello",
+          "timestamp": "2025-02-27T13:32:07.536Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c06957e729a9fd4b70409e",
+          "senderType": "VENDOR",
+          "messageImages": []
+        }
+      ]
+    },
+    {
+      "id": "67c069f6b1b231d5c88fa532",
+      "productId": "12345",
+      "vendorId": 2,
+      "customerId": 2,
+      "productImageUrl": "https://example.com/product-image.jpg",
+      "productPrice": "299",
+      "productName": "Wireless Headphones",
+      "storeLogoUrl": "https://example.com/store-logo.png",
+      "customerProfilePic": "https://example.com/buyer-profile.jpg",
+      "customerName": "John Doe",
+      "storeName": "Tech Haven",
+      "createdAt": "2025-02-27T13:34:46.136Z",
+      "updatedAt": "2025-02-27T13:34:46.136Z",
+      "messages": [
+        {
+          "senderId": 2,
+          "text": "Hello",
+          "timestamp": "2025-02-27T13:34:46.136Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c069f6b1b231d5c88fa532",
+          "senderType": "VENDOR",
+          "messageImages": []
+        },
+        {
+          "senderId": 2,
+          "text": "Hello",
+          "timestamp": "2025-02-27T13:35:10.358Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c069f6b1b231d5c88fa532",
+          "senderType": "VENDOR",
+          "messageImages": []
+        },
+        {
+          "senderId": 2,
+          "text": "Hello",
+          "timestamp": "2025-02-27T13:35:52.957Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c069f6b1b231d5c88fa532",
+          "senderType": "VENDOR",
+          "messageImages": []
+        },
+        {
+          "senderId": 2,
+          "text": "Hello",
+          "timestamp": "2025-02-27T13:38:50.319Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c069f6b1b231d5c88fa532",
+          "senderType": "VENDOR",
+          "messageImages": []
+        }
+      ]
+    },
+    {
+      "id": "67c06a925dcc3e41f7c03dc3",
+      "productId": "12345",
+      "vendorId": 2,
+      "customerId": 2,
+      "productImageUrl": "https://example.com/product-image.jpg",
+      "productPrice": "299",
+      "productName": "Wireless Headphones",
+      "storeLogoUrl": "https://example.com/store-logo.png",
+      "customerProfilePic": "https://example.com/buyer-profile.jpg",
+      "customerName": "John Doe",
+      "storeName": "Tech Haven",
+      "createdAt": "2025-02-27T13:37:22.111Z",
+      "updatedAt": "2025-02-27T13:37:22.111Z",
+      "messages": [
+        {
+          "senderId": 2,
+          "text": "Hello",
+          "timestamp": "2025-02-27T13:37:22.111Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c06a925dcc3e41f7c03dc3",
+          "senderType": "VENDOR",
+          "messageImages": []
+        }
+      ]
+    },
+    {
+      "id": "67c06a9c5dcc3e41f7c03dc5",
+      "productId": "12345",
+      "vendorId": 2,
+      "customerId": 2,
+      "productImageUrl": "https://example.com/product-image.jpg",
+      "productPrice": "299.99",
+      "productName": "Wireless Headphones",
+      "storeLogoUrl": "https://example.com/store-logo.png",
+      "customerProfilePic": "https://example.com/buyer-profile.jpg",
+      "customerName": "John Doe",
+      "storeName": "Tech Haven",
+      "createdAt": "2025-02-27T13:37:32.042Z",
+      "updatedAt": "2025-02-27T13:37:32.042Z",
+      "messages": [
+        {
+          "senderId": 2,
+          "text": "Hello vendor",
+          "timestamp": "2025-02-27T13:37:32.042Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c06a9c5dcc3e41f7c03dc5",
+          "senderType": "CUSTOMER",
+          "messageImages": []
+        }
+      ]
+    },
+    {
+      "id": "67c06aaa5dcc3e41f7c03dc7",
+      "productId": "12345",
+      "vendorId": 2,
+      "customerId": 2,
+      "productImageUrl": "https://example.com/product-image.jpg",
+      "productPrice": "299",
+      "productName": "Wireless Headphones",
+      "storeLogoUrl": "https://example.com/store-logo.png",
+      "customerProfilePic": "https://example.com/buyer-profile.jpg",
+      "customerName": "John Doe",
+      "storeName": "Tech Haven",
+      "createdAt": "2025-02-27T13:37:46.915Z",
+      "updatedAt": "2025-02-27T13:37:46.915Z",
+      "messages": [
+        {
+          "senderId": 2,
+          "text": "Hello",
+          "timestamp": "2025-02-27T13:37:46.915Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c06aaa5dcc3e41f7c03dc7",
+          "senderType": "VENDOR",
+          "messageImages": []
+        }
+      ]
+    }
+  ]
+}
+```
+
+---
+
+# **4. Send Message**
 
 ### **Event Name:** `sendMessage`
 
@@ -212,6 +549,7 @@ Sends a message to another user. If there is no existing chat, a new one is crea
 2. If the recipient is **online**, it emits `newChat`.
 3. If the recipient is **offline**, mark the message as **unread**.
 4. If `chatId` exists, and the recipient is online ,the server emits `receiveMessage`.
+5.
 
 ### **Example Response:**
 
@@ -277,28 +615,25 @@ Sends a message to another user. If there is no existing chat, a new one is crea
 }
 ```
 
----
-
-# **4. Receive Message (Real-Time)**
-
-### **Event Name:** `receiveMessage`
-
-### **Emitted By:** Server
-
-### **Received By:** Client
-
-### **Description:**
-
-Triggered when a new message is sent in a chat room.
-
-### **Example Response:**
+#### **sentMessage**
 
 ```json
 {
-  "error": false,
-  "message": "New message received",
   "statusCode": 200,
-  "data": { "messageId": "msg-uuid", "text": "Hello!" }
+  "error": false,
+  "message": null,
+  "data": [
+    {
+      "senderId": 2,
+      "text": "Finally",
+      "timestamp": "2025-02-28T17:48:12.954Z",
+      "read": false,
+      "recipientOnline": false,
+      "chatId": "67c1f6dc898b2a0851b56f23",
+      "senderType": "CUSTOMER",
+      "messageImages": []
+    }
+  ]
 }
 ```
 
@@ -320,7 +655,7 @@ Marks all messages in a chat as read.
 
 ```json
 {
-  "chatId": "chat-uuid"
+  "chatId": "67c04c9f108c8c9aa29b1d11"
 }
 ```
 
@@ -331,13 +666,14 @@ Marks all messages in a chat as read.
 
 ### **Example Response:**
 
-#### **Success Response (Messages Marked as Read)**
+#### **updateReadReceipts emits**
 
 ```json
 {
   "error": false,
   "message": "Messages marked as read",
-  "statusCode": 200
+  "statusCode": 200,
+  "data": {}
 }
 ```
 
@@ -359,17 +695,23 @@ Deletes a specific message from a chat.
 
 ```json
 {
-  "chatId": "chat-uuid",
-  "messageId": "msg-uuid"
+  "chatId": "67c04c9f108c8c9aa29b1d11",
+  "messageId": "67c04c9f108c8c9aa29b1d11"
 }
 ```
 
+1. Emits `"messageDeleted"`;
+
 ### **Example Response:**
+
+#### **messageDeleted emits**
 
 ```json
 {
   "error": false,
-  "message": "Message has been deleted successfully"
+  "message": "Message has been deleted successfully",
+  "statusCode": 200,
+  "data": {}
 }
 ```
 
@@ -391,16 +733,22 @@ Notifies the recipient that the sender is typing.
 
 ```json
 {
-  "chatId": "chat-uuid"
+  "chatId": "67c04c9f108c8c9aa29b1d11"
 }
 ```
 
+1. Emits `"userTyping"`;
+
 ### **Example Response:**
+
+#### **userTyping emits**
 
 ```json
 {
   "error": false,
-  "message": "User is typing"
+  "message": "User is typing",
+  "statusCode": 200,
+  "data": {}
 }
 ```
 
@@ -418,21 +766,434 @@ Notifies the recipient that the sender is typing.
 
 Fetches all chat conversations for the user.
 
+1. Emits `"userChats"`.
+
 ### **Example Response:**
+
+#### **userChats emits**
 
 ```json
 {
+  "statusCode": 200,
   "error": false,
-  "message": "Chats have been sent successfully",
-  "data": [ { ...chat1 }, { ...chat2 } ]
+  "message": "Chats has been sent successfully",
+  "data": [
+    {
+      "id": "67c04c9f108c8c9aa29b1d11",
+      "productId": "12345",
+      "vendorId": 2,
+      "customerId": 2,
+      "productImageUrl": "https://example.com/product-image.jpg",
+      "productPrice": "299.99",
+      "productName": "Wireless Headphones",
+      "storeLogoUrl": "https://example.com/store-logo.png",
+      "customerProfilePic": "https://example.com/buyer-profile.jpg",
+      "customerName": "John Doe",
+      "storeName": "Tech Haven",
+      "createdAt": "2025-02-27T11:29:35.099Z",
+      "updatedAt": "2025-02-27T11:29:35.099Z",
+      "messages": [
+        {
+          "senderId": 2,
+          "text": "Are you crazy?",
+          "timestamp": "2025-02-27T11:29:35.099Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c04c9f108c8c9aa29b1d11",
+          "senderType": "CUSTOMER",
+          "messageImages": []
+        },
+        {
+          "senderId": 2,
+          "text": "Are you crazy?",
+          "timestamp": "2025-02-27T11:41:34.161Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c04c9f108c8c9aa29b1d11",
+          "senderType": "VENDOR",
+          "messageImages": []
+        },
+        {
+          "senderId": 2,
+          "text": "Are you crazy?",
+          "timestamp": "2025-02-27T11:42:17.134Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c04c9f108c8c9aa29b1d11",
+          "senderType": "CUSTOMER",
+          "messageImages": []
+        },
+        {
+          "senderId": 2,
+          "text": "Hello",
+          "timestamp": "2025-02-27T11:44:47.287Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c04c9f108c8c9aa29b1d11",
+          "senderType": "VENDOR",
+          "messageImages": []
+        },
+        {
+          "senderId": 2,
+          "text": "Hello",
+          "timestamp": "2025-02-27T12:38:36.425Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c04c9f108c8c9aa29b1d11",
+          "senderType": "VENDOR",
+          "messageImages": []
+        }
+      ]
+    },
+    {
+      "id": "67c05ca677b0838ae7417fe8",
+      "productId": "12345",
+      "vendorId": 2,
+      "customerId": 2,
+      "productImageUrl": "https://example.com/product-image.jpg",
+      "productPrice": "299.99",
+      "productName": "Wireless Headphones",
+      "storeLogoUrl": "https://example.com/store-logo.png",
+      "customerProfilePic": "https://example.com/buyer-profile.jpg",
+      "customerName": "John Doe",
+      "storeName": "Tech Haven",
+      "createdAt": "2025-02-27T12:37:58.704Z",
+      "updatedAt": "2025-02-27T12:37:58.704Z",
+      "messages": [
+        {
+          "senderId": 2,
+          "text": "Hello vendor",
+          "timestamp": "2025-02-27T12:37:58.704Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c05ca677b0838ae7417fe8",
+          "senderType": "CUSTOMER",
+          "messageImages": []
+        }
+      ]
+    },
+    {
+      "id": "67c06957e729a9fd4b70409e",
+      "productId": "12345",
+      "vendorId": 2,
+      "customerId": 2,
+      "productImageUrl": "https://example.com/product-image.jpg",
+      "productPrice": "299",
+      "productName": "Wireless Headphones",
+      "storeLogoUrl": "https://example.com/store-logo.png",
+      "customerProfilePic": "https://example.com/buyer-profile.jpg",
+      "customerName": "John Doe",
+      "storeName": "Tech Haven",
+      "createdAt": "2025-02-27T13:32:07.536Z",
+      "updatedAt": "2025-02-27T13:32:07.536Z",
+      "messages": [
+        {
+          "senderId": 2,
+          "text": "Hello",
+          "timestamp": "2025-02-27T13:32:07.536Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c06957e729a9fd4b70409e",
+          "senderType": "VENDOR",
+          "messageImages": []
+        }
+      ]
+    },
+    {
+      "id": "67c069f6b1b231d5c88fa532",
+      "productId": "12345",
+      "vendorId": 2,
+      "customerId": 2,
+      "productImageUrl": "https://example.com/product-image.jpg",
+      "productPrice": "299",
+      "productName": "Wireless Headphones",
+      "storeLogoUrl": "https://example.com/store-logo.png",
+      "customerProfilePic": "https://example.com/buyer-profile.jpg",
+      "customerName": "John Doe",
+      "storeName": "Tech Haven",
+      "createdAt": "2025-02-27T13:34:46.136Z",
+      "updatedAt": "2025-02-27T13:34:46.136Z",
+      "messages": [
+        {
+          "senderId": 2,
+          "text": "Hello",
+          "timestamp": "2025-02-27T13:34:46.136Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c069f6b1b231d5c88fa532",
+          "senderType": "VENDOR",
+          "messageImages": []
+        },
+        {
+          "senderId": 2,
+          "text": "Hello",
+          "timestamp": "2025-02-27T13:35:10.358Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c069f6b1b231d5c88fa532",
+          "senderType": "VENDOR",
+          "messageImages": []
+        },
+        {
+          "senderId": 2,
+          "text": "Hello",
+          "timestamp": "2025-02-27T13:35:52.957Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c069f6b1b231d5c88fa532",
+          "senderType": "VENDOR",
+          "messageImages": []
+        },
+        {
+          "senderId": 2,
+          "text": "Hello",
+          "timestamp": "2025-02-27T13:38:50.319Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c069f6b1b231d5c88fa532",
+          "senderType": "VENDOR",
+          "messageImages": []
+        }
+      ]
+    },
+    {
+      "id": "67c06a925dcc3e41f7c03dc3",
+      "productId": "12345",
+      "vendorId": 2,
+      "customerId": 2,
+      "productImageUrl": "https://example.com/product-image.jpg",
+      "productPrice": "299",
+      "productName": "Wireless Headphones",
+      "storeLogoUrl": "https://example.com/store-logo.png",
+      "customerProfilePic": "https://example.com/buyer-profile.jpg",
+      "customerName": "John Doe",
+      "storeName": "Tech Haven",
+      "createdAt": "2025-02-27T13:37:22.111Z",
+      "updatedAt": "2025-02-27T13:37:22.111Z",
+      "messages": [
+        {
+          "senderId": 2,
+          "text": "Hello",
+          "timestamp": "2025-02-27T13:37:22.111Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c06a925dcc3e41f7c03dc3",
+          "senderType": "VENDOR",
+          "messageImages": []
+        }
+      ]
+    },
+    {
+      "id": "67c06a9c5dcc3e41f7c03dc5",
+      "productId": "12345",
+      "vendorId": 2,
+      "customerId": 2,
+      "productImageUrl": "https://example.com/product-image.jpg",
+      "productPrice": "299.99",
+      "productName": "Wireless Headphones",
+      "storeLogoUrl": "https://example.com/store-logo.png",
+      "customerProfilePic": "https://example.com/buyer-profile.jpg",
+      "customerName": "John Doe",
+      "storeName": "Tech Haven",
+      "createdAt": "2025-02-27T13:37:32.042Z",
+      "updatedAt": "2025-02-27T13:37:32.042Z",
+      "messages": [
+        {
+          "senderId": 2,
+          "text": "Hello vendor",
+          "timestamp": "2025-02-27T13:37:32.042Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c06a9c5dcc3e41f7c03dc5",
+          "senderType": "CUSTOMER",
+          "messageImages": []
+        }
+      ]
+    },
+    {
+      "id": "67c06aaa5dcc3e41f7c03dc7",
+      "productId": "12345",
+      "vendorId": 2,
+      "customerId": 2,
+      "productImageUrl": "https://example.com/product-image.jpg",
+      "productPrice": "299",
+      "productName": "Wireless Headphones",
+      "storeLogoUrl": "https://example.com/store-logo.png",
+      "customerProfilePic": "https://example.com/buyer-profile.jpg",
+      "customerName": "John Doe",
+      "storeName": "Tech Haven",
+      "createdAt": "2025-02-27T13:37:46.915Z",
+      "updatedAt": "2025-02-27T13:37:46.915Z",
+      "messages": [
+        {
+          "senderId": 2,
+          "text": "Hello",
+          "timestamp": "2025-02-27T13:37:46.915Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c06aaa5dcc3e41f7c03dc7",
+          "senderType": "VENDOR",
+          "messageImages": []
+        }
+      ]
+    },
+    {
+      "id": "67c1f5c2d04dd84f1bc240ed",
+      "productId": "12345",
+      "vendorId": 2,
+      "customerId": 2,
+      "productImageUrl": "https://example.com/product-image.jpg",
+      "productPrice": "299.99",
+      "productName": "Wireless Headphones",
+      "storeLogoUrl": "https://example.com/store-logo.png",
+      "customerProfilePic": "https://example.com/buyer-profile.jpg",
+      "customerName": "John Doe",
+      "storeName": "Tech Haven",
+      "createdAt": "2025-02-28T17:43:30.934Z",
+      "updatedAt": "2025-02-28T17:43:30.934Z",
+      "messages": [
+        {
+          "senderId": 2,
+          "text": "Finally",
+          "timestamp": "2025-02-28T17:43:30.934Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c1f5c2d04dd84f1bc240ed",
+          "senderType": "CUSTOMER",
+          "messageImages": []
+        },
+        {
+          "senderId": 2,
+          "text": "Hello",
+          "timestamp": "2025-02-28T17:51:31.913Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c1f5c2d04dd84f1bc240ed",
+          "senderType": "VENDOR",
+          "messageImages": []
+        },
+        {
+          "senderId": 2,
+          "text": "Finally",
+          "timestamp": "2025-02-28T17:54:51.702Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c1f5c2d04dd84f1bc240ed",
+          "senderType": "CUSTOMER",
+          "messageImages": []
+        },
+        {
+          "senderId": 2,
+          "text": "Socket",
+          "timestamp": "2025-02-28T17:55:07.912Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c1f5c2d04dd84f1bc240ed",
+          "senderType": "VENDOR",
+          "messageImages": []
+        },
+        {
+          "senderId": 2,
+          "text": "Hi Socket",
+          "timestamp": "2025-02-28T17:55:53.275Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c1f5c2d04dd84f1bc240ed",
+          "senderType": "VENDOR",
+          "messageImages": []
+        }
+      ]
+    },
+    {
+      "id": "67c1f62fd04dd84f1bc240ef",
+      "productId": "12345",
+      "vendorId": 2,
+      "customerId": 2,
+      "productImageUrl": "https://example.com/product-image.jpg",
+      "productPrice": "299.99",
+      "productName": "Wireless Headphones",
+      "storeLogoUrl": "https://example.com/store-logo.png",
+      "customerProfilePic": "https://example.com/buyer-profile.jpg",
+      "customerName": "John Doe",
+      "storeName": "Tech Haven",
+      "createdAt": "2025-02-28T17:45:19.507Z",
+      "updatedAt": "2025-02-28T17:45:19.507Z",
+      "messages": [
+        {
+          "senderId": 2,
+          "text": "Finally",
+          "timestamp": "2025-02-28T17:45:19.507Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c1f62fd04dd84f1bc240ef",
+          "senderType": "CUSTOMER",
+          "messageImages": []
+        }
+      ]
+    },
+    {
+      "id": "67c1f6667eed7952cb1deb70",
+      "productId": "12345",
+      "vendorId": 2,
+      "customerId": 2,
+      "productImageUrl": "https://example.com/product-image.jpg",
+      "productPrice": "299.99",
+      "productName": "Wireless Headphones",
+      "storeLogoUrl": "https://example.com/store-logo.png",
+      "customerProfilePic": "https://example.com/buyer-profile.jpg",
+      "customerName": "John Doe",
+      "storeName": "Tech Haven",
+      "createdAt": "2025-02-28T17:46:08.176Z",
+      "updatedAt": "2025-02-28T17:46:08.176Z",
+      "messages": [
+        {
+          "senderId": 2,
+          "text": "Finally",
+          "timestamp": "2025-02-28T17:46:08.176Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c1f6667eed7952cb1deb70",
+          "senderType": "CUSTOMER",
+          "messageImages": []
+        }
+      ]
+    },
+    {
+      "id": "67c1f6dc898b2a0851b56f23",
+      "productId": "12345",
+      "vendorId": 2,
+      "customerId": 2,
+      "productImageUrl": "https://example.com/product-image.jpg",
+      "productPrice": "299.99",
+      "productName": "Wireless Headphones",
+      "storeLogoUrl": "https://example.com/store-logo.png",
+      "customerProfilePic": "https://example.com/buyer-profile.jpg",
+      "customerName": "John Doe",
+      "storeName": "Tech Haven",
+      "createdAt": "2025-02-28T17:48:12.954Z",
+      "updatedAt": "2025-02-28T17:48:12.954Z",
+      "messages": [
+        {
+          "senderId": 2,
+          "text": "Finally",
+          "timestamp": "2025-02-28T17:48:12.954Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c1f6dc898b2a0851b56f23",
+          "senderType": "CUSTOMER",
+          "messageImages": []
+        }
+      ]
+    }
+  ]
 }
 ```
 
 ---
 
-# **9. Join Rooms**
+# **9. Stopped Typing**
 
-### **Event Name:** `joinRooms`
+### **Event Name:** `stoppedTyping`
 
 ### **Emitted By:** Client
 
@@ -440,14 +1201,20 @@ Fetches all chat conversations for the user.
 
 ### **Description:**
 
-Joins all rooms (chats) associated with the user.
+Notifies the recipient that the sender has stopped typing.
+
+1. Emits `"stoppedTyping"`;
 
 ### **Example Response:**
+
+#### **stoppedTyping emits**
 
 ```json
 {
   "error": false,
-  "message": "User joined all chat rooms"
+  "message": "User has stopped typing",
+  "statusCode": 200,
+  "data": {}
 }
 ```
 
@@ -464,15 +1231,6 @@ Joins all rooms (chats) associated with the user.
 ### **Description:**
 
 Triggered when a user disconnects from the chat namespace.
-
-### **Example Response:**
-
-```json
-{
-  "error": false,
-  "message": "User has gone offline"
-}
-```
 
 ---
 

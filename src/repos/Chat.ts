@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 import prisma from ".";
 import Repo from "./bases/Repo";
 import { TransactionChat } from "../types/dtos";
+import { UserType } from "../types/enums";
 
 export default class Chat extends Repo {
 
@@ -97,6 +98,24 @@ export default class Chat extends Repo {
                         select: this.messageSelect
                     }
                 }
+            });
+            return this.repoResponse(false, 200, null, items);
+        } catch (error) {
+            return this.handleDatabaseError(error);
+        }
+    }
+
+    public async getChatIds(userId: number, userType: UserType) {
+        const where = {
+            [UserType.Customer]: { customerId: userId },
+            [UserType.Vendor]: { vendorId: userId },
+            [UserType.Admin]: {}
+        };
+
+        try {
+            const items = await prisma.chat.findMany({
+                where: where[userType],
+                select: { id: true }
             });
             return this.repoResponse(false, 200, null, items);
         } catch (error) {

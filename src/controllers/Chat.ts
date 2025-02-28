@@ -45,7 +45,7 @@ export default class Chat {
         }
 
         const messageId = req.params.messageId;
-        const facadeResult = await Chat.facade.deleteMessage(messageId);
+        const facadeResult = await Chat.facade.httpDeleteMessage(messageId);
         Controller.response(res, facadeResult);
     }
 }

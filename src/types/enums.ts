@@ -11,7 +11,8 @@ export enum Events {
 }
 export enum Namespace {
     CHAT = '/chat',
-    PRESENCE = '/presence'
+    PRESENCE = '/presence',
+    NOTIFICATION = '/notification'
 }
 
 export enum ServiceResultDataType {

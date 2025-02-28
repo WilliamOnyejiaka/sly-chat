@@ -17,11 +17,11 @@ export default class Message extends BaseService<MessageRepo> {
         return super.responseData(dataType, 201, false, "Message has been created successfully", repoResult.data)
     }
 
-    public async deleteMessage(messageId: string) {
+    public async deleteMessage(messageId: string, dataType: ServiceResultDataType) {
         const repoResult = await this.repo!.deleteWithId(messageId);
-        const repoResultError = super.httpHandleRepoError(repoResult);
+        const repoResultError = super.handleRepoError(dataType, repoResult);
         if (repoResultError) return repoResultError;
-        return super.httpResponseData(200, false, "Message has been deleted successfully");
+        return super.responseData(dataType, 200, false, "Message has been deleted successfully");
     }
 
     public async updateOfflineMessages(chatIds: any[], userType: UserType, dataType: ServiceResultDataType) {
@@ -35,6 +35,6 @@ export default class Message extends BaseService<MessageRepo> {
         const repoResult = await this.repo!.markMessagesAsRead(chatId, senderType);
         const repoResultError = super.handleRepoError(dataType, repoResult);
         if (repoResultError) return repoResultError;
-        return super.responseData(dataType,200,false,"Messages has been marked as read",repoResult.data);
+        return super.responseData(dataType, 200, false, "Messages has been marked as read", repoResult.data);
     }
 }

@@ -8,6 +8,7 @@ import { Server } from 'socket.io';
 import { chat, presence } from "../events";
 import { ISocket } from "../types";
 import { user, chat as chatRoute } from "../routes";
+import { Namespace } from "../types/enums";
 
 function createApp() {
     const app: Application = express();
@@ -22,9 +23,11 @@ function createApp() {
 
     const chatNamespace = io.of("/chat");
     const presenceNamespace = io.of('/presence');
+    const notificationNamespace = io.of(Namespace.NOTIFICATION);
 
     chatNamespace.use(validateJWT(["customer", "vendor"], env("tokenSecret")!));
     presenceNamespace.use(validateJWT(["customer", "vendor", "admin"], env("tokenSecret")!));
+    notificationNamespace.use(validateJWT(["customer", "vendor", "admin"], env("tokenSecret")!));
 
     chat.initialize(chatNamespace, io);
     presence.initialize(presenceNamespace, io);
