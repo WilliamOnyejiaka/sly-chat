@@ -7,48 +7,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Vendor {
-  id             String                 @id @default(auto()) @map("_id") @db.ObjectId
-  userId         Int                    @unique
-  firstName      String
-  lastName       String
-  email          String                 @unique
-  verified       Boolean
-  active         Boolean
-  createdAt      DateTime               @default(now())
-  updatedAt      DateTime               @updatedAt
-  profilePicture VendorProfilePicture[]
+enum UserType {
+  VENDOR
+  CUSTOMER
+  ADMIN
 }
 
-model VendorProfilePicture {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  imageUrl  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  vendor    Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
-  vendorId  String   @db.ObjectId
-}
-
-model Customer {
-  id                 String               @id @default(auto()) @map("_id") @db.ObjectId
-  userId             Int                  @unique
-  firstName          String
-  lastName           String
-  email              String               @unique
-  verified           Boolean
-  active             Boolean
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
-  CustomerProfilePic CustomerProfilePic[]
-}
-
-model CustomerProfilePic {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  imageUrl   String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  customerId String   @unique @db.ObjectId
-  Customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+model User {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId            Int      @unique
+  firstName         String
+  lastName          String
+  email             String
+  verified          Boolean
+  active            Boolean
+  userType          UserType
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  profilePictureUrl String?
 }
 
 enum SenderType {
@@ -60,7 +36,7 @@ model Chat {
   id                 String    @id @default(auto()) @map("_id") @db.ObjectId
   productId          String
   vendorId           Int
-  customerId         Int
+  customerId         Int 
   productImageUrl    String
   productPrice       String
   productName        String

@@ -12,7 +12,7 @@ export default class Repo implements Repository {
         this.tblName = tblName;
     }
 
-    public async insert(data: any) {
+    public async insert<T = any>(data: T) {
         try {
             const newItem = await (prisma[this.tblName] as any).create({ data: data });
             return this.repoResponse(false, 201, null, newItem);
@@ -163,6 +163,7 @@ export default class Repo implements Repository {
     }
 
     protected handleDatabaseError(error: any) {
+        console.log(error);
 
         if (error.code === "P2002") {
             // Unique constraint violation

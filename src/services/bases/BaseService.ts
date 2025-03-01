@@ -79,11 +79,8 @@ export default class BaseService<T extends Repo = Repo> {
     private async getItem(nameOrId: string | number, message200: string | undefined) {
         const repoResult = typeof nameOrId == "number" ? await this.repo!.getItemWithId(nameOrId) :
             await this.repo!.getItemWithName(nameOrId);
-
-        if (repoResult.error) {
-            return this.httpResponseData(repoResult.type, true, repoResult.message!);
-        }
-
+        const repoResultError = this.httpHandleRepoError(repoResult);
+        if (repoResultError) return repoResultError;
 
         const data = repoResult.data;
         const statusCode = data ? 200 : 404;

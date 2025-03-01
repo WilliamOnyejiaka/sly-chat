@@ -2,11 +2,10 @@ import Token from "./Token";
 import Email from "./Email";
 import OTP from "./OTP";
 import ImageService from "./Image";
-import Vendor from "./Vendor";
-import Customer from "./Customer";
 import Cloudinary from "./Cloudinary";
 import Chat from "./Chat";
 import Message from "./Message";
+import User from "./User";
 
 export {
     Token,
@@ -14,8 +13,7 @@ export {
     OTP,
     ImageService,
     Cloudinary,
-    Customer,
-    Vendor,
     Chat,
-    Message
+    Message,
+    User
 };

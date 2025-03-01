@@ -1,14 +1,15 @@
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import Controller from "./bases/Controller";
-import { UserManagementFacade } from "../facade";
 import { UserType } from "../types/enums";
+import { User as UserService } from "./../services";
+import { UserDto } from "../types/dtos";
 
 export default class User {
 
-    private static facade = new UserManagementFacade();
+    private static service = new UserService();
 
-    public static createUser(userType: UserType) {
+    private static createUser(userType: UserType) {
         return async (req: Request, res: Response) => {
             const validationErrors = validationResult(req);
 
@@ -17,8 +18,11 @@ export default class User {
                 return;
             }
 
-            const facadeResult = await User.facade.createUser(req.body, userType);
-            Controller.response(res, facadeResult);
+            const newUser: UserDto = req.body;
+            newUser.userType = userType;
+
+            const serviceResult = await User.service.createUser(newUser);
+            Controller.response(res, serviceResult);
         }
     }
 

@@ -1,5 +1,5 @@
 import getBasicAuthHeader from "./getBasicAuthHeader";
-import uploads, { bannerUploads } from "./multer";
+import uploads from "./multer";
 import validateJWT from "./validateJWT";
 import validateUser from "./validateUser";
 import handleMulterErrors from "./handleMulterErrors";
@@ -17,6 +17,5 @@ export {
     validateBody,
     secureApi,
     redisClientMiddleware,
-    bannerUploads,
     vendorIsActive
 };

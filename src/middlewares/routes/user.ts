@@ -1,12 +1,10 @@
-import { Customer, Vendor } from "../../repos";
 import validateBody from "../validateBody";
 import {
     emailIsValid,
     passwordIsValid,
     phoneNumberIsValid,
     tokenIsPresent,
-    userEmailExists,
-    userPhoneNumberExists,
+    // userEmailExists,
     zipCodeIsValid
 } from "../validators";
 
@@ -23,12 +21,12 @@ const createUser = [
 
 export const createVendor = [
     ...createUser,
-    userEmailExists<Vendor>(new Vendor())
+    // userEmailExists<Vendor>(new Vendor())
 ];
 
 export const createCustomer = [
     ...createUser,
-    userEmailExists<Customer>(new Customer())
+    // userEmailExists<Customer>(new Customer())
 ];
 
 

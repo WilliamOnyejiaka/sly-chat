@@ -17,15 +17,15 @@ function createApp() {
     const server = http.createServer(app);
     const io = new Server(server, { cors: { origin: "*" } });
 
-    const pubClient = createClient({ url: env('redisURL')! });
-    const subClient = pubClient.duplicate();
+    // const pubClient = createClient({ url: env('redisURL')! });
+    // const subClient = pubClient.duplicate();
 
-    Promise.all([pubClient.connect(), subClient.connect()])
-        .then(() => {
-            io.adapter(createAdapter(pubClient, subClient));
-            console.log("Redis Adapter Connected");
-        })
-        .catch(err => console.error("Redis Connection Error:", err));
+    // Promise.all([pubClient.connect(), subClient.connect()])
+    //     .then(() => {
+    //         io.adapter(createAdapter(pubClient, subClient));
+    //         console.log("Redis Adapter Connected");
+    //     })
+    //     .catch(err => console.error("Redis Connection Error:", err));
 
     const stream = { write: (message: string) => logger.http(message.trim()) };
 
@@ -45,7 +45,17 @@ function createApp() {
     chat.initialize(chatNamespace, io);
     presence.initialize(presenceNamespace, io);
 
-    app.use(secureApi);
+    // app.use(secureApi);
+
+    app.get("/test", async (req: Request, res: Response) => {
+        console.log("Hello From chat");
+
+        res.status(200).json({
+            'error': false,
+            'message': "External Api",
+            'data': "hello World"
+        });
+    });
 
     app.use("/api/v1/user", user);
     app.use("/api/v1/chat", chatRoute);
