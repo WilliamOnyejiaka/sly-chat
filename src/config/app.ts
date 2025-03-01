@@ -9,11 +9,24 @@ import { chat, presence } from "../events";
 import { ISocket } from "../types";
 import { user, chat as chatRoute } from "../routes";
 import { Namespace } from "../types/enums";
+import { createClient } from "redis";
+import { createAdapter } from "@socket.io/redis-adapter";
 
 function createApp() {
     const app: Application = express();
     const server = http.createServer(app);
     const io = new Server(server, { cors: { origin: "*" } });
+
+    const pubClient = createClient({ url: env('redisURL')! });
+    const subClient = pubClient.duplicate();
+
+    Promise.all([pubClient.connect(), subClient.connect()])
+        .then(() => {
+            io.adapter(createAdapter(pubClient, subClient));
+            console.log("Redis Adapter Connected");
+        })
+        .catch(err => console.error("Redis Connection Error:", err));
+
     const stream = { write: (message: string) => logger.http(message.trim()) };
 
     app.use(express.urlencoded({ extended: true }));

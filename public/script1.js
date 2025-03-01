@@ -1,6 +1,6 @@
 import { io } from "./socket.js"
 
-// Customer
+// Vendor
 
 const sendBtn = document.querySelector("#send-btn");
 const displayMsg = document.querySelector("#display-msg");
@@ -14,13 +14,13 @@ const msg = document.querySelector("#msg");
 
 const socket = io('https://sly-chat.onrender.com/presence', {
     auth: {
-        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjozfSwidHlwZXMiOlsiY3VzdG9tZXIiXSwiaWF0IjoxNzQwNzY5NzczLCJleHAiOjE3NDMzNjE3NzN9.PoeftTYT1cyymfEgD9GbLmza32K57hPKetc_vqO3Hek"
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoxfSwidHlwZXMiOlsidmVuZG9yIl0sImlhdCI6MTc0MDc3MTE5OSwiZXhwIjoxNzQzMzYzMTk5fQ.ON35L1TxyJUieLm7XknKLMy0Q6z86ao8x_-BWROxCtI"
     },
 });
 
 const chat = io('https://sly-chat.onrender.com/chat', {
     auth: {
-        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjozfSwidHlwZXMiOlsiY3VzdG9tZXIiXSwiaWF0IjoxNzQwNzY5NzczLCJleHAiOjE3NDMzNjE3NzN9.PoeftTYT1cyymfEgD9GbLmza32K57hPKetc_vqO3Hek"
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoxfSwidHlwZXMiOlsidmVuZG9yIl0sImlhdCI6MTc0MDc3MTE5OSwiZXhwIjoxNzQzMzYzMTk5fQ.ON35L1TxyJUieLm7XknKLMy0Q6z86ao8x_-BWROxCtI"
     },
 });
 
@@ -34,6 +34,7 @@ chat.on('appError', (data) => {
 
 });
 
+
 socket.on('connection', () => {
     console.log("User is online");
 });
@@ -46,18 +47,18 @@ chat.on('newChat', (data) => {
     console.log(data);
 });
 
-
-chat.on('receiveMessage',(data) => {
+chat.on('receiveMessage', (data) => {
     console.log(data);
 });
+
 
 sendBtn.addEventListener("click", async e => {
     const message = {
         "productId": "12345",
-        "recipientId": 1,
+        "recipientId": 3,
         "productImageUrl": "https://example.com/product-image.jpg",
         "productPrice": "299.99",
-        "text": "Hello",
+        "text": "Vendor",
         "productName": "Wireless Headphones",
         "storeLogoUrl": "https://example.com/store-logo.png",
         "customerProfilePic": "https://example.com/buyer-profile.jpg",

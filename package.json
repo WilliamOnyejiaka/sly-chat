@@ -19,6 +19,7 @@
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^6.4.1",
+    "@socket.io/redis-adapter": "^8.3.0",
     "cloudinary": "^2.5.1",
     "commander": "^12.1.0",
     "cookie-session": "^2.1.0",
