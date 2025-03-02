@@ -2,12 +2,14 @@ import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import Controller from "./bases/Controller";
 import { ChatManagementFacade } from "../facade";
-import { CdnFolders, ResourceType, UserType } from "../types/enums";
+import { CdnFolders, Namespace, ResourceType, UserType } from "../types/enums";
 import { ServiceResult } from "../types";
 import { cloudinary } from "../config";
 import { compressImage } from "../utils";
 import { Chat as ChatRepo, Message as MessageRepo } from "./../repos";
-import { TransactionMessage } from "../types/dtos";
+import { TransactionChat, TransactionMessage } from "../types/dtos";
+import { Server } from "socket.io";
+import Handler from "../handlers/Handler";
 
 export default class Chat {
 
@@ -89,6 +91,16 @@ export default class Chat {
         return { uploadedFiles, failedFiles }
     }
 
+    public static async deleteFiles(publicIds: string[]) {
+        try {
+            const result = await cloudinary.api.delete_resources(publicIds);
+            return result;
+        } catch (error) {
+            console.error(error);
+            return false;
+        }
+    }
+
     public static async sendPdf(req: Request, res: Response) {
         try {
             if (!req.files) {
@@ -99,8 +111,20 @@ export default class Chat {
                 });
                 return;
             }
-
-            const { chatId, senderId } = req.body;
+            let {
+                recipientId,
+                productId,
+                chatId,
+                text,
+                storeName,
+                customerName,
+                storeLogoUrl,
+                customerProfilePic,
+                productPrice,
+                productName,
+                productImageUrl,
+                senderId
+            } = req.body;
             const { uploadedFiles, failedFiles } = await Chat.upload(req.files as Express.Multer.File[], ResourceType.PDF, CdnFolders.PDF);
 
 
@@ -131,16 +155,56 @@ export default class Chat {
                 return;
             }
 
-            let { chatId, senderId, text } = req.body;
-            senderId = Number(senderId);
+            const userId = Number(res.locals.data.id);
+            const userType = res.locals.userType;
+            const io: Server = res.locals.io;
+            const chatNamespace = io.of(Namespace.CHAT);
+
+
+            console.log(userId, " ", userType);
+
+            let {
+                recipientId, // validate in middleware
+                productId,
+                chatId,
+                text,// validate in middleware
+                storeName,
+                customerName,
+                storeLogoUrl,
+                customerProfilePic,
+                productPrice,
+                productName,
+                productImageUrl,
+            } = req.body;
+            recipientId = Number(recipientId);
+
+            let customerId, vendorId;
+            if (userType == UserType.Customer) {
+                vendorId = recipientId;
+                customerId = userId;
+            } else if (userType == UserType.Vendor) {
+                customerId = recipientId;
+                vendorId = userId;
+            } else {
+                res.status(401).json({
+                    error: true,
+                    message: "Unauthorized user",
+                    data: {}
+                });
+                return;
+            }
+
 
             const { uploadedFiles, failedFiles } = await Chat.upload(req.files, ResourceType.IMAGE, CdnFolders.IMAGE);
 
             if (uploadedFiles.length > 0) {
+                const publicIds = uploadedFiles.map((item: any) => item.publicId);
                 let newMessage: TransactionMessage = {
-                    senderId: senderId,
+                    senderId: userId,
                     text: text,
+                    senderType: userType.toUpperCase()
                 };
+
                 if (chatId) {
                     newMessage.chatId = chatId;
                     const repoResult = await Chat.message.insertWithMedia(newMessage, uploadedFiles);
@@ -152,6 +216,21 @@ export default class Chat {
                         });
                         return;
                     }
+                    const userSocket = await Chat.facade.getUserOnlineStatus(userType, String(userId));
+                    if (userSocket.error || !userSocket.data) {
+                        res.status(500).json({
+                            error: true,
+                            message: "Something Went wrong,failed to get user online status",
+                            data: {}
+                        });
+                        return;
+                    }
+
+                    const socketId = userSocket.data.chatId;
+                    console.log(socketId);
+                    
+
+                    io.of(Namespace.CHAT).to(socketId).emit('sentMedia', Handler.responseData(200, false, null, repoResult.data));
                     res.status(201).json({
                         error: true,
                         message: "Created",
@@ -159,19 +238,75 @@ export default class Chat {
                     });
                     return;
                 } else {
-                    // const repoResult = await Chat.repo.insertChatWithMessageAndMedias()
+                    if (!storeName || !customerName || !productPrice || !productName || !productImageUrl || !productId) {
+                        res.status(400).json({
+                            error: true,
+                            message: "Chat here",
+                            data: "All fields are required to create a new chat"
+                        });
+                        return;
+                    }
+                    const newChat: TransactionChat = {
+                        storeName,
+                        customerName,
+                        customerId,
+                        customerProfilePic,
+                        vendorId,
+                        storeLogoUrl,
+                        productId,
+                        productImageUrl,
+                        productName,
+                        productPrice
+                    };
+
+                    const repoResult = await Chat.repo.insertChatWithMessageAndMedias(newChat, newMessage, uploadedFiles);
+                    if (repoResult.error) {
+                        const deleted = Chat.deleteFiles(publicIds);
+                        if (!deleted) {
+                            res.status(500).json({
+                                error: true,
+                                message: "Something went wrong",
+                                data: {}
+                            });
+                            return;
+                        }
+
+                        res.status(repoResult.type).json({
+                            error: true,
+                            message: repoResult.message,
+                            data: repoResult.data
+                        });
+                        return;
+                    }
+
+                    const userSocket = await Chat.facade.getUserOnlineStatus(userType, String(userId));
+                    if (userSocket.error || !userSocket.data) {
+                        res.status(500).json({
+                            error: true,
+                            message: "Something Went wrong,failed to get user online status",
+                            data: {}
+                        });
+                        return;
+                    }
+                    const chat = repoResult.data;
+
+                    const socketId = userSocket.data.chatSocketId;
+                    console.log(socketId);
+
+                    io.sockets.sockets.get(socketId)?.join(chat.id);
+                    io.of(Namespace.CHAT).to(socketId).emit('sentMedia', Handler.responseData(200, false, null, repoResult.data));
 
                     res.status(201).json({
                         error: true,
-                        message: "Chat here",
-                        data: "repoResult.data"
+                        message: "New chat has been created",
+                        data: repoResult.data
                     });
                     return;
                 }
             }
 
 
-            res.status(201).json({ chatId, senderId, uploadedFiles, failedFiles });
+            res.status(201).json({ chatId, senderId: userId, uploadedFiles, failedFiles });
             return;
         } catch (error: any) {
             console.error("Upload failed:", error);

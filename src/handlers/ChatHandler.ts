@@ -183,7 +183,8 @@ export default class ChatHandler {
 
             socket.join(chatId);
             console.log(`✅ New chat has been created`);
-            io.of(Namespace.CHAT).to(socket.id).emit('sentMessage', Handler.responseData(200, false, null, chat.messages));
+            // io.of(Namespace.CHAT).to(socket.id).emit('sentMessage', Handler.responseData(200, false, null, chat.messages));
+
             if (recipientOnlineData) {
                 const recipientSocketId = recipientOnlineData.chatSocketId;
                 io.sockets.sockets.get(recipientSocketId)?.join(chatId); //💬 Forcing the the recipient to join the room 
@@ -191,6 +192,7 @@ export default class ChatHandler {
                 console.log(`✅ Message sent directly to user ${recipientId} via socket ${recipientSocketId}`);
                 return;
             }
+            io.of(Namespace.CHAT).to(chatId).emit('receiveMessage', Handler.responseData(200, false, null, chat.messages));
         } else {
             console.log(`📩 User ${userId} sending message to room ${chatId}: "${text}"`);
 
@@ -219,8 +221,10 @@ export default class ChatHandler {
                 // Emit new message event to the room
                 // io.of(Namespace.CHAT).to(chatId).emit('receiveMessage', Handler.responseData(200, false, null, newMessage));
                 const newMessage = newMessageResult.data;
-                if (recipientOnline) socket.to(chatId).emit('receiveMessage', Handler.responseData(200, false, null, newMessage));
-                io.of(Namespace.CHAT).to(socket.id).emit('sentMessage', Handler.responseData(200, false, null, newMessage));
+                // if (recipientOnline) socket.to(chatId).emit('receiveMessage', Handler.responseData(200, false, null, newMessage));
+                // io.of(Namespace.CHAT).to(socket.id).emit('sentMessage', Handler.responseData(200, false, null, newMessage));
+                io.of(Namespace.CHAT).to(chatId).emit('receiveMessage', Handler.responseData(200, false, null, newMessage));
+
                 console.log(`✅ Message sent successfully to room ${chatId}`);
                 return;
             } else {

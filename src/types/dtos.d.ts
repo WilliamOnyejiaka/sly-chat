@@ -4,12 +4,12 @@ export interface TransactionChat {
     productId: string,
     vendorId: number,
     customerId: number,
-    customerProfilePic: string,
+    customerProfilePic?: string,
     productPrice: string,
     productName: string,
     storeName: string,
     customerName: string,
-    storeLogoUrl: string,
+    storeLogoUrl?: string,
     productImageUrl: string,
 };
 

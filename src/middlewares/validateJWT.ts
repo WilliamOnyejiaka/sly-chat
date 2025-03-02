@@ -4,7 +4,7 @@ import { http } from '../constants';
 import { TokenBlackList } from '../cache';
 import { ISocket } from '../types';
 
-const validateJWT = (types: string[], tokenSecret: string, neededData: string[] = ['data']) => async (socket: ISocket, next: (err?: any) => void) => {
+const validateHttpJWT = (types: string[], tokenSecret: string, neededData: string[] = ['data']) => async (socket: ISocket, next: (err?: any) => void) => {
     const token = socket.handshake.auth.token || socket.handshake.headers['token'];
     if (!token) {
         socket.emit('appError', {
@@ -56,4 +56,4 @@ const validateJWT = (types: string[], tokenSecret: string, neededData: string[] 
     next();
 }
 
-export default validateJWT;
+export default validateHttpJWT;

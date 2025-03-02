@@ -40,8 +40,8 @@ model Chat {
   productImageUrl    String
   productPrice       String
   productName        String
-  storeLogoUrl       String
-  customerProfilePic String
+  storeLogoUrl       String?
+  customerProfilePic String?
   customerName       String
   storeName          String
   messages           Message[]

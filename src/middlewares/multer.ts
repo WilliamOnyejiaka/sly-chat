@@ -3,6 +3,7 @@ import multer, { FileFilterCallback } from "multer";
 import * as path from "path"
 import { Request, Express } from "express";
 import { ResourceType } from "../types/enums";
+import { log } from "util";
 
 const allowedMimeTypes: string[] = ['image/jpeg', 'image/jpg', 'image/png'];
 const storeImagesFields: string[] = ['firstBanner', 'secondBanner', 'storeLogo', 'name', 'address'];
@@ -46,10 +47,10 @@ const audioFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFil
 
 const uploads = (resourceType: ResourceType) => {
     let fileFilter = imageFilter;
-    const fileSize = resourceType === ResourceType.IMAGE ? 3.0 * 1024 * 1024 : 100 * 1024 * 1024;
+    const fileSize = resourceType === ResourceType.IMAGE ? 3.0 * 1024 * 1024 : 50 * 1024 * 1024;
     if (resourceType == ResourceType.PDF) fileFilter = pdfFilter;
     if (resourceType === ResourceType.VIDEO) fileFilter = videoFilter;
-    if (resourceType === ResourceType.AUDIO) fileFilter = audioFilter;
+    // if (resourceType === ResourceType.AUDIO) fileFilter = audioFilter;
 
     return multer({
         storage: storage,

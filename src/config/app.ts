@@ -1,7 +1,7 @@
 import express, { Application, NextFunction, Request, Response } from "express";
 import morgan from "morgan";
 import { cloudinary, corsConfig, env, logger } from ".";
-import { validateJWT, validateUser, handleMulterErrors, secureApi, redisClientMiddleware, vendorIsActive, uploads } from "./../middlewares";
+import { validateJWT, validateUser, handleMulterErrors, secureApi, redisClientMiddleware, vendorIsActive, uploads, validateHttpJWT } from "./../middlewares";
 import cors from "cors";
 import http from 'http';
 import { Server } from 'socket.io';
@@ -44,6 +44,10 @@ function createApp() {
 
     chat.initialize(chatNamespace, io);
     presence.initialize(presenceNamespace, io);
+    app.use((req: Request, res: Response, next: NextFunction) => {
+        res.locals.io = io;
+        next();
+    });
 
     // app.use(secureApi);
 
@@ -58,7 +62,7 @@ function createApp() {
     });
 
     app.use("/api/v1/user", user);
-    app.use("/api/v1/chat", chatRoute);
+    app.use("/api/v1/chat", validateHttpJWT(["customer", "vendor"], env("tokenSecret")!), chatRoute);
 
     app.post("/test2", async (req: Request, res: Response) => {
         res.status(200).json({

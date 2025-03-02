@@ -103,10 +103,10 @@ export default class ChatManagementFacade extends BaseFacade {
         return this.service.socketResponseData(200, false, null, data);
     }
 
-    public async getUserOnlineStatus(userType: UserType, recipientId: string) {
+    public async getUserOnlineStatus(userType: UserType, userId: string) {
         const recipientOnlineCache = await (userType === UserType.Vendor
             ? this.onlineVendor
-            : this.onlineCustomer).get(recipientId);
+            : this.onlineCustomer).get(userId);
         if (recipientOnlineCache.error) return this.service.socketResponseData(500, true, "Something went wrong");
 
         const data = recipientOnlineCache?.data ? JSON.parse(recipientOnlineCache.data) : null;
