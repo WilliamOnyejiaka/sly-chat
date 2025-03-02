@@ -36,7 +36,7 @@ model Chat {
   id                 String    @id @default(auto()) @map("_id") @db.ObjectId
   productId          String
   vendorId           Int
-  customerId         Int 
+  customerId         Int
   productImageUrl    String
   productPrice       String
   productName        String
@@ -52,7 +52,7 @@ model Chat {
 model Message {
   id              String         @id @default(auto()) @map("_id") @db.ObjectId
   senderId        Int
-  senderType      SenderType
+  senderType      SenderType?
   text            String
   timestamp       DateTime       @default(now())
   read            Boolean        @default(false)
@@ -61,14 +61,17 @@ model Message {
   chat            Chat?          @relation(fields: [chatId], references: [id], onDelete: Cascade)
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
-  messageImages   MessageImage[]
+  messageMedias   MessageMedia[]
 }
 
-model MessageImage {
+model MessageMedia {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   imageUrl  String
+  publicId  String
+  mimeType  String
+  size      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  messageId String   @unique @db.ObjectId
+  messageId String   @db.ObjectId
   Message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
 }

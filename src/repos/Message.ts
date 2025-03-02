@@ -20,6 +20,27 @@ export default class Message extends Repo {
         }
     }
 
+    public async insertWithMedia(chatId: string, newMessage: any, medias: any) {
+        try {
+            const newItem = await prisma.message.create({
+                data: {
+                    text: newMessage.text,
+                    senderId: newMessage.senderId,
+                    recipientOnline: newMessage.recipientOnline,
+                    senderType: newMessage.senderType,
+                    chatId: chatId,
+                    messageMedias: {
+                        createMany: medias
+                    }
+                },
+
+            });
+            return this.repoResponse(false, 201, null, newItem);
+        } catch (error) {
+            return this.handleDatabaseError(error);
+        }
+    }
+
     public async markMessagesAsRead(chatId: string, userType: string) {
         try {
             const updatedMessages = await prisma.message.updateMany({
@@ -43,7 +64,7 @@ export default class Message extends Repo {
             const updatedMessages = await prisma.message.updateMany({
                 where: {
                     chatId: { in: chatIds },
-                    senderType: { not: userType as any},
+                    senderType: { not: userType as any },
                     recipientOnline: false,
                 },
                 data: {

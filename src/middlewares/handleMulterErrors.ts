@@ -9,6 +9,7 @@ const handleMulterErrors = (err: any, req: Request, res: Response, next: NextFun
                 error: true,
                 message: 'File exceeds the allowed size limit'
             });
+            return;
         }
         if (err.code === 'LIMIT_UNEXPECTED_FILE') {
             res.status(400).json({
@@ -16,7 +17,7 @@ const handleMulterErrors = (err: any, req: Request, res: Response, next: NextFun
                 // message: 'Unexpected field in the request',
                 message: "Required field not found in request"
             });
-            // return;
+            return;
         }
     }
     if (err.message === 'LIMIT_INVALID_FILE_TYPE') {
@@ -24,6 +25,7 @@ const handleMulterErrors = (err: any, req: Request, res: Response, next: NextFun
             error: true,
             message: 'Invalid file type'
         });
+        return;
     }
 
     if (err.message === 'INVALID_FIELD_NAME') {
@@ -31,6 +33,7 @@ const handleMulterErrors = (err: any, req: Request, res: Response, next: NextFun
             error: true,
             message: 'Invalid field name'
         });
+        return;
     }
     next();
 }

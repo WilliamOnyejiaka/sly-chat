@@ -3,8 +3,7 @@ import { logger } from "../config";
 
 export default async function compressImage(image: Express.Multer.File) {
     try {
-        const outputPath = `compressed/${image.filename}`;
-        await sharp(image.path)
+        const buffer = await sharp(image.buffer)
             .resize({
                 height: 800, width: 800, fit: 'cover',
             })
@@ -12,17 +11,14 @@ export default async function compressImage(image: Express.Multer.File) {
                 // lossless: true,
                 quality: 80
             })
-            .toFile(outputPath);
+            .toBuffer()
 
-        return {
-            error: false,
-            outputPath: outputPath
-        }
+        return { error: false, buffer };
     } catch (error) {
         logger.error(`Error processing the image: ${error}`);
         return {
             error: true,
-            outputPath: null
+            buffer: null
         }
     }
 }

@@ -14,7 +14,7 @@ export default class Chat extends Repo {
         recipientOnline: true,
         chatId: true,
         senderType: true,
-        messageImages: true
+        messageMedias: true
     };
 
     public constructor() {

@@ -58,8 +58,8 @@ export default class ImageService extends BaseService {
             return super.httpResponseData(500, true, http('500')!);
         }
 
-        const uploadResult = await this.cloudinary.uploadImage(result.outputPath!, imageFolder);
-        const deletedCompressedImage = await this.deleteFiles([result.outputPath!]);
+        const uploadResult = await this.cloudinary.uploadImage("dsd", imageFolder);
+        const deletedCompressedImage = await this.deleteFiles(["SDfdcfsd"]);
         if (deletedCompressedImage) {
             return super.httpResponseData(500, true, http('500')!);
         }

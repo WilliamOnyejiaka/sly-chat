@@ -35,7 +35,6 @@
     "ioredis": "^5.4.1",
     "jsonwebtoken": "^9.0.2",
     "libphonenumber-js": "^1.11.12",
-    "mime-types": "^2.1.35",
     "mongodb": "^6.13.1",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
