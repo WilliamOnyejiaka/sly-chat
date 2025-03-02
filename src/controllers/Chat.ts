@@ -230,7 +230,7 @@ export default class Chat {
                     console.log(socketId);
                     
 
-                    io.of(Namespace.CHAT).to(socketId).emit('sentMedia', Handler.responseData(200, false, null, repoResult.data));
+                    io.of(Namespace.CHAT).to(socketId).emit('receiveMedia', Handler.responseData(200, false, null, repoResult.data));
                     res.status(201).json({
                         error: true,
                         message: "Created",
@@ -280,6 +280,16 @@ export default class Chat {
                     }
 
                     const userSocket = await Chat.facade.getUserOnlineStatus(userType, String(userId));
+                    if (userSocket.error || !userSocket.data) {
+                        res.status(500).json({
+                            error: true,
+                            message: "Something Went wrong,failed to get user online status",
+                            data: {}
+                        });
+                        return;
+                    }
+
+                    const recipientSocket = await Chat.facade.getRecipientOnlineStatus(userType, String(recipientId));
                     if (userSocket.error || !userSocket.data) {
                         res.status(500).json({
                             error: true,
