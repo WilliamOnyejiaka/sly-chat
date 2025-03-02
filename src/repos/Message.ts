@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 import prisma from ".";
 import Repo from "./bases/Repo";
 import { UserType } from "../types/enums";
+import { TransactionMessage } from "../types/dtos";
 
 export default class Message extends Repo {
 
@@ -20,7 +21,7 @@ export default class Message extends Repo {
         }
     }
 
-    public async insertWithMedia(chatId: string, newMessage: any, medias: any) {
+    public async insertWithMedia(newMessage: TransactionMessage, medias: any) {
         try {
             const newItem = await prisma.message.create({
                 data: {
@@ -28,11 +29,23 @@ export default class Message extends Repo {
                     senderId: newMessage.senderId,
                     recipientOnline: newMessage.recipientOnline,
                     senderType: newMessage.senderType,
-                    chatId: chatId,
+                    chatId: newMessage.chatId,
                     messageMedias: {
-                        createMany: medias
+                        createMany: {
+                            data: medias
+                        }
                     }
                 },
+                include: {
+                    messageMedias:{
+                        select: {
+                            id: true,
+                            imageUrl: true,
+                            size: true,
+                            mimeType: true
+                        }
+                    }
+                }
 
             });
             return this.repoResponse(false, 201, null, newItem);

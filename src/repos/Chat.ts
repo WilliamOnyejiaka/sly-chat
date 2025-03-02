@@ -14,8 +14,16 @@ export default class Chat extends Repo {
         recipientOnline: true,
         chatId: true,
         senderType: true,
-        messageMedias: true
-    };
+        messageMedias: {
+            select: {
+                id: true,
+                imageUrl: true,
+                size: true,
+                mimeType: true
+            }
+        }
+    }
+
 
     public constructor() {
         super('chat');
@@ -63,8 +71,46 @@ export default class Chat extends Repo {
             });
             return this.repoResponse(false, 201, null, newItem);
         } catch (error) {
-            console.log(error);
+            return this.handleDatabaseError(error);
+        }
+    }
 
+    public async insertChatWithMessageAndMedias(newChat: TransactionChat, newMessage: any, medias: any) {
+        try {
+            const newItem = await prisma.chat.create({
+                data: {
+                    vendorId: newChat.vendorId,
+                    productId: newChat.productId,
+                    productImageUrl: newChat.productImageUrl,
+                    storeLogoUrl: newChat.storeLogoUrl,
+                    storeName: newChat.storeName,
+                    customerProfilePic: newChat.customerProfilePic,
+                    customerId: newChat.customerId,
+                    customerName: newChat.customerName,
+                    productName: newChat.productName,
+                    productPrice: newChat.productPrice,
+                    messages: {
+                        create: {
+                            text: newMessage.text,
+                            senderId: newMessage.senderId,
+                            recipientOnline: newMessage.recipientOnline,
+                            senderType: newMessage.senderType,
+                            messageMedias: {
+                                createMany: {
+                                    data: medias
+                                }
+                            }
+                        },
+                    },
+                },
+                include: {
+                    messages: {
+                        select: this.messageSelect
+                    }
+                }
+            });
+            return this.repoResponse(false, 201, null, newItem);
+        } catch (error) {
             return this.handleDatabaseError(error);
         }
     }

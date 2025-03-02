@@ -6,10 +6,14 @@ import { CdnFolders, ResourceType, UserType } from "../types/enums";
 import { ServiceResult } from "../types";
 import { cloudinary } from "../config";
 import { compressImage } from "../utils";
+import { Chat as ChatRepo, Message as MessageRepo } from "./../repos";
+import { TransactionMessage } from "../types/dtos";
 
 export default class Chat {
 
     private static facade = new ChatManagementFacade();
+    private static repo = new ChatRepo();
+    private static message = new MessageRepo();
 
     public static async sendPdf1(req: Request, res: Response) {
         try {
@@ -68,7 +72,7 @@ export default class Chat {
                         result.url = url;
                         uploadedFiles.push({
                             publicId: result.public_id,
-                            size: result.bytes,
+                            size: String(result.bytes),
                             imageUrl: result.url,
                             mimeType: file.mimetype
                         });
@@ -99,6 +103,7 @@ export default class Chat {
             const { chatId, senderId } = req.body;
             const { uploadedFiles, failedFiles } = await Chat.upload(req.files as Express.Multer.File[], ResourceType.PDF, CdnFolders.PDF);
 
+
             res.status(201).json({ chatId, senderId, uploadedFiles, failedFiles });
         } catch (error: any) {
             console.error("Upload failed:", error);
@@ -126,8 +131,45 @@ export default class Chat {
                 return;
             }
 
-            const { chatId, senderId } = req.body;
+            let { chatId, senderId, text } = req.body;
+            senderId = Number(senderId);
+
             const { uploadedFiles, failedFiles } = await Chat.upload(req.files, ResourceType.IMAGE, CdnFolders.IMAGE);
+
+            if (uploadedFiles.length > 0) {
+                let newMessage: TransactionMessage = {
+                    senderId: senderId,
+                    text: text,
+                };
+                if (chatId) {
+                    newMessage.chatId = chatId;
+                    const repoResult = await Chat.message.insertWithMedia(newMessage, uploadedFiles);
+                    if (repoResult.error) {
+                        res.status(500).json({
+                            error: true,
+                            message: "Failed to create",
+                            data: {}
+                        });
+                        return;
+                    }
+                    res.status(201).json({
+                        error: true,
+                        message: "Created",
+                        data: repoResult.data
+                    });
+                    return;
+                } else {
+                    // const repoResult = await Chat.repo.insertChatWithMessageAndMedias()
+
+                    res.status(201).json({
+                        error: true,
+                        message: "Chat here",
+                        data: "repoResult.data"
+                    });
+                    return;
+                }
+            }
+
 
             res.status(201).json({ chatId, senderId, uploadedFiles, failedFiles });
             return;
