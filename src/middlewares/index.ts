@@ -8,6 +8,7 @@ import redisClientMiddleware from "./redisClientMiddleware";
 import vendorIsActive from "./vendorIsActive";
 import validateBody from "./validateBody";
 import validateHttpJWT from "./validateHttpJWT";
+import validateFileUpload from "./validateFileUpload";
 
 export {
     getBasicAuthHeader,
@@ -19,5 +20,6 @@ export {
     secureApi,
     redisClientMiddleware,
     vendorIsActive,
-    validateHttpJWT
+    validateHttpJWT,
+    validateFileUpload
 };

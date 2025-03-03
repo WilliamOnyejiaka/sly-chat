@@ -52,8 +52,8 @@ model Chat {
 model Message {
   id              String         @id @default(auto()) @map("_id") @db.ObjectId
   senderId        Int
-  senderType      SenderType?
-  text            String
+  senderType      SenderType
+  text            String?
   timestamp       DateTime       @default(now())
   read            Boolean        @default(false)
   recipientOnline Boolean        @default(false)

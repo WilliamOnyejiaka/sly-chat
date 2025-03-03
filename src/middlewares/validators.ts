@@ -80,11 +80,11 @@ const isTokenPresent = (value: string, { req, location, path }: { req: any, loca
     return true;
 }
 
-const isValidNumber = (value: string) => {
+const isValidNumber = (name: string) => (value: string) => {
     const idResult = numberValidator(value);
 
     if (idResult.error) {
-        throw new Error(errorDetails("Param must be an integer", HttpStatus.BAD_REQUEST));
+        throw new Error(errorDetails(`${name} must be an integer`, HttpStatus.BAD_REQUEST));
     }
     return true;
 }
@@ -113,8 +113,8 @@ export const emailIsValid = body('email').custom(isValidEmail);
 // export const userEmailExists = <T extends UserRepo>(repo: T) => body('email').custom(emailExists<T>(repo));
 export const zipCodeIsValid = body('zip').custom(isValidZipCode);
 export const tokenIsPresent = header('Authorization').custom(isTokenPresent);
-export const paramNumberIsValid = (paramName: string) => param(paramName).custom(isValidNumber);
-export const bodyNumberIsValid = (bodyName: string) => body(bodyName).custom(isValidNumber);
+export const paramNumberIsValid = (paramName: string) => param(paramName).custom(isValidNumber(paramName));
+export const bodyNumberIsValid = (bodyName: string) => body(bodyName).custom(isValidNumber(bodyName));
 export const itemNameExists = <T extends Repo>(repo: T, bodyName: string) => body(bodyName).custom(nameExists<T>(repo));
 export const pageQueryIsValid = query('page').custom(validateQueryNumber('page'));
 export const pageSizeQueryIsValid = query('pageSize').custom(validateQueryNumber('pageSize'));

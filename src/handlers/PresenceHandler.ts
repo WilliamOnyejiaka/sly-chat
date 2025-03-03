@@ -32,6 +32,14 @@ export default class PresenceHandler {
 
     public static async disconnect(io: Server, socket: ISocket, data: any) {
         try {
+
+            io.of(Namespace.CHAT).sockets.forEach((chatSocket) => {
+                if ((chatSocket.handshake.auth.token === socket.handshake.auth.token) || (chatSocket.handshake.headers['token'] === socket.handshake.headers['token'])) {
+                    console.log(`🔌 [Chat Namespace] Disconnecting user ${chatSocket.id} due to Presence Namespace disconnect`);
+                    chatSocket.disconnect(true);
+                }
+            });
+
             const userId = Number(socket.locals.data.id);
             const userType = socket.locals.userType;
             const facadeResult = await PresenceHandler.facade.deleteOnlineUser(String(userId), userType);

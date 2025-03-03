@@ -4,113 +4,34 @@ import Controller from "./bases/Controller";
 import { ChatManagementFacade } from "../facade";
 import { CdnFolders, Namespace, ResourceType, UserType } from "../types/enums";
 import { ServiceResult } from "../types";
-import { cloudinary } from "../config";
-import { compressImage } from "../utils";
 import { Chat as ChatRepo, Message as MessageRepo } from "./../repos";
 import { TransactionChat, TransactionMessage } from "../types/dtos";
 import { Server } from "socket.io";
 import Handler from "../handlers/Handler";
+import { Cloudinary } from "../services";
+import { logger } from "../config";
 
 export default class Chat {
 
     private static facade = new ChatManagementFacade();
     private static repo = new ChatRepo();
     private static message = new MessageRepo();
+    private static cloudinary = new Cloudinary();
 
-    public static async sendPdf1(req: Request, res: Response) {
-        try {
-            if (!req.file) {
-                res.status(400).json({ error: "No file uploaded" });
+    public static sendMedia(resourceType: ResourceType, folder: CdnFolders) {
+        return async (req: Request, res: Response) => {
+            const validationErrors = validationResult(req);
+
+            if (!validationErrors.isEmpty()) {
+                Controller.handleValidationErrors(res, validationErrors);
                 return;
             }
 
-            // Convert the file buffer to a Cloudinary stream
-            const result = await new Promise((resolve, reject) => {
-                const stream = cloudinary.uploader.upload_stream(
-                    { resource_type: "raw", folder: "chat-cdn/chat-pdfs" },
-                    (error, result) => {
-                        if (error) reject(error);
-                        else resolve(result);
-                    }
-                );
-                stream.end(req.file!.buffer); // Send the file buffer to Cloudinary
-            });
+            const userId = Number(res.locals.data.id);
+            const userType = res.locals.userType;
+            const io: Server = res.locals.io;
+            const chatNamespace = io.of(Namespace.CHAT);
 
-            const { chatId, senderId } = req.body;
-            const fileUrl = (result as any).secure_url; // Cloudinary URL
-
-            res.status(201).json({ chatId, senderId, fileUrl });
-        } catch (error: any) {
-            console.error("Upload failed:", error);
-            res.status(500).json({ error: "File upload failed", details: error.message });
-        }
-    }
-
-    public static async upload(files: Express.Multer.File[], resourceType: ResourceType, folder: CdnFolders) {
-        const uploadedFiles: any = [];
-        const failedFiles: any = [];
-
-        await Promise.all(
-            files.map(async (file) => {
-                try {
-                    const buffer = resourceType === ResourceType.IMAGE ? await compressImage(file) : { error: false, buffer: file.buffer };
-                    if (!buffer.error) {
-                        const result: any = await new Promise((resolve, reject) => {
-                            const stream = cloudinary.uploader.upload_stream(
-                                { resource_type: resourceType, folder: folder, timeout: 100000 },
-                                (error, result) => {
-                                    if (error) reject(error);
-                                    else resolve(result);
-                                }
-                            );
-                            stream.end(buffer.buffer);
-                        });
-                        const url = resourceType === ResourceType.IMAGE ? cloudinary.url(result.public_id, {
-                            transformation: [
-                                { fetch_format: 'auto' },
-                                { quality: 'auto' }
-                            ]
-                        }) : result.url;
-                        result.url = url;
-                        uploadedFiles.push({
-                            publicId: result.public_id,
-                            size: String(result.bytes),
-                            imageUrl: result.url,
-                            mimeType: file.mimetype
-                        });
-                    } else {
-                        failedFiles.push({ filename: file.originalname, error: "Failed to compress image." });
-                    }
-                } catch (error: any) {
-                    console.error(`Upload failed for ${file.originalname}:`, error);
-                    failedFiles.push({ filename: file.originalname, error: error.message });
-                }
-            })
-        );
-
-        return { uploadedFiles, failedFiles }
-    }
-
-    public static async deleteFiles(publicIds: string[]) {
-        try {
-            const result = await cloudinary.api.delete_resources(publicIds);
-            return result;
-        } catch (error) {
-            console.error(error);
-            return false;
-        }
-    }
-
-    public static async sendPdf(req: Request, res: Response) {
-        try {
-            if (!req.files) {
-                res.status(400).json({
-                    error: true,
-                    message: "No file uploaded",
-                    data: {}
-                });
-                return;
-            }
             let {
                 recipientId,
                 productId,
@@ -123,86 +44,47 @@ export default class Chat {
                 productPrice,
                 productName,
                 productImageUrl,
-                senderId
             } = req.body;
-            const { uploadedFiles, failedFiles } = await Chat.upload(req.files as Express.Multer.File[], ResourceType.PDF, CdnFolders.PDF);
 
-
-            res.status(201).json({ chatId, senderId, uploadedFiles, failedFiles });
-        } catch (error: any) {
-            console.error("Upload failed:", error);
-            res.status(500).json({ error: "File upload failed", details: error.message });
-        }
-    }
-
-    public static async sendImage(req: Request, res: Response) {
-        try {
-            if (!req.files || !Array.isArray(req.files)) {
-                res.status(400).json({
-                    error: true,
-                    message: "No file uploaded",
-                    data: {}
-                });
-                return;
-            }
-
-            if (req.files.length > 3) {
-                res.status(400).json({
-                    error: true,
-                    message: "File limit has been exceeded.Maximum file limit is 3.",
-                    data: {}
-                });
-                return;
-            }
-
-            const userId = Number(res.locals.data.id);
-            const userType = res.locals.userType;
-            const io: Server = res.locals.io;
-            const chatNamespace = io.of(Namespace.CHAT);
-
-
-            console.log(userId, " ", userType);
-
-            let {
-                recipientId, // validate in middleware
-                productId,
-                chatId,
-                text,// validate in middleware
-                storeName,
-                customerName,
-                storeLogoUrl,
-                customerProfilePic,
-                productPrice,
-                productName,
-                productImageUrl,
-            } = req.body;
             recipientId = Number(recipientId);
 
-            let customerId, vendorId;
-            if (userType == UserType.Customer) {
-                vendorId = recipientId;
-                customerId = userId;
-            } else if (userType == UserType.Vendor) {
-                customerId = recipientId;
-                vendorId = userId;
-            } else {
-                res.status(401).json({
+            const [customerId, vendorId] = userType === UserType.Customer ? [userId, recipientId] : [recipientId, userId];
+
+            const userSocket = await Chat.facade.getUserOnlineStatus(userType, String(userId));
+            if (userSocket.error || !userSocket.data) {
+                logger.error("Something went wrong,failed to get user online status")
+                res.status(500).json({
                     error: true,
-                    message: "Unauthorized user",
+                    message: "Something went wrong,failed to get user online status",
                     data: {}
                 });
                 return;
             }
 
+            const socketId = userSocket.data.chatSocketId;
 
-            const { uploadedFiles, failedFiles } = await Chat.upload(req.files, ResourceType.IMAGE, CdnFolders.IMAGE);
+            const recipientSocket = await Chat.facade.getRecipientOnlineStatus(userType, String(recipientId));
+            if (recipientSocket.error) {
+                logger.error("Something went wrong,failed to get recipient online status")
+                res.status(500).json({
+                    error: true,
+                    message: "Something went wrong,failed to get recipient online status",
+                    data: {}
+                });
+                return;
+            }
+
+            const recipientIsOnline = !!recipientSocket.data;
+            const { uploadedFiles, failedFiles } = await Chat.cloudinary.upload(req.files as Express.Multer.File[], resourceType, folder);
 
             if (uploadedFiles.length > 0) {
                 const publicIds = uploadedFiles.map((item: any) => item.publicId);
+
                 let newMessage: TransactionMessage = {
                     senderId: userId,
                     text: text,
-                    senderType: userType.toUpperCase()
+                    senderType: userType.toUpperCase(),
+                    recipientOnline: recipientIsOnline
                 };
 
                 if (chatId) {
@@ -216,24 +98,11 @@ export default class Chat {
                         });
                         return;
                     }
-                    const userSocket = await Chat.facade.getUserOnlineStatus(userType, String(userId));
-                    if (userSocket.error || !userSocket.data) {
-                        res.status(500).json({
-                            error: true,
-                            message: "Something Went wrong,failed to get user online status",
-                            data: {}
-                        });
-                        return;
-                    }
 
-                    const socketId = userSocket.data.chatId;
-                    console.log(socketId);
-                    
-
-                    io.of(Namespace.CHAT).to(socketId).emit('receiveMedia', Handler.responseData(200, false, null, repoResult.data));
+                    chatNamespace.to(chatId).emit('receiveMedia', Handler.responseData(200, false, null, repoResult.data));
                     res.status(201).json({
                         error: true,
-                        message: "Created",
+                        message: "Message has been sent",
                         data: repoResult.data
                     });
                     return;
@@ -261,7 +130,7 @@ export default class Chat {
 
                     const repoResult = await Chat.repo.insertChatWithMessageAndMedias(newChat, newMessage, uploadedFiles);
                     if (repoResult.error) {
-                        const deleted = Chat.deleteFiles(publicIds);
+                        const deleted = Chat.cloudinary.deleteFiles(publicIds);
                         if (!deleted) {
                             res.status(500).json({
                                 error: true,
@@ -279,35 +148,25 @@ export default class Chat {
                         return;
                     }
 
-                    const userSocket = await Chat.facade.getUserOnlineStatus(userType, String(userId));
-                    if (userSocket.error || !userSocket.data) {
-                        res.status(500).json({
-                            error: true,
-                            message: "Something Went wrong,failed to get user online status",
-                            data: {}
-                        });
-                        return;
-                    }
+                    console.log(userSocket);
+                    // console.log(recipientSocket);
 
-                    const recipientSocket = await Chat.facade.getRecipientOnlineStatus(userType, String(recipientId));
-                    if (userSocket.error || !userSocket.data) {
-                        res.status(500).json({
-                            error: true,
-                            message: "Something Went wrong,failed to get user online status",
-                            data: {}
-                        });
-                        return;
-                    }
                     const chat = repoResult.data;
+                    console.log(chat);
 
-                    const socketId = userSocket.data.chatSocketId;
-                    console.log(socketId);
+                    chatNamespace.sockets.get(socketId)?.join(chat.id);
 
-                    io.sockets.sockets.get(socketId)?.join(chat.id);
-                    io.of(Namespace.CHAT).to(socketId).emit('sentMedia', Handler.responseData(200, false, null, repoResult.data));
+                    if (recipientIsOnline) {
+                        const recipientSocketId = recipientSocket.data.chatSocketId;
+                        chatNamespace.sockets.get(recipientSocketId)?.join(chat.id); //💬 Forcing the the recipient to join the room 
+                        chatNamespace.sockets.get(recipientSocketId)?.emit('newChat', Handler.responseData(200, false, chat));
+                        console.log(`✅ Message sent directly to user ${recipientId} via socket ${recipientSocketId}`);
+                    }
+
+                    chatNamespace.to(chat.id).emit('receiveMedia', Handler.responseData(200, false, null, repoResult.data));
 
                     res.status(201).json({
-                        error: true,
+                        error: false,
                         message: "New chat has been created",
                         data: repoResult.data
                     });
@@ -315,47 +174,20 @@ export default class Chat {
                 }
             }
 
-
-            res.status(201).json({ chatId, senderId: userId, uploadedFiles, failedFiles });
-            return;
-        } catch (error: any) {
-            console.error("Upload failed:", error);
-            res.status(500).json({ error: "File upload failed", details: error.message });
-            return;
+            Controller.rawResponse(res, 500, true, "Something went wrong", failedFiles);
         }
     }
 
-    public static async sendVideo(req: Request, res: Response) {
-        try {
-            req.setTimeout(600000); // 10 minutes timeout
-            if (!req.files || !Array.isArray(req.files)) {
-                res.status(400).json({
-                    error: true,
-                    message: "No file uploaded",
-                    data: {}
-                });
-                return;
-            }
+    public static sendImage() {
+        return Chat.sendMedia(ResourceType.IMAGE, CdnFolders.IMAGE);
+    }
 
-            if (req.files.length > 3) {
-                res.status(400).json({
-                    error: true,
-                    message: "File limit has been exceeded.Maximum file limit is 3.",
-                    data: {}
-                });
-                return;
-            }
+    public static sendVideo() {
+        return Chat.sendMedia(ResourceType.VIDEO, CdnFolders.VIDEO);
+    }
 
-            const { chatId, senderId } = req.body;
-            const { uploadedFiles, failedFiles } = await Chat.upload(req.files, ResourceType.VIDEO, CdnFolders.VIDEO);
-
-            res.status(201).json({ chatId, senderId, uploadedFiles, failedFiles });
-            return;
-        } catch (error: any) {
-            console.error("Upload failed:", error);
-            res.status(500).json({ error: "File upload failed", details: error.message });
-            return;
-        }
+    public static sendPdf() {
+        return Chat.sendMedia(ResourceType.PDF, CdnFolders.PDF);
     }
 
     public static async getUserChats(req: Request, res: Response) {

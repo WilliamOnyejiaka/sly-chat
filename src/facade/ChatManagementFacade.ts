@@ -1,7 +1,7 @@
 import { Socket } from "socket.io";
 import { OnlineCustomer, OnlineVendor } from "../cache";
 import { Chat, Message } from "../services";
-import { ISocket, ServiceData, ServiceResult } from "../types";
+import { ISocket, ServiceData, ServiceResult, UploadedFiles } from "../types";
 import { TransactionChat, TransactionMessage } from "../types/dtos";
 import { ServiceResultDataType, UserType } from "../types/enums";
 import BaseFacade from "./bases/BaseFacade";
@@ -131,5 +131,9 @@ export default class ChatManagementFacade extends BaseFacade {
 
     public async socketMarkMessagesAsRead(chatId: string, senderType: any): Promise<ServiceData> {
         return (await this.markMessagesAsRead(chatId, senderType, ServiceResultDataType.SOCKET)) as ServiceData;
+    }
+
+    public async insertMessageWithMedia(newMessage: TransactionMessage,uploadedFiles: UploadedFiles[]){
+
     }
 }

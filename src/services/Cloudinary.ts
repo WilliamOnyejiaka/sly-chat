@@ -1,6 +1,9 @@
 import { cloudinary, logger } from "../config";
 import BaseService from "./bases/BaseService";
 import { http, imageFolders } from "../constants";
+import { CdnFolders, ResourceType } from "../types/enums";
+import { UploadedFiles, FailedFiles } from "./../types";
+import { compressImage } from "../utils";
 
 export default class Cloudinary extends BaseService {
 
@@ -15,6 +18,56 @@ export default class Cloudinary extends BaseService {
                 { quality: 'auto' }
             ]
         });
+    }
+
+    public async upload(files: Express.Multer.File[], resourceType: ResourceType, folder: CdnFolders) {
+        const uploadedFiles: UploadedFiles[] = [];
+        const failedFiles: FailedFiles[] = [];
+
+        await Promise.all(
+            files.map(async (file) => {
+                try {
+                    const buffer = resourceType === ResourceType.IMAGE ? await compressImage(file) : { error: false, buffer: file.buffer };
+                    if (!buffer.error) {
+                        const result: any = await new Promise((resolve, reject) => {
+                            const stream = cloudinary.uploader.upload_stream(
+                                { resource_type: resourceType, folder: folder, timeout: 100000 },
+                                (error, result) => {
+                                    if (error) reject(error);
+                                    else resolve(result);
+                                }
+                            );
+                            stream.end(buffer.buffer);
+                        });
+                        const url = resourceType === ResourceType.IMAGE ? this.getUrl(result.public_id) : result.url;
+                        result.url = url;
+                        uploadedFiles.push({
+                            publicId: result.public_id,
+                            size: String(result.bytes),
+                            imageUrl: result.url,
+                            mimeType: file.mimetype
+                        });
+                    } else {
+                        failedFiles.push({ filename: file.originalname, error: "Failed to compress image." });
+                    }
+                } catch (error: any) {
+                    console.error(`Upload failed for ${file.originalname}:`, error);
+                    failedFiles.push({ filename: file.originalname, error: error.message });
+                }
+            })
+        );
+
+        return { uploadedFiles, failedFiles }
+    }
+
+    public async deleteFiles(publicIds: string[]) {
+        try {
+            const result = await cloudinary.api.delete_resources(publicIds);
+            return result;
+        } catch (error) {
+            console.error(error);
+            return false;
+        }
     }
 
     public async uploadImage(filePath: string, imageFolder: string) {

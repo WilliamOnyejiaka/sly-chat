@@ -26,3 +26,15 @@ export type ServiceResult = {
     },
     statusCode: number
 };
+
+export type UploadedFiles = {
+    publicId: string,
+    size: string,
+    imageUrl: string,
+    mimeType: string
+};
+
+export type FailedFiles = {
+    filename: string,
+    error: string
+}

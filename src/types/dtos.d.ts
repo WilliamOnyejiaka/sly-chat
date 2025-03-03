@@ -20,7 +20,7 @@ export interface TransactionMessage {
     text: string;
     timestamp?: Date;
     read?: boolean;
-    recipientOnline?: boolean;
+    recipientOnline: boolean;
     chatId?: string | null;
     createdAt?: Date;
     updatedAt?: Date;

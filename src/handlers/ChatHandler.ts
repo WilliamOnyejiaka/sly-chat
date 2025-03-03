@@ -184,7 +184,7 @@ export default class ChatHandler {
             socket.join(chatId);
             console.log(`✅ New chat has been created`);
             // io.of(Namespace.CHAT).to(socket.id).emit('sentMessage', Handler.responseData(200, false, null, chat.messages));
-
+            io.of(Namespace.CHAT).to(chatId).emit('receiveMessage', Handler.responseData(200, false, null, chat.messages));
             if (recipientOnlineData) {
                 const recipientSocketId = recipientOnlineData.chatSocketId;
                 io.sockets.sockets.get(recipientSocketId)?.join(chatId); //💬 Forcing the the recipient to join the room 
@@ -192,7 +192,6 @@ export default class ChatHandler {
                 console.log(`✅ Message sent directly to user ${recipientId} via socket ${recipientSocketId}`);
                 return;
             }
-            io.of(Namespace.CHAT).to(chatId).emit('receiveMessage', Handler.responseData(200, false, null, chat.messages));
         } else {
             console.log(`📩 User ${userId} sending message to room ${chatId}: "${text}"`);
 
