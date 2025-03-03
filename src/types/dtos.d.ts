@@ -9,6 +9,7 @@ export interface TransactionChat {
     productName: string,
     storeName: string,
     customerName: string,
+    lastMessageAt?: DateTime,
     storeLogoUrl?: string,
     productImageUrl: string,
 };

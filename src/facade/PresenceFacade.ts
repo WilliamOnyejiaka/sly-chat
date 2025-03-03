@@ -52,7 +52,7 @@ export default class PresenceFacade extends BaseFacade {
     public async getUserTransactionChatRooms(userId: number, userType: UserType): Promise<ServiceData> {
         if (userType == UserType.Admin) return this.service.socketResponseData(200, false,null,[]);
 
-        const serviceResult = await this.chatService.getChatIds(userId, userType, ServiceResultDataType.SOCKET) as ServiceData;
+        const serviceResult = await this.chatService.getUserChatsWithMessages(userId, userType, ServiceResultDataType.SOCKET) as ServiceData;
         if (serviceResult.error) return serviceResult;
         return serviceResult
     }

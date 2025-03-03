@@ -8,7 +8,7 @@ const chat: Router = Router();
 chat.post('/send-pdf', sendPdf, asyncHandler(Chat.sendPdf()));
 chat.post('/send-image', sendImage, asyncHandler(Chat.sendImage()));
 chat.post('/send-video', sendVideo, asyncHandler(Chat.sendVideo()));
-chat.get("/:chatId", asyncHandler(Chat.getChat));
+chat.get("/:productId/:vendorId/:customerId", asyncHandler(Chat.getChat));
 chat.delete("/:messageId", asyncHandler(Chat.deleteMessage));
 chat.get("/", asyncHandler(Chat.getUserChats));
 

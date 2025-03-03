@@ -65,7 +65,8 @@ export default class Chat extends Repo {
                 },
                 include: {
                     messages: {
-                        select: this.messageSelect
+                        select: this.messageSelect,
+                        orderBy: { updatedAt: 'desc' }
                     }
                 }
             });
@@ -105,7 +106,8 @@ export default class Chat extends Repo {
                 },
                 include: {
                     messages: {
-                        select: this.messageSelect
+                        select: this.messageSelect,
+                        orderBy: { updatedAt: 'desc' }
                     }
                 }
             });
@@ -123,7 +125,8 @@ export default class Chat extends Repo {
                 },
                 include: {
                     messages: {
-                        select: this.messageSelect
+                        select: this.messageSelect,
+                        orderBy: { updatedAt: 'desc' }
                     }
                 }
             });
@@ -133,17 +136,36 @@ export default class Chat extends Repo {
         }
     }
 
+    public async getChatWithRoomId(productId: string, customerId: number, vendorId: number) {
+        try {
+            const items = await prisma.chat.findFirst({
+                where: { productId, customerId, vendorId },
+                include: {
+                    messages: {
+                        select: this.messageSelect,
+                        orderBy: { updatedAt: 'desc' }
+                    }
+                }
+            });
+            return this.repoResponse(false, 200, null, items);
+        } catch (error) {
+            return this.handleDatabaseError(error);
+        }
+    }
     public async getCustomerChatsWithMessages(userId: number) {
         try {
             const items = await prisma.chat.findMany({
                 where: {
                     customerId: userId
                 },
+                orderBy: { lastMessageAt: 'desc' },
                 include: {
                     messages: {
-                        select: this.messageSelect
+                        select: this.messageSelect,
+                        orderBy: { updatedAt: 'desc' },
                     }
-                }
+                },
+
             });
             return this.repoResponse(false, 200, null, items);
         } catch (error) {
@@ -176,7 +198,8 @@ export default class Chat extends Repo {
                 where: where,
                 include: {
                     messages: {
-                        select: this.messageSelect
+                        select: this.messageSelect,
+                        orderBy: { updatedAt: 'desc' }
                     }
                 }
             });

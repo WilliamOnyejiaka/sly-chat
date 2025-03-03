@@ -44,6 +44,7 @@ model Chat {
   customerProfilePic String?
   customerName       String
   storeName          String
+  lastMessageAt      DateTime  @default(now())
   messages           Message[]
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt

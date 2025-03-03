@@ -1,0 +1,129 @@
+// public static async sendMessage(io: Server, socket: ISocket, data: any) {
+    //     const userId = Number(socket.locals.data.id);
+    //     const userType = socket.locals.userType;
+    //     const senderType = (userType as string).toUpperCase();
+
+    //     let {
+    //         recipientId,
+    //         productId,
+    //         chatId,
+    //         text,
+    //         storeName,
+    //         customerName,
+    //         storeLogoUrl,
+    //         customerProfilePic,
+    //         productPrice,
+    //         productName,
+    //         productImageUrl
+    //     } = data;
+
+    //     if (!recipientId || !text) {
+    //         socket.emit('appError', Handler.responseData(400, true, "Invalid data provided"));
+    //         return;
+    //     }
+
+    //     let customerId, vendorId;
+    //     if (userType == UserType.Customer) {
+    //         vendorId = recipientId;
+    //         customerId = userId;
+    //     } else if (userType == UserType.Vendor) {
+    //         customerId = recipientId;
+    //         vendorId = userId;
+    //     } else {
+    //         socket.emit('appError', {
+    //             error: true,
+    //             message: "Unauthorized user",
+    //             statusCode: 401
+    //         });
+    //         return;
+    //     }
+
+    //     const statusResult = await ChatHandler.facade.getRecipientOnlineStatus(userType, recipientId);
+    //     if (statusResult.error) {
+    //         socket.emit('appError', statusResult);
+    //         return;
+    //     }
+
+    //     const recipientOnlineData = statusResult.data;
+    //     const recipientOnline = !!recipientOnlineData;
+
+    //     let chat;
+    //     if (!chatId) {
+    //         console.log(`💬 Creating new chat for room `);
+
+    //         const newChat: TransactionChat = {
+    //             productId: productId as string,
+    //             vendorId,
+    //             customerId,
+    //             customerProfilePic,
+    //             productPrice,
+    //             productName,
+    //             storeName,
+    //             customerName,
+    //             storeLogoUrl,
+    //             productImageUrl,
+    //         };
+    //         const newMessage: TransactionMessage = { senderId: userId, text, recipientOnline, senderType };
+
+    //         // Create new chat with first message
+    //         const newChatResult = await ChatHandler.facade.createChatWithMessage(newChat, newMessage);
+    //         if (newChatResult.error) {
+    //             socket.emit('appError', newChatResult);
+    //             return;
+    //         }
+
+    //         chat = newChatResult.data; // Get the newly created chat
+    //         chatId = chat.id;
+    //         console.log(chatId);
+
+    //         socket.join(chatId);
+    //         console.log(`✅ New chat has been created`);
+    //         // io.of(Namespace.CHAT).to(socket.id).emit('sentMessage', Handler.responseData(200, false, null, chat.messages));
+    //         io.of(Namespace.CHAT).to(chatId).emit('receiveMessage', Handler.responseData(200, false, null, chat.messages));
+    //         if (recipientOnlineData) {
+    //             const recipientSocketId = recipientOnlineData.chatSocketId;
+    //             io.sockets.sockets.get(recipientSocketId)?.join(chatId); //💬 Forcing the the recipient to join the room 
+    //             socket.to(recipientSocketId).emit('newChat', Handler.responseData(200, false, chat));
+    //             console.log(`✅ Message sent directly to user ${recipientId} via socket ${recipientSocketId}`);
+    //             return;
+    //         }
+    //     } else {
+    //         console.log(`📩 User ${userId} sending message to room ${chatId}: "${text}"`);
+
+    //         const chatResult = await ChatHandler.facade.socketGetChat(chatId);
+    //         if (chatResult.error) {
+    //             socket.emit('appError', chatResult);
+    //             return;
+    //         }
+
+    //         console.log(`🟡 Adding message to existing chat for room ${chatId}`);
+    //         chat = chatResult.data;
+    //         if (chat) {
+    //             const newMessageResult = await ChatHandler.facade.socketCreateMessage(userId, text, chatId, recipientOnline, senderType);
+    //             if (newMessageResult.error) {
+    //                 socket.emit('appError', newMessageResult);
+    //                 return;
+    //             }
+
+    //             // Mark all existing messages as read except for the sender's own messages
+    //             const markMessagesAsReadResult = await ChatHandler.facade.socketMarkMessagesAsRead(chat.id, senderType);
+    //             if (markMessagesAsReadResult.error) {
+    //                 socket.emit('appError', markMessagesAsReadResult);
+    //                 return;
+    //             }
+
+    //             // Emit new message event to the room
+    //             // io.of(Namespace.CHAT).to(chatId).emit('receiveMessage', Handler.responseData(200, false, null, newMessage));
+    //             const newMessage = newMessageResult.data;
+    //             // if (recipientOnline) socket.to(chatId).emit('receiveMessage', Handler.responseData(200, false, null, newMessage));
+    //             // io.of(Namespace.CHAT).to(socket.id).emit('sentMessage', Handler.responseData(200, false, null, newMessage));
+    //             io.of(Namespace.CHAT).to(chatId).emit('receiveMessage', Handler.responseData(200, false, null, newMessage));
+
+    //             console.log(`✅ Message sent successfully to room ${chatId}`);
+    //             return;
+    //         } else {
+    //             socket.emit('appError', Handler.responseData(404, true, "Chat was not found"));
+    //             return;
+    //         }
+    //     }
+    // }

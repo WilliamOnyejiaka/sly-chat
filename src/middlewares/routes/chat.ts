@@ -6,6 +6,7 @@ const sendMedia = [
     validateFileUpload,
     validateBody([
         'recipientId',
+        'productId'
     ]),
     bodyNumberIsValid('recipientId')
 ];

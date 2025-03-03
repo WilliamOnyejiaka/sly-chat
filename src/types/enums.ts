@@ -5,7 +5,7 @@ export enum UserType {
     Customer = "customer",
 };
 
-export enum Events {
+export enum EventList {
     APP_ERROR = "appError",
 
 }

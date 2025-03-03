@@ -10,6 +10,7 @@ import { Server } from "socket.io";
 import Handler from "../handlers/Handler";
 import { Cloudinary } from "../services";
 import { logger } from "../config";
+import { error } from "console";
 
 export default class Chat {
 
@@ -35,7 +36,6 @@ export default class Chat {
             let {
                 recipientId,
                 productId,
-                chatId,
                 text,
                 storeName,
                 customerName,
@@ -47,8 +47,8 @@ export default class Chat {
             } = req.body;
 
             recipientId = Number(recipientId);
-
             const [customerId, vendorId] = userType === UserType.Customer ? [userId, recipientId] : [recipientId, userId];
+            const room = `chat_${productId}_${vendorId}_${customerId}`;
 
             const userSocket = await Chat.facade.getUserOnlineStatus(userType, String(userId));
             if (userSocket.error || !userSocket.data) {
@@ -87,19 +87,31 @@ export default class Chat {
                     recipientOnline: recipientIsOnline
                 };
 
-                if (chatId) {
-                    newMessage.chatId = chatId;
+                const repoResult = await Chat.repo.getChatWithRoomId(productId, customerId, vendorId);
+                if (repoResult.error) {
+                    res.status(500).json({
+                        error: repoResult.error,
+                        message: repoResult.message,
+                        data: {}
+                    });
+                    return;
+                }
+
+                const chat = repoResult.data;
+                if (chat) {
+                    newMessage.chatId = chat.id;
                     const repoResult = await Chat.message.insertWithMedia(newMessage, uploadedFiles);
                     if (repoResult.error) {
+                        await await Chat.cloudinary.deleteFiles(publicIds);
                         res.status(500).json({
                             error: true,
-                            message: "Failed to create",
+                            message: "Failed to create new message",
                             data: {}
                         });
                         return;
                     }
 
-                    chatNamespace.to(chatId).emit('receiveMedia', Handler.responseData(200, false, null, repoResult.data));
+                    chatNamespace.to(room).emit('receiveMedia', Handler.responseData(200, false, null, repoResult.data));
                     res.status(201).json({
                         error: true,
                         message: "Message has been sent",
@@ -107,7 +119,9 @@ export default class Chat {
                     });
                     return;
                 } else {
-                    if (!storeName || !customerName || !productPrice || !productName || !productImageUrl || !productId) {
+                    if (!storeName || !customerName || !productPrice || !productName || !productImageUrl) {
+                        await await Chat.cloudinary.deleteFiles(publicIds);
+
                         res.status(400).json({
                             error: true,
                             message: "Chat here",
@@ -115,6 +129,9 @@ export default class Chat {
                         });
                         return;
                     }
+
+                    console.log(`💬 Creating new chat for room `);
+
                     const newChat: TransactionChat = {
                         storeName,
                         customerName,
@@ -148,22 +165,17 @@ export default class Chat {
                         return;
                     }
 
-                    console.log(userSocket);
-                    // console.log(recipientSocket);
-
                     const chat = repoResult.data;
-                    console.log(chat);
-
-                    chatNamespace.sockets.get(socketId)?.join(chat.id);
+                    chatNamespace.sockets.get(socketId)?.join(room);
 
                     if (recipientIsOnline) {
                         const recipientSocketId = recipientSocket.data.chatSocketId;
-                        chatNamespace.sockets.get(recipientSocketId)?.join(chat.id); //💬 Forcing the the recipient to join the room 
+                        chatNamespace.sockets.get(recipientSocketId)?.join(room); //💬 Forcing the the recipient to join the room 
                         chatNamespace.sockets.get(recipientSocketId)?.emit('newChat', Handler.responseData(200, false, chat));
                         console.log(`✅ Message sent directly to user ${recipientId} via socket ${recipientSocketId}`);
                     }
 
-                    chatNamespace.to(chat.id).emit('receiveMedia', Handler.responseData(200, false, null, repoResult.data));
+                    chatNamespace.to(room).emit('receiveMedia', Handler.responseData(200, false, null, repoResult.data));
 
                     res.status(201).json({
                         error: false,
@@ -212,9 +224,16 @@ export default class Chat {
             return;
         }
 
-        const chatId = req.params.chatId;
-        const facadeResult = await Chat.facade.httpGetChat(chatId);
-        Controller.response(res, facadeResult as ServiceResult);
+        const productId = req.params.productId;
+        const customerId = Number(req.params.customerId);
+        const vendorId = Number(req.params.vendorId);
+
+        const facadeResult = await Chat.repo.getChatWithRoomId(productId, customerId, vendorId);
+        res.status(facadeResult.type).json({
+            error: facadeResult.error,
+            message: facadeResult.message,
+            data: facadeResult.data
+        })
     }
 
     public static async deleteMessage(req: Request, res: Response) {

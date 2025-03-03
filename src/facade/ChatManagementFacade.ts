@@ -69,7 +69,7 @@ export default class ChatManagementFacade extends BaseFacade {
             return item;
         });
 
-        const rooms = chat.length > 0 ? chat.map((item: any) => item.id) : null;
+        const rooms = chat.length > 0 ? chat.map((item: any) => `chat_${item.productId}_${item.vendorId}_${item.customerId}`) : null;
         return this.service.socketResponseData(200, false, null, { chat, offlineMessages, rooms });
     }
 
@@ -133,7 +133,7 @@ export default class ChatManagementFacade extends BaseFacade {
         return (await this.markMessagesAsRead(chatId, senderType, ServiceResultDataType.SOCKET)) as ServiceData;
     }
 
-    public async insertMessageWithMedia(newMessage: TransactionMessage,uploadedFiles: UploadedFiles[]){
+    public async insertMessageWithMedia(newMessage: TransactionMessage, uploadedFiles: UploadedFiles[]) {
 
     }
 }

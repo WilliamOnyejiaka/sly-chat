@@ -33,12 +33,12 @@ export default class PresenceHandler {
     public static async disconnect(io: Server, socket: ISocket, data: any) {
         try {
 
-            io.of(Namespace.CHAT).sockets.forEach((chatSocket) => {
-                if ((chatSocket.handshake.auth.token === socket.handshake.auth.token) || (chatSocket.handshake.headers['token'] === socket.handshake.headers['token'])) {
-                    console.log(`🔌 [Chat Namespace] Disconnecting user ${chatSocket.id} due to Presence Namespace disconnect`);
-                    chatSocket.disconnect(true);
-                }
-            });
+            // io.of(Namespace.CHAT).sockets.forEach((chatSocket) => {
+            //     if ((chatSocket.handshake.auth.token === socket.handshake.auth.token) || (chatSocket.handshake.headers['token'] === socket.handshake.headers['token'])) {
+            //         console.log(`🔌 [Chat Namespace] Disconnecting user ${chatSocket.id} due to Presence Namespace disconnect`);
+            //         chatSocket.disconnect(true);
+            //     }
+            // });
 
             const userId = Number(socket.locals.data.id);
             const userType = socket.locals.userType;
@@ -60,7 +60,7 @@ export default class PresenceHandler {
             }
 
             const chatRooms = chatRoomsResult.data;
-            const rooms = chatRooms ? (chatRooms as Array<{ id: string }>).map(item => item.id) : [];
+            const rooms = chatRooms ? (chatRooms as Array<any>).map(item => `chat_${item.productId}_${item.vendorId}_${item.customerId}`) : [];
 
             console.log('User chat rooms', rooms);
 

@@ -1,7 +1,5 @@
-import { Prisma } from "@prisma/client";
 import prisma from ".";
 import Repo from "./bases/Repo";
-import { UserType } from "../types/enums";
 import { TransactionMessage } from "../types/dtos";
 
 export default class Message extends Repo {
@@ -10,12 +8,36 @@ export default class Message extends Repo {
         super('message');
     }
 
-    public override async insert(data: any) {
+    // public override async insert(data: any) {
+    //     try {
+    //         const newItem = await prisma.message.create({
+    //             data: data
+    //         });
+    //         return this.repoResponse(false, 201, null, newItem);
+    //     } catch (error) {
+    //         return this.handleDatabaseError(error);
+    //     }
+    // }
+
+    public async insert(newMessage: any) {
         try {
-            const newItem = await prisma.message.create({
-                data: data
-            });
-            return this.repoResponse(false, 201, null, newItem);
+            const [message] = await prisma.$transaction([
+                prisma.message.create({
+                    data: {
+                        text: newMessage.text,
+                        senderId: newMessage.senderId,
+                        recipientOnline: newMessage.recipientOnline,
+                        senderType: newMessage.senderType,
+                        chatId: newMessage.chatId,
+                    }
+                }),
+                prisma.chat.update({
+                    where: { id: newMessage.chatId! },
+                    data: { lastMessageAt: new Date() },
+                }),
+            ]);
+
+            return this.repoResponse(false, 201, null, message);
         } catch (error) {
             return this.handleDatabaseError(error);
         }
@@ -23,36 +45,75 @@ export default class Message extends Repo {
 
     public async insertWithMedia(newMessage: TransactionMessage, medias: any) {
         try {
-            const newItem = await prisma.message.create({
-                data: {
-                    text: newMessage.text,
-                    senderId: newMessage.senderId,
-                    recipientOnline: newMessage.recipientOnline,
-                    senderType: newMessage.senderType,
-                    chatId: newMessage.chatId,
-                    messageMedias: {
-                        createMany: {
-                            data: medias
+            const [message] = await prisma.$transaction([
+                prisma.message.create({
+                    data: {
+                        text: newMessage.text,
+                        senderId: newMessage.senderId,
+                        recipientOnline: newMessage.recipientOnline,
+                        senderType: newMessage.senderType,
+                        chatId: newMessage.chatId,
+                        messageMedias: {
+                            createMany: {
+                                data: medias
+                            }
+                        }
+                    },
+                    include: {
+                        messageMedias: {
+                            select: {
+                                id: true,
+                                imageUrl: true,
+                                size: true,
+                                mimeType: true
+                            }
                         }
                     }
-                },
-                include: {
-                    messageMedias:{
-                        select: {
-                            id: true,
-                            imageUrl: true,
-                            size: true,
-                            mimeType: true
-                        }
-                    }
-                }
+                }),
+                prisma.chat.update({
+                    where: { id: newMessage.chatId! },
+                    data: { lastMessageAt: new Date() },
+                }),
+            ]);
 
-            });
-            return this.repoResponse(false, 201, null, newItem);
+            return this.repoResponse(false, 201, null, message);
         } catch (error) {
             return this.handleDatabaseError(error);
         }
     }
+
+    // public async insertWithMedia(newMessage: TransactionMessage, medias: any) {
+    //     try {
+    //         const newItem = await prisma.message.create({
+    //             data: {
+    //                 text: newMessage.text,
+    //                 senderId: newMessage.senderId,
+    //                 recipientOnline: newMessage.recipientOnline,
+    //                 senderType: newMessage.senderType,
+    //                 chatId: newMessage.chatId,
+    //                 messageMedias: {
+    //                     createMany: {
+    //                         data: medias
+    //                     }
+    //                 }
+    //             },
+    //             include: {
+    //                 messageMedias: {
+    //                     select: {
+    //                         id: true,
+    //                         imageUrl: true,
+    //                         size: true,
+    //                         mimeType: true
+    //                     }
+    //                 }
+    //             }
+
+    //         });
+    //         return this.repoResponse(false, 201, null, newItem);
+    //     } catch (error) {
+    //         return this.handleDatabaseError(error);
+    //     }
+    // }
 
     public async markMessagesAsRead(chatId: string, userType: string) {
         try {
