@@ -3,6 +3,9 @@ import { Chat as ChatRepo, Message as MessageRepo } from "../repos";
 import { CustomerCache } from "../cache";
 import BaseService from "./bases/BaseService";
 import { ServiceResultDataType, UserType } from "../types/enums";
+import { UploadedFiles } from "../types";
+import { TransactionMessage } from "../types/dtos";
+
 
 export default class Message extends BaseService<MessageRepo> {
 
@@ -15,6 +18,13 @@ export default class Message extends BaseService<MessageRepo> {
         const repoResultError = super.handleRepoError(dataType, repoResult);
         if (repoResultError) return repoResultError;
         return super.responseData(dataType, 201, false, "Message has been created successfully", repoResult.data)
+    }
+
+    public async createMessageWithMedia(newMessage: TransactionMessage, uploadedFiles: UploadedFiles[], dataType: ServiceResultDataType) {
+        const repoResult = await this.repo!.insertWithMedia(newMessage, uploadedFiles);
+        const repoResultError = super.handleRepoError(dataType, repoResult);
+        if (repoResultError) return repoResultError;
+        return super.responseData(dataType, 201, false, null, repoResult.data);
     }
 
     public async deleteMessage(messageId: string, dataType: ServiceResultDataType) {

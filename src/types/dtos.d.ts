@@ -5,13 +5,13 @@ export interface TransactionChat {
     vendorId: number,
     customerId: number,
     customerProfilePic?: string,
-    productPrice: string,
-    productName: string,
-    storeName: string,
-    customerName: string,
+    productPrice?: string,
+    productName?: string,
+    storeName?: string,
+    customerName?: string,
     lastMessageAt?: DateTime,
     storeLogoUrl?: string,
-    productImageUrl: string,
+    productImageUrl?: string,
 };
 
 export interface TransactionMessage {

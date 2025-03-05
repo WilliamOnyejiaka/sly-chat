@@ -82,39 +82,6 @@ export default class Message extends Repo {
         }
     }
 
-    // public async insertWithMedia(newMessage: TransactionMessage, medias: any) {
-    //     try {
-    //         const newItem = await prisma.message.create({
-    //             data: {
-    //                 text: newMessage.text,
-    //                 senderId: newMessage.senderId,
-    //                 recipientOnline: newMessage.recipientOnline,
-    //                 senderType: newMessage.senderType,
-    //                 chatId: newMessage.chatId,
-    //                 messageMedias: {
-    //                     createMany: {
-    //                         data: medias
-    //                     }
-    //                 }
-    //             },
-    //             include: {
-    //                 messageMedias: {
-    //                     select: {
-    //                         id: true,
-    //                         imageUrl: true,
-    //                         size: true,
-    //                         mimeType: true
-    //                     }
-    //                 }
-    //             }
-
-    //         });
-    //         return this.repoResponse(false, 201, null, newItem);
-    //     } catch (error) {
-    //         return this.handleDatabaseError(error);
-    //     }
-    // }
-
     public async markMessagesAsRead(chatId: string, userType: string) {
         try {
             const updatedMessages = await prisma.message.updateMany({

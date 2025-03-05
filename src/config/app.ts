@@ -49,7 +49,7 @@ function createApp() {
         next();
     });
 
-    // app.use(secureApi);
+    app.use(secureApi);
 
     app.get("/test", async (req: Request, res: Response) => {
         console.log("Hello From chat");

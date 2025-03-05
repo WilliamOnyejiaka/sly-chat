@@ -1,6 +1,7 @@
 import { Result, ValidationError } from "express-validator";
 import BaseService from "../../services/bases/BaseService";
 import { Request, Response } from "express";
+import { ServiceResult } from "../../types";
 
 export default class Controller {
 
@@ -17,13 +18,7 @@ export default class Controller {
         res.status(error.statusCode).json({ error: true, message: error.message });
     }
 
-    public static response(res: Response, responseData: {
-        statusCode: number, json: {
-            error: boolean;
-            message: string | null;
-            data: any;
-        }
-    }) {
+    public static response(res: Response, responseData: ServiceResult) {
         res.status(responseData.statusCode).json(responseData.json);
     }
 

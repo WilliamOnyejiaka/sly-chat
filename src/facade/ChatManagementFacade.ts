@@ -3,8 +3,10 @@ import { OnlineCustomer, OnlineVendor } from "../cache";
 import { Chat, Message } from "../services";
 import { ISocket, ServiceData, ServiceResult, UploadedFiles } from "../types";
 import { TransactionChat, TransactionMessage } from "../types/dtos";
-import { ServiceResultDataType, UserType } from "../types/enums";
+import { CdnFolders, ResourceType, ServiceResultDataType, UserType } from "../types/enums";
 import BaseFacade from "./bases/BaseFacade";
+import { logger } from "../config";
+import { Cloudinary } from "../services";
 
 export default class ChatManagementFacade extends BaseFacade {
 
@@ -12,6 +14,7 @@ export default class ChatManagementFacade extends BaseFacade {
     private readonly messageService = new Message();
     private readonly onlineCustomer: OnlineCustomer = new OnlineCustomer();
     private readonly onlineVendor: OnlineVendor = new OnlineVendor();
+    private readonly cloudinary = new Cloudinary();
 
     public constructor() {
         super();
@@ -113,6 +116,25 @@ export default class ChatManagementFacade extends BaseFacade {
         return this.service.socketResponseData(200, false, null, data);
     }
 
+    public async getUsersOnlineStatus(userId: string, recipientId: string, userType: UserType) {
+        const userSocket = await this.getUserOnlineStatus(userType, String(userId));
+        if (userSocket.error || !userSocket.data) {
+            logger.error("Something went wrong,failed to get user online status");
+            return this.service.socketResponseData(500, true, "Something went wrong,failed to get user online status");
+        }
+
+        const recipientSocket = await this.getRecipientOnlineStatus(userType, String(recipientId));
+        if (recipientSocket.error) {
+            logger.error("Something went wrong,failed to get recipient online status")
+            return this.service.socketResponseData(500, true, "Something went wrong,failed to get user online status");
+        }
+
+        return this.service.socketResponseData(200, false, null, {
+            userSocketId: userSocket.data.chatSocketId,
+            recipientSocketId: recipientSocket.data?.chatSocketId as string | null
+        })
+    }
+
     public async createChatWithMessage(newChat: TransactionChat, newMessage: TransactionMessage): Promise<ServiceData> {
         return (await this.chatService.createChatWithMessage(newChat, newMessage, ServiceResultDataType.SOCKET)) as ServiceData;
     }
@@ -135,5 +157,50 @@ export default class ChatManagementFacade extends BaseFacade {
 
     public async insertMessageWithMedia(newMessage: TransactionMessage, uploadedFiles: UploadedFiles[]) {
 
+    }
+
+    public async createChatWithMedia(
+        newChat: TransactionChat,
+        newMessage: TransactionMessage,
+        files: Express.Multer.File[],
+        resourceType: ResourceType,
+        folder: CdnFolders
+    ) {
+        const chatResult = await this.chatService.getChatWithRoomId(newChat.productId, newChat.customerId, newChat.vendorId, ServiceResultDataType.HTTP) as ServiceResult;
+        if (chatResult.json.error) return chatResult;
+        const chat = chatResult.json.data;
+        const { uploadedFiles, failedFiles, publicIds } = await this.cloudinary.upload(files, resourceType, folder);
+        if (uploadedFiles.length > 0) {
+            if (chat) {
+                newMessage.chatId = chat.id;
+                const serviceResult = await this.messageService.createMessageWithMedia(newMessage, uploadedFiles, ServiceResultDataType.HTTP) as ServiceResult;
+                if (!serviceResult.json.error) {
+                    serviceResult.json.data = { message: serviceResult.json.data, isNewChat: false };
+                    return serviceResult;
+                }
+                await this.cloudinary.deleteFiles(publicIds);
+                return serviceResult;
+            }
+            if (!newChat.storeName || !newChat.customerName || !newChat.productPrice || !newChat.productName || !newChat.productImageUrl) {
+                await this.cloudinary.deleteFiles(publicIds);
+                return this.service.httpResponseData(400, true, "All fields are required to create a new chat");
+            }
+            const serviceResult = await this.chatService.createChatWithMedia(newChat, newMessage, uploadedFiles, ServiceResultDataType.HTTP) as ServiceResult;
+            if (!serviceResult.json.error) {
+                serviceResult.json.data = { chat: serviceResult.json.data, isNewChat: true };
+                return serviceResult;
+            }
+            await this.cloudinary.deleteFiles(publicIds);
+            return serviceResult;
+        }
+        return this.service.httpResponseData(500, true, "Something went wrong", failedFiles);
+    }
+
+    public async httpGetChatWithRoomId(productId: string, customerId: number, vendorId: number) {
+        return await this.chatService.getChatWithRoomId(productId, customerId, vendorId, ServiceResultDataType.HTTP) as ServiceResult;
+    }
+
+    public async socketGetChatWithRoomId(productId: string, customerId: number, vendorId: number) {
+        return await this.chatService.getChatWithRoomId(productId, customerId, vendorId, ServiceResultDataType.SOCKET) as ServiceData;
     }
 }

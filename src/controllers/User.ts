@@ -19,7 +19,7 @@ export default class User {
             }
 
             const newUser: UserDto = req.body;
-            newUser.userType = userType;
+            newUser.userType = userType.toUpperCase();
 
             const serviceResult = await User.service.createUser(newUser);
             Controller.response(res, serviceResult);

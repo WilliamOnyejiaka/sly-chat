@@ -37,6 +37,8 @@ export default class ChatHandler {
         const chat = getUserChatsAndOfflineMessages.data.chat;
 
         console.log("🚧 Joining rooms...");
+        console.log(rooms);
+
         if (rooms) socket.join(rooms);
         console.log("✅ Rooms has been joint");
 
@@ -141,6 +143,8 @@ export default class ChatHandler {
             socket.emit('appError', Handler.handleRepoError(repoResult));
             return;
         }
+
+        console.log(room);
 
         let chat = repoResult.data;
         if (!chat) {

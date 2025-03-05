@@ -1,12 +1,16 @@
+import { User } from "../../repos";
+import { UserType } from "../../types/enums";
 import validateBody from "../validateBody";
 import {
     emailIsValid,
     passwordIsValid,
     phoneNumberIsValid,
     tokenIsPresent,
-    // userEmailExists,
+    userEmailExists,
     zipCodeIsValid
 } from "../validators";
+
+const user = new User();
 
 const createUser = [
     validateBody([
@@ -16,24 +20,15 @@ const createUser = [
         'email',
         'verified',
         'userId'
-    ]),
+    ])
 ];
 
 export const createVendor = [
     ...createUser,
-    // userEmailExists<Vendor>(new Vendor())
+    userEmailExists(user, UserType.Vendor)
 ];
 
 export const createCustomer = [
     ...createUser,
-    // userEmailExists<Customer>(new Customer())
+    userEmailExists(user, UserType.Customer)
 ];
-
-
-export const login = [
-    validateBody(['email', 'password'])
-];
-
-export const logOut = [
-    tokenIsPresent
-]

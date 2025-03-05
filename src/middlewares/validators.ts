@@ -3,6 +3,8 @@ import { emailValidator, numberValidator, phoneNumberValidator, zipCodeValidator
 import constants, { HttpStatus } from "../constants";
 // import UserRepo from "../repos/bases/UserRepo";
 import Repo from "../repos/bases/Repo";
+import { User } from "../repos";
+import { UserType } from "../types/enums";
 
 const errorDetails = (message: string, statusCode: number) => {
     return JSON.stringify({
@@ -34,19 +36,19 @@ const isValidEmail = (value: string) => {
     return true;
 }
 
-// const emailExists = <T extends UserRepo>(repo: T) => async (value: string) => {
-//     const repoResult = await repo.getUserProfileWithEmail(value);
+const emailExists = (repo: User, userType: UserType) => async (value: string) => {
+    const repoResult = await repo.userEmailExists(value, userType.toUpperCase());
 
-//     if (repoResult.error) {
-//         throw new Error(JSON.stringify({
-//             message: repoResult.message,
-//             statusCode: repoResult.type
-//         }));
-//     } else if (repoResult.data) {
-//         throw new Error(errorDetails("Email already exists", HttpStatus.BAD_REQUEST));
-//     }
-//     return true;
-// }
+    if (repoResult.error) {
+        throw new Error(JSON.stringify({
+            message: repoResult.message,
+            statusCode: repoResult.type
+        }));
+    } else if (repoResult.data) {
+        throw new Error(errorDetails("Email already exists", HttpStatus.BAD_REQUEST));
+    }
+    return true;
+}
 
 const nameExists = <T extends Repo>(repo: T) => async (value: string) => {
     const repoResult = await repo.getItemWithName(value);
@@ -110,7 +112,7 @@ const validateQueryNumber = (name: string) => (value: string) => {
 export const passwordIsValid = body('password').custom(isValidPassword); // Custom password validation
 export const phoneNumberIsValid = body('phoneNumber').custom(isValidPhoneNumber);
 export const emailIsValid = body('email').custom(isValidEmail);
-// export const userEmailExists = <T extends UserRepo>(repo: T) => body('email').custom(emailExists<T>(repo));
+export const userEmailExists = (repo: User, userType: UserType) => body('email').custom(emailExists(repo, userType));
 export const zipCodeIsValid = body('zip').custom(isValidZipCode);
 export const tokenIsPresent = header('Authorization').custom(isTokenPresent);
 export const paramNumberIsValid = (paramName: string) => param(paramName).custom(isValidNumber(paramName));

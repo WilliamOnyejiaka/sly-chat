@@ -46,14 +46,14 @@ export default class Chat extends Repo {
                 data: {
                     vendorId: newChat.vendorId,
                     productId: newChat.productId,
-                    productImageUrl: newChat.productImageUrl,
-                    storeLogoUrl: newChat.storeLogoUrl,
-                    storeName: newChat.storeName,
+                    productImageUrl: newChat.productImageUrl!,
+                    storeLogoUrl: newChat.storeLogoUrl!,
+                    storeName: newChat.storeName!,
                     customerProfilePic: newChat.customerProfilePic,
                     customerId: newChat.customerId,
-                    customerName: newChat.customerName,
-                    productName: newChat.productName,
-                    productPrice: newChat.productPrice,
+                    customerName: newChat.customerName!,
+                    productName: newChat.productName!,
+                    productPrice: newChat.productPrice!,
                     messages: {
                         create: {
                             text: newMessage.text,
@@ -82,14 +82,14 @@ export default class Chat extends Repo {
                 data: {
                     vendorId: newChat.vendorId,
                     productId: newChat.productId,
-                    productImageUrl: newChat.productImageUrl,
+                    productImageUrl: newChat.productImageUrl!,
                     storeLogoUrl: newChat.storeLogoUrl,
-                    storeName: newChat.storeName,
+                    storeName: newChat.storeName!,
                     customerProfilePic: newChat.customerProfilePic,
                     customerId: newChat.customerId,
-                    customerName: newChat.customerName,
-                    productName: newChat.productName,
-                    productPrice: newChat.productPrice,
+                    customerName: newChat.customerName!,
+                    productName: newChat.productName!,
+                    productPrice: newChat.productPrice!,
                     messages: {
                         create: {
                             text: newMessage.text,

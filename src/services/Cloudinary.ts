@@ -23,6 +23,7 @@ export default class Cloudinary extends BaseService {
     public async upload(files: Express.Multer.File[], resourceType: ResourceType, folder: CdnFolders) {
         const uploadedFiles: UploadedFiles[] = [];
         const failedFiles: FailedFiles[] = [];
+        const publicIds: string[] = [];
 
         await Promise.all(
             files.map(async (file) => {
@@ -47,6 +48,7 @@ export default class Cloudinary extends BaseService {
                             imageUrl: result.url,
                             mimeType: file.mimetype
                         });
+                        publicIds.push(result.public_id);
                     } else {
                         failedFiles.push({ filename: file.originalname, error: "Failed to compress image." });
                     }
@@ -57,7 +59,7 @@ export default class Cloudinary extends BaseService {
             })
         );
 
-        return { uploadedFiles, failedFiles }
+        return { uploadedFiles, failedFiles, publicIds }
     }
 
     public async deleteFiles(publicIds: string[]) {

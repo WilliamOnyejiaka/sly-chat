@@ -9,6 +9,8 @@ import getPagination from "./getPagination";
 import compressImage from "./compressImage";
 import CipherUtility from "./CipherUtility";
 import parseJson from "./parseJson";
+import getRoom from "./getRoom";
+import userIds from "./userIds";
 
 export {
     Password,
@@ -21,5 +23,7 @@ export {
     getPagination,
     compressImage,
     CipherUtility,
-    parseJson
+    parseJson,
+    getRoom,
+    userIds
 };

@@ -3,6 +3,7 @@
 This document provides an extensive explanation of all the events supported in the chat system. The system uses **Socket.io** for real-time communication and follows a **namespace-based structure** to manage different types of connections.
 
 ## **Production Url**
+
 https://sly-chat.onrender.com
 
 ## **Overview**
@@ -62,7 +63,7 @@ This event is triggered when a user establishes a connection to the **chat names
   "error": false,
   "message": "Chats have been sent successfully",
   "statusCode": 200,
-  "data":[
+  "data": [
     {
       "id": "67c041dd744c61c167a18a32",
       "productId": "12345",
@@ -77,16 +78,18 @@ This event is triggered when a user establishes a connection to the **chat names
       "storeName": "Tech Haven",
       "createdAt": "2025-02-27T10:43:41.905Z",
       "updatedAt": "2025-02-27T10:43:41.905Z",
-      "messages": [ {
-                    "senderId": 2,
-                    "text": "Are you crazy?",
-                    "timestamp": "2025-02-27T10:43:41.905Z",
-                    "read": false,
-                    "recipientOnline": true,
-                    "chatId": "67c041dd744c61c167a18a32",
-                    "senderType": "CUSTOMER",
-                    "messageImages": []
-                }]
+      "messages": [
+        {
+          "senderId": 2,
+          "text": "Are you crazy?",
+          "timestamp": "2025-02-27T10:43:41.905Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c041dd744c61c167a18a32",
+          "senderType": "CUSTOMER",
+          "messageMedia": []
+        }
+      ]
     }
   ]
 }
@@ -152,69 +155,182 @@ A user joins a chat room with another user. This allows them to receive real-tim
   "error": false,
   "message": "Chats has been loaded",
   "data": {
-    "id": "67c04c9f108c8c9aa29b1d11",
-    "productId": "12345",
+    "id": "67c782b71fdd817ba74f45a2",
+    "productId": "12345679",
     "vendorId": 2,
     "customerId": 2,
-    "productImageUrl": "https://example.com/product-image.jpg",
-    "productPrice": "299.99",
-    "productName": "Wireless Headphones",
-    "storeLogoUrl": "https://example.com/store-logo.png",
-    "customerProfilePic": "https://example.com/buyer-profile.jpg",
-    "customerName": "John Doe",
-    "storeName": "Tech Haven",
-    "createdAt": "2025-02-27T11:29:35.099Z",
-    "updatedAt": "2025-02-27T11:29:35.099Z",
+    "productImageUrl": "productImageUrl",
+    "productPrice": "2390",
+    "productName": "Apple",
+    "storeLogoUrl": null,
+    "customerProfilePic": null,
+    "customerName": "customerName",
+    "storeName": "Jay Tech",
+    "lastMessageAt": "2025-03-04T23:01:23.308Z",
+    "createdAt": "2025-03-04T22:46:15.111Z",
+    "updatedAt": "2025-03-04T23:01:23.312Z",
     "messages": [
       {
         "senderId": 2,
-        "text": "Are you crazy?",
-        "timestamp": "2025-02-27T11:29:35.099Z",
+        "text": "Finally",
+        "timestamp": "2025-03-04T22:50:36.843Z",
         "read": true,
         "recipientOnline": true,
-        "chatId": "67c04c9f108c8c9aa29b1d11",
+        "chatId": "67c782b71fdd817ba74f45a2",
         "senderType": "CUSTOMER",
-        "messageImages": []
+        "messageMedias": []
       },
       {
         "senderId": 2,
-        "text": "Are you crazy?",
-        "timestamp": "2025-02-27T11:41:34.161Z",
+        "text": "Finally",
+        "timestamp": "2025-03-04T22:52:17.913Z",
         "read": true,
         "recipientOnline": true,
-        "chatId": "67c04c9f108c8c9aa29b1d11",
-        "senderType": "VENDOR",
-        "messageImages": []
-      },
-      {
-        "senderId": 2,
-        "text": "Are you crazy?",
-        "timestamp": "2025-02-27T11:42:17.134Z",
-        "read": true,
-        "recipientOnline": true,
-        "chatId": "67c04c9f108c8c9aa29b1d11",
+        "chatId": "67c782b71fdd817ba74f45a2",
         "senderType": "CUSTOMER",
-        "messageImages": []
+        "messageMedias": []
       },
       {
         "senderId": 2,
-        "text": "Hello",
-        "timestamp": "2025-02-27T11:44:47.287Z",
+        "text": null,
+        "timestamp": "2025-03-04T22:54:03.797Z",
         "read": true,
         "recipientOnline": true,
-        "chatId": "67c04c9f108c8c9aa29b1d11",
-        "senderType": "VENDOR",
-        "messageImages": []
+        "chatId": "67c782b71fdd817ba74f45a2",
+        "senderType": "CUSTOMER",
+        "messageMedias": [
+          {
+            "id": "67c7848b4cf3cbc2de5882cb",
+            "imageUrl": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741128843/chat-cdn/chat-pdfs/xxunqyyleyhbvwkynuni",
+            "size": "4067",
+            "mimeType": "application/pdf"
+          }
+        ]
       },
       {
         "senderId": 2,
-        "text": "Hello",
-        "timestamp": "2025-02-27T12:38:36.425Z",
+        "text": null,
+        "timestamp": "2025-03-04T22:57:23.587Z",
         "read": true,
         "recipientOnline": true,
-        "chatId": "67c04c9f108c8c9aa29b1d11",
+        "chatId": "67c782b71fdd817ba74f45a2",
+        "senderType": "CUSTOMER",
+        "messageMedias": [
+          {
+            "id": "67c785537035f667ef4bcdee",
+            "imageUrl": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741129042/chat-cdn/chat-pdfs/td9jqaqz3qpviy48nhbu",
+            "size": "4067",
+            "mimeType": "application/pdf"
+          }
+        ]
+      },
+      {
+        "senderId": 2,
+        "text": null,
+        "timestamp": "2025-03-04T22:59:23.809Z",
+        "read": true,
+        "recipientOnline": true,
+        "chatId": "67c782b71fdd817ba74f45a2",
+        "senderType": "CUSTOMER",
+        "messageMedias": [
+          {
+            "id": "67c785cb39c67ec89ca65f10",
+            "imageUrl": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741129163/chat-cdn/chat-pdfs/axta7tbic2cre6o4edhv",
+            "size": "4067",
+            "mimeType": "application/pdf"
+          }
+        ]
+      },
+      {
+        "senderId": 2,
+        "text": null,
+        "timestamp": "2025-03-04T23:01:10.311Z",
+        "read": true,
+        "recipientOnline": true,
+        "chatId": "67c782b71fdd817ba74f45a2",
+        "senderType": "CUSTOMER",
+        "messageMedias": [
+          {
+            "id": "67c7863673e79b84cc9e81e9",
+            "imageUrl": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741129269/chat-cdn/chat-pdfs/achgwryg28evtq6efqk0",
+            "size": "4067",
+            "mimeType": "application/pdf"
+          }
+        ]
+      },
+      {
+        "senderId": 2,
+        "text": "Hi Socket",
+        "timestamp": "2025-03-04T23:01:23.312Z",
+        "read": false,
+        "recipientOnline": true,
+        "chatId": "67c782b71fdd817ba74f45a2",
         "senderType": "VENDOR",
-        "messageImages": []
+        "messageMedias": []
+      },
+      {
+        "senderId": 2,
+        "text": "Hi Socket",
+        "timestamp": "2025-03-04T22:50:28.241Z",
+        "read": true,
+        "recipientOnline": true,
+        "chatId": "67c782b71fdd817ba74f45a2",
+        "senderType": "VENDOR",
+        "messageMedias": []
+      },
+      {
+        "senderId": 2,
+        "text": "Finally",
+        "timestamp": "2025-03-04T22:49:35.710Z",
+        "read": true,
+        "recipientOnline": true,
+        "chatId": "67c782b71fdd817ba74f45a2",
+        "senderType": "CUSTOMER",
+        "messageMedias": []
+      },
+      {
+        "senderId": 2,
+        "text": "Hi Socket",
+        "timestamp": "2025-03-04T22:48:33.962Z",
+        "read": true,
+        "recipientOnline": true,
+        "chatId": "67c782b71fdd817ba74f45a2",
+        "senderType": "VENDOR",
+        "messageMedias": []
+      },
+      {
+        "senderId": 2,
+        "text": null,
+        "timestamp": "2025-03-04T22:46:15.111Z",
+        "read": true,
+        "recipientOnline": true,
+        "chatId": "67c782b71fdd817ba74f45a2",
+        "senderType": "CUSTOMER",
+        "messageMedias": [
+          {
+            "id": "67c782b71fdd817ba74f45a4",
+            "imageUrl": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741128374/chat-cdn/chat-pdfs/yddnfa9zysjqyjpmf9ax",
+            "size": "4067",
+            "mimeType": "application/pdf"
+          }
+        ]
+      },
+      {
+        "senderId": 2,
+        "text": null,
+        "timestamp": "2025-03-04T22:46:45.502Z",
+        "read": true,
+        "recipientOnline": true,
+        "chatId": "67c782b71fdd817ba74f45a2",
+        "senderType": "CUSTOMER",
+        "messageMedias": [
+          {
+            "id": "67c782d51fdd817ba74f45a6",
+            "imageUrl": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741128405/chat-cdn/chat-pdfs/raudlbqxopthsnbb0egl",
+            "size": "4067",
+            "mimeType": "application/pdf"
+          }
+        ]
       }
     ]
   }
@@ -249,7 +365,7 @@ Make the user to join every room that the user is in. This allows them to receiv
   "message": "Chats has been sent successfully",
   "data": [
     {
-      "id": "67c04c9f108c8c9aa29b1d11",
+      "id": "67c605dec4286fc53e2ad992",
       "productId": "12345",
       "vendorId": 2,
       "customerId": 2,
@@ -260,64 +376,82 @@ Make the user to join every room that the user is in. This allows them to receiv
       "customerProfilePic": "https://example.com/buyer-profile.jpg",
       "customerName": "John Doe",
       "storeName": "Tech Haven",
-      "createdAt": "2025-02-27T11:29:35.099Z",
-      "updatedAt": "2025-02-27T11:29:35.099Z",
+      "lastMessageAt": "2025-03-05T00:24:03.890Z",
+      "createdAt": "2025-03-03T19:41:18.936Z",
+      "updatedAt": "2025-03-05T00:24:03.893Z",
       "messages": [
         {
           "senderId": 2,
-          "text": "Are you crazy?",
-          "timestamp": "2025-02-27T11:29:35.099Z",
-          "read": true,
+          "text": null,
+          "timestamp": "2025-03-05T00:24:03.893Z",
+          "read": false,
           "recipientOnline": true,
-          "chatId": "67c04c9f108c8c9aa29b1d11",
+          "chatId": "67c605dec4286fc53e2ad992",
           "senderType": "CUSTOMER",
-          "messageImages": []
+          "messageMedias": [
+            {
+              "id": "67c799a4ef5676c3f6bed3b8",
+              "imageUrl": "https://res.cloudinary.com/dyjhe7cg2/image/upload/f_auto/q_auto/v1/chat-cdn/chat-images/vyaxadgv97gchxucrbcy?_a=BAMCkGRg0",
+              "size": "115998",
+              "mimeType": "image/jpeg"
+            }
+          ]
         },
         {
           "senderId": 2,
-          "text": "Are you crazy?",
-          "timestamp": "2025-02-27T11:41:34.161Z",
+          "text": "Hi Socket",
+          "timestamp": "2025-03-03T19:56:53.019Z",
           "read": true,
           "recipientOnline": true,
-          "chatId": "67c04c9f108c8c9aa29b1d11",
+          "chatId": "67c605dec4286fc53e2ad992",
           "senderType": "VENDOR",
-          "messageImages": []
+          "messageMedias": []
         },
         {
           "senderId": 2,
-          "text": "Are you crazy?",
-          "timestamp": "2025-02-27T11:42:17.134Z",
+          "text": "Hi Socket",
+          "timestamp": "2025-03-03T19:47:15.485Z",
           "read": true,
           "recipientOnline": true,
-          "chatId": "67c04c9f108c8c9aa29b1d11",
+          "chatId": "67c605dec4286fc53e2ad992",
+          "senderType": "VENDOR",
+          "messageMedias": []
+        },
+        {
+          "senderId": 2,
+          "text": "Hi Socket",
+          "timestamp": "2025-03-03T19:41:26.577Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c605dec4286fc53e2ad992",
+          "senderType": "VENDOR",
+          "messageMedias": []
+        },
+        {
+          "senderId": 2,
+          "text": "Hello Chat",
+          "timestamp": "2025-03-03T19:58:25.242Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c605dec4286fc53e2ad992",
           "senderType": "CUSTOMER",
-          "messageImages": []
+          "messageMedias": []
         },
         {
           "senderId": 2,
-          "text": "Hello",
-          "timestamp": "2025-02-27T11:44:47.287Z",
+          "text": "Hello Chat",
+          "timestamp": "2025-03-03T19:41:18.936Z",
           "read": true,
           "recipientOnline": true,
-          "chatId": "67c04c9f108c8c9aa29b1d11",
-          "senderType": "VENDOR",
-          "messageImages": []
-        },
-        {
-          "senderId": 2,
-          "text": "Hello",
-          "timestamp": "2025-02-27T12:38:36.425Z",
-          "read": true,
-          "recipientOnline": true,
-          "chatId": "67c04c9f108c8c9aa29b1d11",
-          "senderType": "VENDOR",
-          "messageImages": []
+          "chatId": "67c605dec4286fc53e2ad992",
+          "senderType": "CUSTOMER",
+          "messageMedias": []
         }
       ]
     },
     {
-      "id": "67c05ca677b0838ae7417fe8",
-      "productId": "12345",
+      "id": "67c60a31d1c7e0bc9ba5460c",
+      "productId": "123456",
       "vendorId": 2,
       "customerId": 2,
       "productImageUrl": "https://example.com/product-image.jpg",
@@ -327,183 +461,323 @@ Make the user to join every room that the user is in. This allows them to receiv
       "customerProfilePic": "https://example.com/buyer-profile.jpg",
       "customerName": "John Doe",
       "storeName": "Tech Haven",
-      "createdAt": "2025-02-27T12:37:58.704Z",
-      "updatedAt": "2025-02-27T12:37:58.704Z",
+      "lastMessageAt": "2025-03-03T21:06:24.570Z",
+      "createdAt": "2025-03-03T19:59:45.351Z",
+      "updatedAt": "2025-03-03T21:06:24.576Z",
       "messages": [
         {
           "senderId": 2,
-          "text": "Hello vendor",
-          "timestamp": "2025-02-27T12:37:58.704Z",
+          "text": null,
+          "timestamp": "2025-03-03T21:06:24.576Z",
           "read": false,
           "recipientOnline": true,
-          "chatId": "67c05ca677b0838ae7417fe8",
+          "chatId": "67c60a31d1c7e0bc9ba5460c",
           "senderType": "CUSTOMER",
-          "messageImages": []
-        }
-      ]
-    },
-    {
-      "id": "67c06957e729a9fd4b70409e",
-      "productId": "12345",
-      "vendorId": 2,
-      "customerId": 2,
-      "productImageUrl": "https://example.com/product-image.jpg",
-      "productPrice": "299",
-      "productName": "Wireless Headphones",
-      "storeLogoUrl": "https://example.com/store-logo.png",
-      "customerProfilePic": "https://example.com/buyer-profile.jpg",
-      "customerName": "John Doe",
-      "storeName": "Tech Haven",
-      "createdAt": "2025-02-27T13:32:07.536Z",
-      "updatedAt": "2025-02-27T13:32:07.536Z",
-      "messages": [
-        {
-          "senderId": 2,
-          "text": "Hello",
-          "timestamp": "2025-02-27T13:32:07.536Z",
-          "read": false,
-          "recipientOnline": true,
-          "chatId": "67c06957e729a9fd4b70409e",
-          "senderType": "VENDOR",
-          "messageImages": []
-        }
-      ]
-    },
-    {
-      "id": "67c069f6b1b231d5c88fa532",
-      "productId": "12345",
-      "vendorId": 2,
-      "customerId": 2,
-      "productImageUrl": "https://example.com/product-image.jpg",
-      "productPrice": "299",
-      "productName": "Wireless Headphones",
-      "storeLogoUrl": "https://example.com/store-logo.png",
-      "customerProfilePic": "https://example.com/buyer-profile.jpg",
-      "customerName": "John Doe",
-      "storeName": "Tech Haven",
-      "createdAt": "2025-02-27T13:34:46.136Z",
-      "updatedAt": "2025-02-27T13:34:46.136Z",
-      "messages": [
-        {
-          "senderId": 2,
-          "text": "Hello",
-          "timestamp": "2025-02-27T13:34:46.136Z",
-          "read": false,
-          "recipientOnline": true,
-          "chatId": "67c069f6b1b231d5c88fa532",
-          "senderType": "VENDOR",
-          "messageImages": []
+          "messageMedias": [
+            {
+              "id": "67c619d0aded1b8471708cb5",
+              "imageUrl": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741035983/chat-cdn/chat-pdfs/rd3r6py0dlndackucozm",
+              "size": "4067",
+              "mimeType": "application/pdf"
+            }
+          ]
         },
         {
           "senderId": 2,
-          "text": "Hello",
-          "timestamp": "2025-02-27T13:35:10.358Z",
-          "read": false,
+          "text": "Hi Socket",
+          "timestamp": "2025-03-03T20:53:50.378Z",
+          "read": true,
           "recipientOnline": true,
-          "chatId": "67c069f6b1b231d5c88fa532",
+          "chatId": "67c60a31d1c7e0bc9ba5460c",
           "senderType": "VENDOR",
-          "messageImages": []
+          "messageMedias": []
         },
         {
           "senderId": 2,
-          "text": "Hello",
-          "timestamp": "2025-02-27T13:35:52.957Z",
-          "read": false,
+          "text": "Hi Socket",
+          "timestamp": "2025-03-03T19:59:59.072Z",
+          "read": true,
           "recipientOnline": true,
-          "chatId": "67c069f6b1b231d5c88fa532",
+          "chatId": "67c60a31d1c7e0bc9ba5460c",
           "senderType": "VENDOR",
-          "messageImages": []
+          "messageMedias": []
         },
         {
           "senderId": 2,
-          "text": "Hello",
-          "timestamp": "2025-02-27T13:38:50.319Z",
-          "read": false,
+          "text": "Hello Chat",
+          "timestamp": "2025-03-03T19:59:45.351Z",
+          "read": true,
           "recipientOnline": true,
-          "chatId": "67c069f6b1b231d5c88fa532",
-          "senderType": "VENDOR",
-          "messageImages": []
-        }
-      ]
-    },
-    {
-      "id": "67c06a925dcc3e41f7c03dc3",
-      "productId": "12345",
-      "vendorId": 2,
-      "customerId": 2,
-      "productImageUrl": "https://example.com/product-image.jpg",
-      "productPrice": "299",
-      "productName": "Wireless Headphones",
-      "storeLogoUrl": "https://example.com/store-logo.png",
-      "customerProfilePic": "https://example.com/buyer-profile.jpg",
-      "customerName": "John Doe",
-      "storeName": "Tech Haven",
-      "createdAt": "2025-02-27T13:37:22.111Z",
-      "updatedAt": "2025-02-27T13:37:22.111Z",
-      "messages": [
-        {
-          "senderId": 2,
-          "text": "Hello",
-          "timestamp": "2025-02-27T13:37:22.111Z",
-          "read": false,
-          "recipientOnline": true,
-          "chatId": "67c06a925dcc3e41f7c03dc3",
-          "senderType": "VENDOR",
-          "messageImages": []
-        }
-      ]
-    },
-    {
-      "id": "67c06a9c5dcc3e41f7c03dc5",
-      "productId": "12345",
-      "vendorId": 2,
-      "customerId": 2,
-      "productImageUrl": "https://example.com/product-image.jpg",
-      "productPrice": "299.99",
-      "productName": "Wireless Headphones",
-      "storeLogoUrl": "https://example.com/store-logo.png",
-      "customerProfilePic": "https://example.com/buyer-profile.jpg",
-      "customerName": "John Doe",
-      "storeName": "Tech Haven",
-      "createdAt": "2025-02-27T13:37:32.042Z",
-      "updatedAt": "2025-02-27T13:37:32.042Z",
-      "messages": [
-        {
-          "senderId": 2,
-          "text": "Hello vendor",
-          "timestamp": "2025-02-27T13:37:32.042Z",
-          "read": false,
-          "recipientOnline": true,
-          "chatId": "67c06a9c5dcc3e41f7c03dc5",
+          "chatId": "67c60a31d1c7e0bc9ba5460c",
           "senderType": "CUSTOMER",
-          "messageImages": []
+          "messageMedias": []
         }
       ]
     },
     {
-      "id": "67c06aaa5dcc3e41f7c03dc7",
-      "productId": "12345",
+      "id": "67c780d8443de0dd1e102b0c",
+      "productId": "1234567",
       "vendorId": 2,
       "customerId": 2,
-      "productImageUrl": "https://example.com/product-image.jpg",
-      "productPrice": "299",
-      "productName": "Wireless Headphones",
-      "storeLogoUrl": "https://example.com/store-logo.png",
-      "customerProfilePic": "https://example.com/buyer-profile.jpg",
-      "customerName": "John Doe",
-      "storeName": "Tech Haven",
-      "createdAt": "2025-02-27T13:37:46.915Z",
-      "updatedAt": "2025-02-27T13:37:46.915Z",
+      "productImageUrl": "productImageUrl",
+      "productPrice": "2390",
+      "productName": "Apple",
+      "storeLogoUrl": null,
+      "customerProfilePic": null,
+      "customerName": "customerName",
+      "storeName": "Jay Tech",
+      "lastMessageAt": "2025-03-04T22:38:16.210Z",
+      "createdAt": "2025-03-04T22:38:16.210Z",
+      "updatedAt": "2025-03-04T22:38:16.210Z",
       "messages": [
         {
           "senderId": 2,
-          "text": "Hello",
-          "timestamp": "2025-02-27T13:37:46.915Z",
+          "text": null,
+          "timestamp": "2025-03-04T22:38:16.210Z",
           "read": false,
           "recipientOnline": true,
-          "chatId": "67c06aaa5dcc3e41f7c03dc7",
+          "chatId": "67c780d8443de0dd1e102b0c",
+          "senderType": "CUSTOMER",
+          "messageMedias": [
+            {
+              "id": "67c780d8443de0dd1e102b0e",
+              "imageUrl": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741127895/chat-cdn/chat-pdfs/h8ct7tni3dukynbfyzwd",
+              "size": "4067",
+              "mimeType": "application/pdf"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "67c782b71fdd817ba74f45a2",
+      "productId": "12345679",
+      "vendorId": 2,
+      "customerId": 2,
+      "productImageUrl": "productImageUrl",
+      "productPrice": "2390",
+      "productName": "Apple",
+      "storeLogoUrl": null,
+      "customerProfilePic": null,
+      "customerName": "customerName",
+      "storeName": "Jay Tech",
+      "lastMessageAt": "2025-03-04T23:01:23.308Z",
+      "createdAt": "2025-03-04T22:46:15.111Z",
+      "updatedAt": "2025-03-04T23:01:23.312Z",
+      "messages": [
+        {
+          "senderId": 2,
+          "text": null,
+          "timestamp": "2025-03-04T23:01:10.311Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c782b71fdd817ba74f45a2",
+          "senderType": "CUSTOMER",
+          "messageMedias": [
+            {
+              "id": "67c7863673e79b84cc9e81e9",
+              "imageUrl": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741129269/chat-cdn/chat-pdfs/achgwryg28evtq6efqk0",
+              "size": "4067",
+              "mimeType": "application/pdf"
+            }
+          ]
+        },
+        {
+          "senderId": 2,
+          "text": null,
+          "timestamp": "2025-03-04T22:59:23.809Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c782b71fdd817ba74f45a2",
+          "senderType": "CUSTOMER",
+          "messageMedias": [
+            {
+              "id": "67c785cb39c67ec89ca65f10",
+              "imageUrl": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741129163/chat-cdn/chat-pdfs/axta7tbic2cre6o4edhv",
+              "size": "4067",
+              "mimeType": "application/pdf"
+            }
+          ]
+        },
+        {
+          "senderId": 2,
+          "text": null,
+          "timestamp": "2025-03-04T22:57:23.587Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c782b71fdd817ba74f45a2",
+          "senderType": "CUSTOMER",
+          "messageMedias": [
+            {
+              "id": "67c785537035f667ef4bcdee",
+              "imageUrl": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741129042/chat-cdn/chat-pdfs/td9jqaqz3qpviy48nhbu",
+              "size": "4067",
+              "mimeType": "application/pdf"
+            }
+          ]
+        },
+        {
+          "senderId": 2,
+          "text": null,
+          "timestamp": "2025-03-04T22:54:03.797Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c782b71fdd817ba74f45a2",
+          "senderType": "CUSTOMER",
+          "messageMedias": [
+            {
+              "id": "67c7848b4cf3cbc2de5882cb",
+              "imageUrl": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741128843/chat-cdn/chat-pdfs/xxunqyyleyhbvwkynuni",
+              "size": "4067",
+              "mimeType": "application/pdf"
+            }
+          ]
+        },
+        {
+          "senderId": 2,
+          "text": "Finally",
+          "timestamp": "2025-03-04T22:52:17.913Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c782b71fdd817ba74f45a2",
+          "senderType": "CUSTOMER",
+          "messageMedias": []
+        },
+        {
+          "senderId": 2,
+          "text": "Finally",
+          "timestamp": "2025-03-04T22:50:36.843Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c782b71fdd817ba74f45a2",
+          "senderType": "CUSTOMER",
+          "messageMedias": []
+        },
+        {
+          "senderId": 2,
+          "text": "Hi Socket",
+          "timestamp": "2025-03-04T23:01:23.312Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c782b71fdd817ba74f45a2",
           "senderType": "VENDOR",
-          "messageImages": []
+          "messageMedias": []
+        },
+        {
+          "senderId": 2,
+          "text": "Hi Socket",
+          "timestamp": "2025-03-04T22:50:28.241Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c782b71fdd817ba74f45a2",
+          "senderType": "VENDOR",
+          "messageMedias": []
+        },
+        {
+          "senderId": 2,
+          "text": "Finally",
+          "timestamp": "2025-03-04T22:49:35.710Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c782b71fdd817ba74f45a2",
+          "senderType": "CUSTOMER",
+          "messageMedias": []
+        },
+        {
+          "senderId": 2,
+          "text": "Hi Socket",
+          "timestamp": "2025-03-04T22:48:33.962Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c782b71fdd817ba74f45a2",
+          "senderType": "VENDOR",
+          "messageMedias": []
+        },
+        {
+          "senderId": 2,
+          "text": null,
+          "timestamp": "2025-03-04T22:46:45.502Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c782b71fdd817ba74f45a2",
+          "senderType": "CUSTOMER",
+          "messageMedias": [
+            {
+              "id": "67c782d51fdd817ba74f45a6",
+              "imageUrl": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741128405/chat-cdn/chat-pdfs/raudlbqxopthsnbb0egl",
+              "size": "4067",
+              "mimeType": "application/pdf"
+            }
+          ]
+        },
+        {
+          "senderId": 2,
+          "text": null,
+          "timestamp": "2025-03-04T22:46:15.111Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c782b71fdd817ba74f45a2",
+          "senderType": "CUSTOMER",
+          "messageMedias": [
+            {
+              "id": "67c782b71fdd817ba74f45a4",
+              "imageUrl": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741128374/chat-cdn/chat-pdfs/yddnfa9zysjqyjpmf9ax",
+              "size": "4067",
+              "mimeType": "application/pdf"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "67c79b8bef5676c3f6bed3b9",
+      "productId": "123450",
+      "vendorId": 2,
+      "customerId": 2,
+      "productImageUrl": "https://example.com/product-image.jpg",
+      "productPrice": "2334",
+      "productName": "Mac",
+      "storeLogoUrl": null,
+      "customerProfilePic": "https://example.com/product-image.jpg",
+      "customerName": "Johnny Storm",
+      "storeName": "Jay Tech",
+      "lastMessageAt": "2025-03-05T00:36:59.267Z",
+      "createdAt": "2025-03-05T00:32:11.106Z",
+      "updatedAt": "2025-03-05T00:36:59.269Z",
+      "messages": [
+        {
+          "senderId": 2,
+          "text": null,
+          "timestamp": "2025-03-05T00:36:59.269Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c79b8bef5676c3f6bed3b9",
+          "senderType": "CUSTOMER",
+          "messageMedias": [
+            {
+              "id": "67c79cabef5676c3f6bed3bd",
+              "imageUrl": "https://res.cloudinary.com/dyjhe7cg2/image/upload/f_auto/q_auto/v1/chat-cdn/chat-images/vjhjkagb52s75oc0gwbw?_a=BAMCkGRg0",
+              "size": "115998",
+              "mimeType": "image/jpeg"
+            }
+          ]
+        },
+        {
+          "senderId": 2,
+          "text": null,
+          "timestamp": "2025-03-05T00:32:11.106Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c79b8bef5676c3f6bed3b9",
+          "senderType": "CUSTOMER",
+          "messageMedias": [
+            {
+              "id": "67c79b8bef5676c3f6bed3bb",
+              "imageUrl": "https://res.cloudinary.com/dyjhe7cg2/image/upload/f_auto/q_auto/v1/chat-cdn/chat-images/l9mkno86l8cb9wurc1ef?_a=BAMCkGRg0",
+              "size": "115998",
+              "mimeType": "image/jpeg"
+            }
+          ]
         }
       ]
     }
@@ -545,11 +819,10 @@ Sends a message to another user. If there is no existing chat, a new one is crea
 
 ### **Server Actions:**
 
-1. If `chatId` does not exist,it creates a new chat.
-2. If the recipient is **online**, it emits `newChat`.
-3. If the recipient is **offline**, mark the message as **unread**.
-4. If `chatId` exists, and the recipient is online ,the server emits `receiveMessage`.
-5.
+1. If the recipient is **online**, it emits `newChat`.
+2. If the recipient is **offline**, mark the message as **unread**.
+3. If the chat does not exist, and the recipient is online ,the server emits `receiveMessage`, the productId and recipientId are required.
+4. If a chat already exists or not it emits `receiveMessage`.The recipient with not get this event if the chat is new.
 
 ### **Example Response:**
 
@@ -557,10 +830,11 @@ Sends a message to another user. If there is no existing chat, a new one is crea
 
 ```json
 {
+  "statusCode": 200,
   "error": false,
-  "data": {
-    "id": "67c04c9f108c8c9aa29b1d11",
-    "productId": "12345",
+  "message": {
+    "id": "67c79e3def5676c3f6bed3be",
+    "productId": "1234589679",
     "vendorId": 2,
     "customerId": 2,
     "productImageUrl": "https://example.com/product-image.jpg",
@@ -570,52 +844,27 @@ Sends a message to another user. If there is no existing chat, a new one is crea
     "customerProfilePic": "https://example.com/buyer-profile.jpg",
     "customerName": "John Doe",
     "storeName": "Tech Haven",
-    "createdAt": "2025-02-27T11:29:35.099Z",
-    "updatedAt": "2025-02-27T11:29:35.099Z",
+    "lastMessageAt": "2025-03-05T00:43:41.523Z",
+    "createdAt": "2025-03-05T00:43:41.523Z",
+    "updatedAt": "2025-03-05T00:43:41.523Z",
     "messages": [
       {
         "senderId": 2,
-        "text": "Are you crazy?",
-        "timestamp": "2025-02-27T11:29:35.099Z",
+        "text": "Finally",
+        "timestamp": "2025-03-05T00:43:41.523Z",
         "read": false,
         "recipientOnline": true,
-        "chatId": "67c04c9f108c8c9aa29b1d11",
+        "chatId": "67c79e3def5676c3f6bed3be",
         "senderType": "CUSTOMER",
-        "messageImages": []
+        "messageMedias": []
       }
     ]
   },
-  "statusCode": 200
+  "data": {}
 }
 ```
 
 #### **receiveMessage**
-
-```json
-{
-  "error": false,
-  "data": {
-    "error": false,
-    "message": null,
-    "type": 201,
-    "data": {
-      "id": "67c0502f6da67b3433a7258a",
-      "senderId": 2,
-      "senderType": "VENDOR",
-      "text": "Hello",
-      "timestamp": "2025-02-27T11:44:47.287Z",
-      "read": false,
-      "recipientOnline": true,
-      "chatId": "67c04c9f108c8c9aa29b1d11",
-      "createdAt": "2025-02-27T11:44:47.287Z",
-      "updatedAt": "2025-02-27T11:44:47.287Z"
-    }
-  },
-  "statusCode": 200
-}
-```
-
-#### **sentMessage**
 
 ```json
 {
@@ -626,12 +875,12 @@ Sends a message to another user. If there is no existing chat, a new one is crea
     {
       "senderId": 2,
       "text": "Finally",
-      "timestamp": "2025-02-28T17:48:12.954Z",
+      "timestamp": "2025-03-05T00:43:41.523Z",
       "read": false,
-      "recipientOnline": false,
-      "chatId": "67c1f6dc898b2a0851b56f23",
+      "recipientOnline": true,
+      "chatId": "67c79e3def5676c3f6bed3be",
       "senderType": "CUSTOMER",
-      "messageImages": []
+      "messageMedias": []
     }
   ]
 }
@@ -655,7 +904,8 @@ Marks all messages in a chat as read.
 
 ```json
 {
-  "chatId": "67c04c9f108c8c9aa29b1d11"
+  "productId": "3234352",
+  "recipientId": 2
 }
 ```
 
@@ -695,7 +945,8 @@ Deletes a specific message from a chat.
 
 ```json
 {
-  "chatId": "67c04c9f108c8c9aa29b1d11",
+  "productId": "3234352",
+  "recipientId": 2,
   "messageId": "67c04c9f108c8c9aa29b1d11"
 }
 ```
@@ -733,7 +984,8 @@ Notifies the recipient that the sender is typing.
 
 ```json
 {
-  "chatId": "67c04c9f108c8c9aa29b1d11"
+  "productId": "3234352",
+  "recipientId": 2
 }
 ```
 
@@ -779,8 +1031,8 @@ Fetches all chat conversations for the user.
   "message": "Chats has been sent successfully",
   "data": [
     {
-      "id": "67c04c9f108c8c9aa29b1d11",
-      "productId": "12345",
+      "id": "67c79e3def5676c3f6bed3be",
+      "productId": "1234589679",
       "vendorId": 2,
       "customerId": 2,
       "productImageUrl": "https://example.com/product-image.jpg",
@@ -790,323 +1042,377 @@ Fetches all chat conversations for the user.
       "customerProfilePic": "https://example.com/buyer-profile.jpg",
       "customerName": "John Doe",
       "storeName": "Tech Haven",
-      "createdAt": "2025-02-27T11:29:35.099Z",
-      "updatedAt": "2025-02-27T11:29:35.099Z",
-      "messages": [
-        {
-          "senderId": 2,
-          "text": "Are you crazy?",
-          "timestamp": "2025-02-27T11:29:35.099Z",
-          "read": true,
-          "recipientOnline": true,
-          "chatId": "67c04c9f108c8c9aa29b1d11",
-          "senderType": "CUSTOMER",
-          "messageImages": []
-        },
-        {
-          "senderId": 2,
-          "text": "Are you crazy?",
-          "timestamp": "2025-02-27T11:41:34.161Z",
-          "read": true,
-          "recipientOnline": true,
-          "chatId": "67c04c9f108c8c9aa29b1d11",
-          "senderType": "VENDOR",
-          "messageImages": []
-        },
-        {
-          "senderId": 2,
-          "text": "Are you crazy?",
-          "timestamp": "2025-02-27T11:42:17.134Z",
-          "read": true,
-          "recipientOnline": true,
-          "chatId": "67c04c9f108c8c9aa29b1d11",
-          "senderType": "CUSTOMER",
-          "messageImages": []
-        },
-        {
-          "senderId": 2,
-          "text": "Hello",
-          "timestamp": "2025-02-27T11:44:47.287Z",
-          "read": true,
-          "recipientOnline": true,
-          "chatId": "67c04c9f108c8c9aa29b1d11",
-          "senderType": "VENDOR",
-          "messageImages": []
-        },
-        {
-          "senderId": 2,
-          "text": "Hello",
-          "timestamp": "2025-02-27T12:38:36.425Z",
-          "read": true,
-          "recipientOnline": true,
-          "chatId": "67c04c9f108c8c9aa29b1d11",
-          "senderType": "VENDOR",
-          "messageImages": []
-        }
-      ]
-    },
-    {
-      "id": "67c05ca677b0838ae7417fe8",
-      "productId": "12345",
-      "vendorId": 2,
-      "customerId": 2,
-      "productImageUrl": "https://example.com/product-image.jpg",
-      "productPrice": "299.99",
-      "productName": "Wireless Headphones",
-      "storeLogoUrl": "https://example.com/store-logo.png",
-      "customerProfilePic": "https://example.com/buyer-profile.jpg",
-      "customerName": "John Doe",
-      "storeName": "Tech Haven",
-      "createdAt": "2025-02-27T12:37:58.704Z",
-      "updatedAt": "2025-02-27T12:37:58.704Z",
-      "messages": [
-        {
-          "senderId": 2,
-          "text": "Hello vendor",
-          "timestamp": "2025-02-27T12:37:58.704Z",
-          "read": false,
-          "recipientOnline": true,
-          "chatId": "67c05ca677b0838ae7417fe8",
-          "senderType": "CUSTOMER",
-          "messageImages": []
-        }
-      ]
-    },
-    {
-      "id": "67c06957e729a9fd4b70409e",
-      "productId": "12345",
-      "vendorId": 2,
-      "customerId": 2,
-      "productImageUrl": "https://example.com/product-image.jpg",
-      "productPrice": "299",
-      "productName": "Wireless Headphones",
-      "storeLogoUrl": "https://example.com/store-logo.png",
-      "customerProfilePic": "https://example.com/buyer-profile.jpg",
-      "customerName": "John Doe",
-      "storeName": "Tech Haven",
-      "createdAt": "2025-02-27T13:32:07.536Z",
-      "updatedAt": "2025-02-27T13:32:07.536Z",
-      "messages": [
-        {
-          "senderId": 2,
-          "text": "Hello",
-          "timestamp": "2025-02-27T13:32:07.536Z",
-          "read": false,
-          "recipientOnline": true,
-          "chatId": "67c06957e729a9fd4b70409e",
-          "senderType": "VENDOR",
-          "messageImages": []
-        }
-      ]
-    },
-    {
-      "id": "67c069f6b1b231d5c88fa532",
-      "productId": "12345",
-      "vendorId": 2,
-      "customerId": 2,
-      "productImageUrl": "https://example.com/product-image.jpg",
-      "productPrice": "299",
-      "productName": "Wireless Headphones",
-      "storeLogoUrl": "https://example.com/store-logo.png",
-      "customerProfilePic": "https://example.com/buyer-profile.jpg",
-      "customerName": "John Doe",
-      "storeName": "Tech Haven",
-      "createdAt": "2025-02-27T13:34:46.136Z",
-      "updatedAt": "2025-02-27T13:34:46.136Z",
-      "messages": [
-        {
-          "senderId": 2,
-          "text": "Hello",
-          "timestamp": "2025-02-27T13:34:46.136Z",
-          "read": false,
-          "recipientOnline": true,
-          "chatId": "67c069f6b1b231d5c88fa532",
-          "senderType": "VENDOR",
-          "messageImages": []
-        },
-        {
-          "senderId": 2,
-          "text": "Hello",
-          "timestamp": "2025-02-27T13:35:10.358Z",
-          "read": false,
-          "recipientOnline": true,
-          "chatId": "67c069f6b1b231d5c88fa532",
-          "senderType": "VENDOR",
-          "messageImages": []
-        },
-        {
-          "senderId": 2,
-          "text": "Hello",
-          "timestamp": "2025-02-27T13:35:52.957Z",
-          "read": false,
-          "recipientOnline": true,
-          "chatId": "67c069f6b1b231d5c88fa532",
-          "senderType": "VENDOR",
-          "messageImages": []
-        },
-        {
-          "senderId": 2,
-          "text": "Hello",
-          "timestamp": "2025-02-27T13:38:50.319Z",
-          "read": false,
-          "recipientOnline": true,
-          "chatId": "67c069f6b1b231d5c88fa532",
-          "senderType": "VENDOR",
-          "messageImages": []
-        }
-      ]
-    },
-    {
-      "id": "67c06a925dcc3e41f7c03dc3",
-      "productId": "12345",
-      "vendorId": 2,
-      "customerId": 2,
-      "productImageUrl": "https://example.com/product-image.jpg",
-      "productPrice": "299",
-      "productName": "Wireless Headphones",
-      "storeLogoUrl": "https://example.com/store-logo.png",
-      "customerProfilePic": "https://example.com/buyer-profile.jpg",
-      "customerName": "John Doe",
-      "storeName": "Tech Haven",
-      "createdAt": "2025-02-27T13:37:22.111Z",
-      "updatedAt": "2025-02-27T13:37:22.111Z",
-      "messages": [
-        {
-          "senderId": 2,
-          "text": "Hello",
-          "timestamp": "2025-02-27T13:37:22.111Z",
-          "read": false,
-          "recipientOnline": true,
-          "chatId": "67c06a925dcc3e41f7c03dc3",
-          "senderType": "VENDOR",
-          "messageImages": []
-        }
-      ]
-    },
-    {
-      "id": "67c06a9c5dcc3e41f7c03dc5",
-      "productId": "12345",
-      "vendorId": 2,
-      "customerId": 2,
-      "productImageUrl": "https://example.com/product-image.jpg",
-      "productPrice": "299.99",
-      "productName": "Wireless Headphones",
-      "storeLogoUrl": "https://example.com/store-logo.png",
-      "customerProfilePic": "https://example.com/buyer-profile.jpg",
-      "customerName": "John Doe",
-      "storeName": "Tech Haven",
-      "createdAt": "2025-02-27T13:37:32.042Z",
-      "updatedAt": "2025-02-27T13:37:32.042Z",
-      "messages": [
-        {
-          "senderId": 2,
-          "text": "Hello vendor",
-          "timestamp": "2025-02-27T13:37:32.042Z",
-          "read": false,
-          "recipientOnline": true,
-          "chatId": "67c06a9c5dcc3e41f7c03dc5",
-          "senderType": "CUSTOMER",
-          "messageImages": []
-        }
-      ]
-    },
-    {
-      "id": "67c06aaa5dcc3e41f7c03dc7",
-      "productId": "12345",
-      "vendorId": 2,
-      "customerId": 2,
-      "productImageUrl": "https://example.com/product-image.jpg",
-      "productPrice": "299",
-      "productName": "Wireless Headphones",
-      "storeLogoUrl": "https://example.com/store-logo.png",
-      "customerProfilePic": "https://example.com/buyer-profile.jpg",
-      "customerName": "John Doe",
-      "storeName": "Tech Haven",
-      "createdAt": "2025-02-27T13:37:46.915Z",
-      "updatedAt": "2025-02-27T13:37:46.915Z",
-      "messages": [
-        {
-          "senderId": 2,
-          "text": "Hello",
-          "timestamp": "2025-02-27T13:37:46.915Z",
-          "read": false,
-          "recipientOnline": true,
-          "chatId": "67c06aaa5dcc3e41f7c03dc7",
-          "senderType": "VENDOR",
-          "messageImages": []
-        }
-      ]
-    },
-    {
-      "id": "67c1f5c2d04dd84f1bc240ed",
-      "productId": "12345",
-      "vendorId": 2,
-      "customerId": 2,
-      "productImageUrl": "https://example.com/product-image.jpg",
-      "productPrice": "299.99",
-      "productName": "Wireless Headphones",
-      "storeLogoUrl": "https://example.com/store-logo.png",
-      "customerProfilePic": "https://example.com/buyer-profile.jpg",
-      "customerName": "John Doe",
-      "storeName": "Tech Haven",
-      "createdAt": "2025-02-28T17:43:30.934Z",
-      "updatedAt": "2025-02-28T17:43:30.934Z",
+      "lastMessageAt": "2025-03-05T00:43:41.523Z",
+      "createdAt": "2025-03-05T00:43:41.523Z",
+      "updatedAt": "2025-03-05T00:43:41.523Z",
       "messages": [
         {
           "senderId": 2,
           "text": "Finally",
-          "timestamp": "2025-02-28T17:43:30.934Z",
-          "read": true,
-          "recipientOnline": true,
-          "chatId": "67c1f5c2d04dd84f1bc240ed",
-          "senderType": "CUSTOMER",
-          "messageImages": []
-        },
-        {
-          "senderId": 2,
-          "text": "Hello",
-          "timestamp": "2025-02-28T17:51:31.913Z",
-          "read": true,
-          "recipientOnline": true,
-          "chatId": "67c1f5c2d04dd84f1bc240ed",
-          "senderType": "VENDOR",
-          "messageImages": []
-        },
-        {
-          "senderId": 2,
-          "text": "Finally",
-          "timestamp": "2025-02-28T17:54:51.702Z",
-          "read": true,
-          "recipientOnline": true,
-          "chatId": "67c1f5c2d04dd84f1bc240ed",
-          "senderType": "CUSTOMER",
-          "messageImages": []
-        },
-        {
-          "senderId": 2,
-          "text": "Socket",
-          "timestamp": "2025-02-28T17:55:07.912Z",
+          "timestamp": "2025-03-05T00:43:41.523Z",
           "read": false,
           "recipientOnline": true,
-          "chatId": "67c1f5c2d04dd84f1bc240ed",
-          "senderType": "VENDOR",
-          "messageImages": []
+          "chatId": "67c79e3def5676c3f6bed3be",
+          "senderType": "CUSTOMER",
+          "messageMedias": []
+        }
+      ]
+    },
+    {
+      "id": "67c79b8bef5676c3f6bed3b9",
+      "productId": "123450",
+      "vendorId": 2,
+      "customerId": 2,
+      "productImageUrl": "https://example.com/product-image.jpg",
+      "productPrice": "2334",
+      "productName": "Mac",
+      "storeLogoUrl": null,
+      "customerProfilePic": "https://example.com/product-image.jpg",
+      "customerName": "Johnny Storm",
+      "storeName": "Jay Tech",
+      "lastMessageAt": "2025-03-05T00:36:59.267Z",
+      "createdAt": "2025-03-05T00:32:11.106Z",
+      "updatedAt": "2025-03-05T00:36:59.269Z",
+      "messages": [
+        {
+          "senderId": 2,
+          "text": null,
+          "timestamp": "2025-03-05T00:36:59.269Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c79b8bef5676c3f6bed3b9",
+          "senderType": "CUSTOMER",
+          "messageMedias": [
+            {
+              "id": "67c79cabef5676c3f6bed3bd",
+              "imageUrl": "https://res.cloudinary.com/dyjhe7cg2/image/upload/f_auto/q_auto/v1/chat-cdn/chat-images/vjhjkagb52s75oc0gwbw?_a=BAMCkGRg0",
+              "size": "115998",
+              "mimeType": "image/jpeg"
+            }
+          ]
+        },
+        {
+          "senderId": 2,
+          "text": null,
+          "timestamp": "2025-03-05T00:32:11.106Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c79b8bef5676c3f6bed3b9",
+          "senderType": "CUSTOMER",
+          "messageMedias": [
+            {
+              "id": "67c79b8bef5676c3f6bed3bb",
+              "imageUrl": "https://res.cloudinary.com/dyjhe7cg2/image/upload/f_auto/q_auto/v1/chat-cdn/chat-images/l9mkno86l8cb9wurc1ef?_a=BAMCkGRg0",
+              "size": "115998",
+              "mimeType": "image/jpeg"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "67c605dec4286fc53e2ad992",
+      "productId": "12345",
+      "vendorId": 2,
+      "customerId": 2,
+      "productImageUrl": "https://example.com/product-image.jpg",
+      "productPrice": "299.99",
+      "productName": "Wireless Headphones",
+      "storeLogoUrl": "https://example.com/store-logo.png",
+      "customerProfilePic": "https://example.com/buyer-profile.jpg",
+      "customerName": "John Doe",
+      "storeName": "Tech Haven",
+      "lastMessageAt": "2025-03-05T00:24:03.890Z",
+      "createdAt": "2025-03-03T19:41:18.936Z",
+      "updatedAt": "2025-03-05T00:24:03.893Z",
+      "messages": [
+        {
+          "senderId": 2,
+          "text": null,
+          "timestamp": "2025-03-05T00:24:03.893Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c605dec4286fc53e2ad992",
+          "senderType": "CUSTOMER",
+          "messageMedias": [
+            {
+              "id": "67c799a4ef5676c3f6bed3b8",
+              "imageUrl": "https://res.cloudinary.com/dyjhe7cg2/image/upload/f_auto/q_auto/v1/chat-cdn/chat-images/vyaxadgv97gchxucrbcy?_a=BAMCkGRg0",
+              "size": "115998",
+              "mimeType": "image/jpeg"
+            }
+          ]
         },
         {
           "senderId": 2,
           "text": "Hi Socket",
-          "timestamp": "2025-02-28T17:55:53.275Z",
-          "read": false,
+          "timestamp": "2025-03-03T19:56:53.019Z",
+          "read": true,
           "recipientOnline": true,
-          "chatId": "67c1f5c2d04dd84f1bc240ed",
+          "chatId": "67c605dec4286fc53e2ad992",
           "senderType": "VENDOR",
-          "messageImages": []
+          "messageMedias": []
+        },
+        {
+          "senderId": 2,
+          "text": "Hi Socket",
+          "timestamp": "2025-03-03T19:47:15.485Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c605dec4286fc53e2ad992",
+          "senderType": "VENDOR",
+          "messageMedias": []
+        },
+        {
+          "senderId": 2,
+          "text": "Hi Socket",
+          "timestamp": "2025-03-03T19:41:26.577Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c605dec4286fc53e2ad992",
+          "senderType": "VENDOR",
+          "messageMedias": []
+        },
+        {
+          "senderId": 2,
+          "text": "Hello Chat",
+          "timestamp": "2025-03-03T19:58:25.242Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c605dec4286fc53e2ad992",
+          "senderType": "CUSTOMER",
+          "messageMedias": []
+        },
+        {
+          "senderId": 2,
+          "text": "Hello Chat",
+          "timestamp": "2025-03-03T19:41:18.936Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c605dec4286fc53e2ad992",
+          "senderType": "CUSTOMER",
+          "messageMedias": []
         }
       ]
     },
     {
-      "id": "67c1f62fd04dd84f1bc240ef",
-      "productId": "12345",
+      "id": "67c782b71fdd817ba74f45a2",
+      "productId": "12345679",
+      "vendorId": 2,
+      "customerId": 2,
+      "productImageUrl": "productImageUrl",
+      "productPrice": "2390",
+      "productName": "Apple",
+      "storeLogoUrl": null,
+      "customerProfilePic": null,
+      "customerName": "customerName",
+      "storeName": "Jay Tech",
+      "lastMessageAt": "2025-03-04T23:01:23.308Z",
+      "createdAt": "2025-03-04T22:46:15.111Z",
+      "updatedAt": "2025-03-04T23:01:23.312Z",
+      "messages": [
+        {
+          "senderId": 2,
+          "text": null,
+          "timestamp": "2025-03-04T23:01:10.311Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c782b71fdd817ba74f45a2",
+          "senderType": "CUSTOMER",
+          "messageMedias": [
+            {
+              "id": "67c7863673e79b84cc9e81e9",
+              "imageUrl": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741129269/chat-cdn/chat-pdfs/achgwryg28evtq6efqk0",
+              "size": "4067",
+              "mimeType": "application/pdf"
+            }
+          ]
+        },
+        {
+          "senderId": 2,
+          "text": null,
+          "timestamp": "2025-03-04T22:59:23.809Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c782b71fdd817ba74f45a2",
+          "senderType": "CUSTOMER",
+          "messageMedias": [
+            {
+              "id": "67c785cb39c67ec89ca65f10",
+              "imageUrl": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741129163/chat-cdn/chat-pdfs/axta7tbic2cre6o4edhv",
+              "size": "4067",
+              "mimeType": "application/pdf"
+            }
+          ]
+        },
+        {
+          "senderId": 2,
+          "text": null,
+          "timestamp": "2025-03-04T22:57:23.587Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c782b71fdd817ba74f45a2",
+          "senderType": "CUSTOMER",
+          "messageMedias": [
+            {
+              "id": "67c785537035f667ef4bcdee",
+              "imageUrl": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741129042/chat-cdn/chat-pdfs/td9jqaqz3qpviy48nhbu",
+              "size": "4067",
+              "mimeType": "application/pdf"
+            }
+          ]
+        },
+        {
+          "senderId": 2,
+          "text": null,
+          "timestamp": "2025-03-04T22:54:03.797Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c782b71fdd817ba74f45a2",
+          "senderType": "CUSTOMER",
+          "messageMedias": [
+            {
+              "id": "67c7848b4cf3cbc2de5882cb",
+              "imageUrl": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741128843/chat-cdn/chat-pdfs/xxunqyyleyhbvwkynuni",
+              "size": "4067",
+              "mimeType": "application/pdf"
+            }
+          ]
+        },
+        {
+          "senderId": 2,
+          "text": "Finally",
+          "timestamp": "2025-03-04T22:52:17.913Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c782b71fdd817ba74f45a2",
+          "senderType": "CUSTOMER",
+          "messageMedias": []
+        },
+        {
+          "senderId": 2,
+          "text": "Finally",
+          "timestamp": "2025-03-04T22:50:36.843Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c782b71fdd817ba74f45a2",
+          "senderType": "CUSTOMER",
+          "messageMedias": []
+        },
+        {
+          "senderId": 2,
+          "text": "Hi Socket",
+          "timestamp": "2025-03-04T23:01:23.312Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c782b71fdd817ba74f45a2",
+          "senderType": "VENDOR",
+          "messageMedias": []
+        },
+        {
+          "senderId": 2,
+          "text": "Hi Socket",
+          "timestamp": "2025-03-04T22:50:28.241Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c782b71fdd817ba74f45a2",
+          "senderType": "VENDOR",
+          "messageMedias": []
+        },
+        {
+          "senderId": 2,
+          "text": "Finally",
+          "timestamp": "2025-03-04T22:49:35.710Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c782b71fdd817ba74f45a2",
+          "senderType": "CUSTOMER",
+          "messageMedias": []
+        },
+        {
+          "senderId": 2,
+          "text": "Hi Socket",
+          "timestamp": "2025-03-04T22:48:33.962Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c782b71fdd817ba74f45a2",
+          "senderType": "VENDOR",
+          "messageMedias": []
+        },
+        {
+          "senderId": 2,
+          "text": null,
+          "timestamp": "2025-03-04T22:46:45.502Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c782b71fdd817ba74f45a2",
+          "senderType": "CUSTOMER",
+          "messageMedias": [
+            {
+              "id": "67c782d51fdd817ba74f45a6",
+              "imageUrl": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741128405/chat-cdn/chat-pdfs/raudlbqxopthsnbb0egl",
+              "size": "4067",
+              "mimeType": "application/pdf"
+            }
+          ]
+        },
+        {
+          "senderId": 2,
+          "text": null,
+          "timestamp": "2025-03-04T22:46:15.111Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c782b71fdd817ba74f45a2",
+          "senderType": "CUSTOMER",
+          "messageMedias": [
+            {
+              "id": "67c782b71fdd817ba74f45a4",
+              "imageUrl": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741128374/chat-cdn/chat-pdfs/yddnfa9zysjqyjpmf9ax",
+              "size": "4067",
+              "mimeType": "application/pdf"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "67c780d8443de0dd1e102b0c",
+      "productId": "1234567",
+      "vendorId": 2,
+      "customerId": 2,
+      "productImageUrl": "productImageUrl",
+      "productPrice": "2390",
+      "productName": "Apple",
+      "storeLogoUrl": null,
+      "customerProfilePic": null,
+      "customerName": "customerName",
+      "storeName": "Jay Tech",
+      "lastMessageAt": "2025-03-04T22:38:16.210Z",
+      "createdAt": "2025-03-04T22:38:16.210Z",
+      "updatedAt": "2025-03-04T22:38:16.210Z",
+      "messages": [
+        {
+          "senderId": 2,
+          "text": null,
+          "timestamp": "2025-03-04T22:38:16.210Z",
+          "read": false,
+          "recipientOnline": true,
+          "chatId": "67c780d8443de0dd1e102b0c",
+          "senderType": "CUSTOMER",
+          "messageMedias": [
+            {
+              "id": "67c780d8443de0dd1e102b0e",
+              "imageUrl": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741127895/chat-cdn/chat-pdfs/h8ct7tni3dukynbfyzwd",
+              "size": "4067",
+              "mimeType": "application/pdf"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "67c60a31d1c7e0bc9ba5460c",
+      "productId": "123456",
       "vendorId": 2,
       "customerId": 2,
       "productImageUrl": "https://example.com/product-image.jpg",
@@ -1116,72 +1422,56 @@ Fetches all chat conversations for the user.
       "customerProfilePic": "https://example.com/buyer-profile.jpg",
       "customerName": "John Doe",
       "storeName": "Tech Haven",
-      "createdAt": "2025-02-28T17:45:19.507Z",
-      "updatedAt": "2025-02-28T17:45:19.507Z",
+      "lastMessageAt": "2025-03-03T21:06:24.570Z",
+      "createdAt": "2025-03-03T19:59:45.351Z",
+      "updatedAt": "2025-03-03T21:06:24.576Z",
       "messages": [
         {
           "senderId": 2,
-          "text": "Finally",
-          "timestamp": "2025-02-28T17:45:19.507Z",
+          "text": null,
+          "timestamp": "2025-03-03T21:06:24.576Z",
           "read": false,
           "recipientOnline": true,
-          "chatId": "67c1f62fd04dd84f1bc240ef",
+          "chatId": "67c60a31d1c7e0bc9ba5460c",
           "senderType": "CUSTOMER",
-          "messageImages": []
-        }
-      ]
-    },
-    {
-      "id": "67c1f6667eed7952cb1deb70",
-      "productId": "12345",
-      "vendorId": 2,
-      "customerId": 2,
-      "productImageUrl": "https://example.com/product-image.jpg",
-      "productPrice": "299.99",
-      "productName": "Wireless Headphones",
-      "storeLogoUrl": "https://example.com/store-logo.png",
-      "customerProfilePic": "https://example.com/buyer-profile.jpg",
-      "customerName": "John Doe",
-      "storeName": "Tech Haven",
-      "createdAt": "2025-02-28T17:46:08.176Z",
-      "updatedAt": "2025-02-28T17:46:08.176Z",
-      "messages": [
+          "messageMedias": [
+            {
+              "id": "67c619d0aded1b8471708cb5",
+              "imageUrl": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741035983/chat-cdn/chat-pdfs/rd3r6py0dlndackucozm",
+              "size": "4067",
+              "mimeType": "application/pdf"
+            }
+          ]
+        },
         {
           "senderId": 2,
-          "text": "Finally",
-          "timestamp": "2025-02-28T17:46:08.176Z",
-          "read": false,
+          "text": "Hi Socket",
+          "timestamp": "2025-03-03T20:53:50.378Z",
+          "read": true,
           "recipientOnline": true,
-          "chatId": "67c1f6667eed7952cb1deb70",
-          "senderType": "CUSTOMER",
-          "messageImages": []
-        }
-      ]
-    },
-    {
-      "id": "67c1f6dc898b2a0851b56f23",
-      "productId": "12345",
-      "vendorId": 2,
-      "customerId": 2,
-      "productImageUrl": "https://example.com/product-image.jpg",
-      "productPrice": "299.99",
-      "productName": "Wireless Headphones",
-      "storeLogoUrl": "https://example.com/store-logo.png",
-      "customerProfilePic": "https://example.com/buyer-profile.jpg",
-      "customerName": "John Doe",
-      "storeName": "Tech Haven",
-      "createdAt": "2025-02-28T17:48:12.954Z",
-      "updatedAt": "2025-02-28T17:48:12.954Z",
-      "messages": [
+          "chatId": "67c60a31d1c7e0bc9ba5460c",
+          "senderType": "VENDOR",
+          "messageMedias": []
+        },
         {
           "senderId": 2,
-          "text": "Finally",
-          "timestamp": "2025-02-28T17:48:12.954Z",
-          "read": false,
+          "text": "Hi Socket",
+          "timestamp": "2025-03-03T19:59:59.072Z",
+          "read": true,
           "recipientOnline": true,
-          "chatId": "67c1f6dc898b2a0851b56f23",
+          "chatId": "67c60a31d1c7e0bc9ba5460c",
+          "senderType": "VENDOR",
+          "messageMedias": []
+        },
+        {
+          "senderId": 2,
+          "text": "Hello Chat",
+          "timestamp": "2025-03-03T19:59:45.351Z",
+          "read": true,
+          "recipientOnline": true,
+          "chatId": "67c60a31d1c7e0bc9ba5460c",
           "senderType": "CUSTOMER",
-          "messageImages": []
+          "messageMedias": []
         }
       ]
     }
@@ -1200,6 +1490,15 @@ Fetches all chat conversations for the user.
 ### **Received By:** Server
 
 ### **Description:**
+
+### **Payload (From Client):**
+
+```json
+{
+  "productId": "3234352",
+  "recipientId": 2
+}
+```
 
 Notifies the recipient that the sender has stopped typing.
 

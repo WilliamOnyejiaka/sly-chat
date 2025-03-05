@@ -1,6 +1,6 @@
 import { uploads, validateBody, validateFileUpload } from "..";
 import { ResourceType } from "../../types/enums";
-import { bodyNumberIsValid } from "../validators";
+import { bodyNumberIsValid, paramNumberIsValid } from "../validators";
 
 const sendMedia = [
     validateFileUpload,
@@ -25,3 +25,8 @@ export const sendVideo = [
     uploads(ResourceType.VIDEO).any(),
     ...sendMedia
 ];
+
+export const getChat =  [
+    paramNumberIsValid('vendorId'),
+    paramNumberIsValid('customerId')
+]
