@@ -5,12 +5,10 @@ import Handler from "./Handler";
 import { ChatManagementFacade } from "../facade";
 import { TransactionChat, TransactionMessage } from "../types/dtos";
 import { EventList } from "./../types/enums";
-import { Chat } from "../repos";
 
 export default class ChatHandler {
 
     private static readonly facade: ChatManagementFacade = new ChatManagementFacade();
-    private static readonly chatRepo = new Chat();
 
     public static async onConnection(io: Server, socket: ISocket) {
         console.log("User connected: ", socket.id);
@@ -72,14 +70,15 @@ export default class ChatHandler {
         const [customerId, vendorId] = userType === UserType.Customer ? [userId, recipientId] : [recipientId, userId];
         const room = `chat_${productId}_${vendorId}_${customerId}`;
 
-        const repoResult = await ChatHandler.chatRepo.getChatWithRoomId(productId, customerId, vendorId);
-        if (repoResult.error) {
-            socket.emit(EventList.APP_ERROR)
+        const facadeResult = await ChatHandler.facade.socketGetChatWithRoomId(productId, customerId, vendorId);
+        if (facadeResult.error) {
+            socket.emit(EventList.APP_ERROR, facadeResult);
+            return;
         }
 
         console.log(`🟢 User ${userId} joining room: ${room}`)
 
-        const chat = repoResult.data;
+        const chat = facadeResult.data;
         if (chat) {
             socket.join(room);
             const messages = chat.messages;
@@ -138,15 +137,15 @@ export default class ChatHandler {
         const recipientOnlineData = statusResult.data;
         const recipientOnline = !!recipientOnlineData;
         const room = `chat_${productId}_${vendorId}_${customerId}`;
-        const repoResult = await ChatHandler.chatRepo.getChatWithRoomId(productId, customerId, vendorId);
-        if (repoResult.error) {
-            socket.emit('appError', Handler.handleRepoError(repoResult));
+        const facadeResult = await ChatHandler.facade.socketGetChatWithRoomId(productId, customerId, vendorId);
+        if (facadeResult.error) {
+            socket.emit('appError', facadeResult);
             return;
         }
 
         console.log(room);
 
-        let chat = repoResult.data;
+        let chat = facadeResult.data;
         if (!chat) {
             console.log(`💬 Creating new chat for room `);
 
@@ -221,13 +220,13 @@ export default class ChatHandler {
             `👀 User ${userId} marking messages as read in room ${room}`
         );
 
-        const repoResult = await ChatHandler.chatRepo.getChatWithRoomId(productId, customerId, vendorId);
-        if (repoResult.error) {
-            socket.emit('appError', Handler.handleRepoError(repoResult));
+        const facadeResult = await ChatHandler.facade.socketGetChatWithRoomId(productId, customerId, vendorId);
+        if (facadeResult.error) {
+            socket.emit('appError', facadeResult);
             return;
         }
 
-        const chat = repoResult.data;
+        const chat = facadeResult.data;
         if (chat) {
             const messages = chat.messages;
             if (messages.length != 0) {
