@@ -24,6 +24,7 @@ export default function env(key: string) {
         'cloudinaryApiSecret': process.env.CLOUDINARY_API_SECRET!,
         'twilioAccountSID': process.env.TWILIO_ACCOUNT_SID!,
         'twilioAuthToken': process.env.TWILIO_AUTH_TOKEN!,
-        'twilioPhoneNumber': process.env.TWILIO_PHONE_NUMBER!
+        'twilioPhoneNumber': process.env.TWILIO_PHONE_NUMBER!,
+        'mainApi': process.env.MAIN_API!
     }[key];
 }

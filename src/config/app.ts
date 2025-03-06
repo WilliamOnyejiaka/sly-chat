@@ -1,7 +1,7 @@
 import express, { Application, NextFunction, Request, Response } from "express";
 import morgan from "morgan";
 import { cloudinary, corsConfig, env, logger } from ".";
-import { validateJWT, validateUser, handleMulterErrors, secureApi, redisClientMiddleware, vendorIsActive, uploads, validateHttpJWT } from "./../middlewares";
+import { validateJWT, validateUser, handleMulterErrors, secureApi, redisClientMiddleware, vendorIsActive, uploads, validateHttpJWT, adminAuthorization } from "./../middlewares";
 import cors from "cors";
 import http from 'http';
 import { Server } from 'socket.io';
@@ -11,6 +11,7 @@ import { user, chat as chatRoute } from "../routes";
 import { Namespace } from "../types/enums";
 import { createClient } from "redis";
 import { createAdapter } from "@socket.io/redis-adapter";
+
 
 function createApp() {
     const app: Application = express();
@@ -49,7 +50,7 @@ function createApp() {
         next();
     });
 
-    app.use(secureApi);
+    // app.use(secureApi);
 
     app.get("/test", async (req: Request, res: Response) => {
         console.log("Hello From chat");
@@ -64,10 +65,11 @@ function createApp() {
     app.use("/api/v1/user", user);
     app.use("/api/v1/chat", validateHttpJWT(["customer", "vendor"], env("tokenSecret")!), chatRoute);
 
-    app.post("/test2", async (req: Request, res: Response) => {
+    app.post("/test2", adminAuthorization(['support']), async (req: Request, res: Response) => {
         res.status(200).json({
             'error': false,
-            'message': "result"
+            'message': "result",
+            data: res.locals.data
         });
     });
 

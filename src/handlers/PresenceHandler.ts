@@ -1,6 +1,4 @@
 import { Server } from "socket.io";
-import { OnlineCustomer, OnlineVendor, OnlineAdmin } from "../cache";
-import { Chat as ChatRepo } from "./../repos";
 import { ISocket } from "../types";
 import { Namespace, UserType } from "../types/enums";
 import Handler from "./Handler";
@@ -33,13 +31,6 @@ export default class PresenceHandler {
     public static async disconnect(io: Server, socket: ISocket, data: any) {
         try {
 
-            // io.of(Namespace.CHAT).sockets.forEach((chatSocket) => {
-            //     if ((chatSocket.handshake.auth.token === socket.handshake.auth.token) || (chatSocket.handshake.headers['token'] === socket.handshake.headers['token'])) {
-            //         console.log(`🔌 [Chat Namespace] Disconnecting user ${chatSocket.id} due to Presence Namespace disconnect`);
-            //         chatSocket.disconnect(true);
-            //     }
-            // });
-
             const userId = Number(socket.locals.data.id);
             const userType = socket.locals.userType;
             const facadeResult = await PresenceHandler.facade.deleteOnlineUser(String(userId), userType);
@@ -70,5 +61,37 @@ export default class PresenceHandler {
             console.error("❌ Error in disconnect:", error);
             socket.emit("appError", Handler.responseData(500, true, "An internal error occurred"));
         }
+
+        // io.of(Namespace.CHAT).sockets.forEach((chatSocket) => {
+        //     if ((chatSocket.handshake.auth.token === socket.handshake.auth.token) || (chatSocket.handshake.headers['token'] === socket.handshake.headers['token'])) {
+        //         console.log(`🔌 [Chat Namespace] Disconnecting user ${chatSocket.id} due to Presence Namespace disconnect`);
+        //         chatSocket.disconnect(true);
+        //     }
+        // });
+
+        // const chatSockets = io.of(Namespace.CHAT).sockets;
+
+        // for (const chatSocket of chatSockets.values()) {
+        //     if (
+        //         chatSocket.id !== socket.id && // Ensure we don’t disconnect the current socket twice
+        //         (chatSocket.handshake.auth?.token === socket.handshake.auth?.token ||
+        //             chatSocket.handshake.headers?.['token'] === socket.handshake.headers?.['token'])
+        //     ) {
+        //         console.log(`🔌 [Chat Namespace] Disconnecting socket ${chatSocket.id} due to Presence Namespace disconnect`);
+        //         chatSocket.disconnect(true);
+        //         break;
+        //     }
+        // }
+
+        // for (const chatSocket of io.of(Namespace.CHAT).sockets.values()) {
+        //     if (
+        //         chatSocket.handshake.auth?.token === socket.handshake.auth?.token ||
+        //         chatSocket.handshake.headers?.['token'] === socket.handshake.headers?.['token']
+        //     ) {
+        //         console.log(`🔌 [Chat Namespace] Disconnecting user ${chatSocket.id} due to Presence Namespace disconnect`);
+        //         chatSocket.disconnect(true);
+        //         break;
+        //     }
+        // }
     }
 }

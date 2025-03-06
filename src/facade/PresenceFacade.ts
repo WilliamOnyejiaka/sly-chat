@@ -11,7 +11,6 @@ export default class PresenceFacade extends BaseFacade {
     private readonly onlineAdmin: OnlineAdmin = new OnlineAdmin();
     private readonly chatService = new Chat();
 
-
     public constructor() {
         super();
     }
