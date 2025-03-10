@@ -7,6 +7,7 @@ import { UserType } from "../types/enums";
 export default class Chat extends Repo {
 
     private messageSelect = {
+        id: true,
         senderId: true,
         text: true,
         timestamp: true,

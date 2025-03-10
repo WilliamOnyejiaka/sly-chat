@@ -77,35 +77,36 @@ This route has two responses.
   "error": false,
   "message": "New chat has been created",
   "data": {
-    "id": "67c79b8bef5676c3f6bed3b9",
-    "productId": "123450",
+    "id": "67cf08754860a5c46bd0fd71",
+    "productId": "1234567987",
     "vendorId": 2,
     "customerId": 2,
-    "productImageUrl": "https://example.com/product-image.jpg",
-    "productPrice": "2334",
-    "productName": "Mac",
+    "productImageUrl": "productImageUrl",
+    "productPrice": "2390",
+    "productName": "Apple",
     "storeLogoUrl": null,
-    "customerProfilePic": "https://example.com/product-image.jpg",
-    "customerName": "Johnny Storm",
+    "customerProfilePic": null,
+    "customerName": "customerName",
     "storeName": "Jay Tech",
-    "lastMessageAt": "2025-03-05T00:32:11.106Z",
-    "createdAt": "2025-03-05T00:32:11.106Z",
-    "updatedAt": "2025-03-05T00:32:11.106Z",
+    "lastMessageAt": "2025-03-10T15:42:45.796Z",
+    "createdAt": "2025-03-10T15:42:45.796Z",
+    "updatedAt": "2025-03-10T15:42:45.796Z",
     "messages": [
       {
+        "id": "67cf08754860a5c46bd0fd72",
         "senderId": 2,
         "text": null,
-        "timestamp": "2025-03-05T00:32:11.106Z",
+        "timestamp": "2025-03-10T15:42:45.796Z",
         "read": false,
-        "recipientOnline": true,
-        "chatId": "67c79b8bef5676c3f6bed3b9",
+        "recipientOnline": false,
+        "chatId": "67cf08754860a5c46bd0fd71",
         "senderType": "CUSTOMER",
         "messageMedias": [
           {
-            "id": "67c79b8bef5676c3f6bed3bb",
-            "imageUrl": "https://res.cloudinary.com/dyjhe7cg2/image/upload/f_auto/q_auto/v1/chat-cdn/chat-images/l9mkno86l8cb9wurc1ef?_a=BAMCkGRg0",
-            "size": "115998",
-            "mimeType": "image/jpeg"
+            "id": "67cf08764860a5c46bd0fd73",
+            "imageUrl": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741621365/chat-cdn/chat-pdfs/yazjzqq5s0uag57ymd3p",
+            "size": "4067",
+            "mimeType": "application/pdf"
           }
         ]
       }
