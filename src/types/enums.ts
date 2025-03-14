@@ -12,7 +12,8 @@ export enum EventList {
 export enum Namespace {
     CHAT = '/chat',
     PRESENCE = '/presence',
-    NOTIFICATION = '/notification'
+    NOTIFICATION = '/notification',
+    SUPPORTCHAT = '/supportChat'
 }
 
 export enum ServiceResultDataType {

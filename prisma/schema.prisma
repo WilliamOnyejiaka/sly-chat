@@ -32,6 +32,20 @@ enum SenderType {
   CUSTOMER
 }
 
+model SupportChat {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  resolved       Boolean   @default(false)
+  userId         Int
+  userType       UserType
+  userProfilePic String?
+  supportAgentId Int
+  supportAgents  String[]
+  lastMessageAt  DateTime  @default(now())
+  messages       Message[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
 model Chat {
   id                 String    @id @default(auto()) @map("_id") @db.ObjectId
   productId          String
@@ -63,6 +77,8 @@ model Message {
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   messageMedias   MessageMedia[]
+  supportChat     SupportChat?   @relation(fields: [supportChatId], references: [id])
+  supportChatId   String?        @db.ObjectId
 }
 
 model MessageMedia {

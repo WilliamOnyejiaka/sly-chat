@@ -1,6 +1,5 @@
 import { Presence } from "../namespaces";
 import { PresenceHandler } from "../handlers";
-import { ISocket } from "../types";
 
 const presence = new Presence();
 

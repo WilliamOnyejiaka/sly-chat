@@ -318,7 +318,7 @@ export default class ChatHandler {
 
             if (rooms.length > 0) {
                 socket.leave(rooms);
-                socket.to(rooms).emit('userIsOffline', Handler.responseData(200, false, "User has gone offline"));
+                // socket.to(rooms).emit('userIsOffline', Handler.responseData(200, false, "User has gone offline"));
             }
             console.log(`User disconnected: userId - ${userId} , userType - ${userType} , socketId - ${socket.id}`);
         } catch (error) {

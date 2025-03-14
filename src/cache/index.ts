@@ -6,5 +6,16 @@ import AdminCache from "./AdminCache";
 import OnlineVendor from "./OnlineVendor";
 import OnlineCustomer from "./OnlineCustomer";
 import OnlineAdmin from "./OnlineAdmin";
+import OnlineSupport from "./OnlineSupport";
 
-export { OTPCache, VendorCache, TokenBlackList, CustomerCache, AdminCache, OnlineVendor, OnlineCustomer, OnlineAdmin };
+export {
+    OTPCache,
+    VendorCache,
+    TokenBlackList,
+    CustomerCache,
+    AdminCache,
+    OnlineVendor,
+    OnlineCustomer,
+    OnlineAdmin,
+    OnlineSupport
+};

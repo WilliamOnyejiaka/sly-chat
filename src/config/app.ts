@@ -5,7 +5,7 @@ import { validateJWT, validateUser, handleMulterErrors, secureApi, redisClientMi
 import cors from "cors";
 import http from 'http';
 import { Server } from 'socket.io';
-import { chat, presence } from "../events";
+import { chat, presence, supportChat } from "../events";
 import { ISocket } from "../types";
 import { user, chat as chatRoute } from "../routes";
 import { Namespace } from "../types/enums";
@@ -37,6 +37,7 @@ function createApp() {
 
     const chatNamespace = io.of("/chat");
     const presenceNamespace = io.of('/presence');
+    const supportChatNamespace = io.of(Namespace.SUPPORTCHAT);
     const notificationNamespace = io.of(Namespace.NOTIFICATION);
 
     chatNamespace.use(validateJWT(["customer", "vendor"], env("tokenSecret")!));
@@ -45,6 +46,8 @@ function createApp() {
 
     chat.initialize(chatNamespace, io);
     presence.initialize(presenceNamespace, io);
+    supportChat.initialize(supportChatNamespace, io);
+
     app.use((req: Request, res: Response, next: NextFunction) => {
         res.locals.io = io;
         next();
