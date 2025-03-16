@@ -104,9 +104,10 @@ This route has two responses.
         "messageMedias": [
           {
             "id": "67cf08764860a5c46bd0fd73",
-            "imageUrl": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741621365/chat-cdn/chat-pdfs/yazjzqq5s0uag57ymd3p",
+            "url": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741621365/chat-cdn/chat-pdfs/yazjzqq5s0uag57ymd3p",
             "size": "4067",
-            "mimeType": "application/pdf"
+            "mimeType": "application/pdf",
+            "thumbnail": "https://res.cloudinary.com/dyjhe7cg2/image/upload/so_1/v1/chat-cdn/chat-videos/nsfgzariz5eyamocmfls?_a=BAMCkGRg0"
           }
         ]
       }
@@ -147,9 +148,10 @@ The following fields are not required for this type of response:
     "messageMedias": [
       {
         "id": "67c79cabef5676c3f6bed3bd",
-        "imageUrl": "https://res.cloudinary.com/dyjhe7cg2/image/upload/f_auto/q_auto/v1/chat-cdn/chat-images/vjhjkagb52s75oc0gwbw?_a=BAMCkGRg0",
+        "url": "https://res.cloudinary.com/dyjhe7cg2/image/upload/f_auto/q_auto/v1/chat-cdn/chat-images/vjhjkagb52s75oc0gwbw?_a=BAMCkGRg0",
         "size": "115998",
-        "mimeType": "image/jpeg"
+        "mimeType": "image/jpeg",
+        "thumbnail": "https://res.cloudinary.com/dyjhe7cg2/image/upload/so_1/v1/chat-cdn/chat-videos/nsfgzariz5eyamocmfls?_a=BAMCkGRg0"
       }
     ]
   }

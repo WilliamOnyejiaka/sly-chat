@@ -30,8 +30,9 @@ export type ServiceResult = {
 export type UploadedFiles = {
     publicId: string,
     size: string,
-    imageUrl: string,
-    mimeType: string
+    url: string,
+    mimeType: string,
+    thumbnail: string | null
 };
 
 export type FailedFiles = {
