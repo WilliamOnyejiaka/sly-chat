@@ -151,8 +151,8 @@ export default class ChatManagementFacade extends BaseFacade {
         return (await this.messageService.markMessagesAsRead(chatId, senderType, dataType));
     }
 
-    public async socketMarkMessagesAsRead(chatId: string, senderType: any): Promise<ServiceData> {
-        return (await this.markMessagesAsRead(chatId, senderType, ServiceResultDataType.SOCKET)) as ServiceData;
+    public async socketMarkMessagesAsRead(chatId: string, userType: any): Promise<ServiceData> {
+        return (await this.markMessagesAsRead(chatId, userType.toUpperCase(), ServiceResultDataType.SOCKET)) as ServiceData;
     }
 
     public async insertMessageWithMedia(newMessage: TransactionMessage, uploadedFiles: UploadedFiles[]) {
