@@ -32,7 +32,8 @@ export type UploadedFiles = {
     size: string,
     url: string,
     mimeType: string,
-    thumbnail: string | null
+    thumbnail: string | null,
+    duration: string | null
 };
 
 export type FailedFiles = {

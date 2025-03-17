@@ -21,11 +21,11 @@ export default class Chat extends Repo {
                 url: true,
                 size: true,
                 mimeType: true,
-                thumbnail: true
+                thumbnail: true,
+                duration: true
             }
         }
     }
-
 
     public constructor() {
         super('chat');

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Markdown Viewer</title>
+    <link rel="stylesheet" href="/markdown.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <!-- Optional: Specific languages -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+    <script type="module" src="/markdown.js" defer></script>
+    <!-- <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+            color: #24292e;
+            background: #ffffff;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            border-bottom: 1px solid #eaecef;
+            padding-bottom: 0.3em;
+        }
+
+        code {
+            background: #f6f8fa;
+            padding: 0.2em 0.4em;
+            border-radius: 6px;
+            font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+        }
+
+        pre {
+            background: #f6f8fa;
+            padding: 16px;
+            border-radius: 6px;
+            overflow: auto;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1em 0;
+        }
+
+        th,
+        td {
+            padding: 6px 13px;
+            border: 1px solid #dfe2e5;
+        }
+
+        th {
+            background: #f6f8fa;
+            text-align: left;
+        }
+
+        ul,
+        ol {
+            padding-left: 2em;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Dark mode styles */
+        body.dark-mode {
+            color: #c9d1d9;
+            background: #0d1117;
+        }
+
+        .dark-mode h1,
+        .dark-mode h2,
+        .dark-mode h3,
+        .dark-mode h4,
+        .dark-mode h5,
+        .dark-mode h6 {
+            border-bottom: 1px solid #30363d;
+        }
+
+        .dark-mode code {
+            background: #161b22;
+        }
+
+        .dark-mode pre {
+            background: #161b22;
+        }
+
+        .dark-mode th,
+        .dark-mode td {
+            border: 1px solid #30363d;
+        }
+
+        .dark-mode th {
+            background: #21262d;
+        }
+
+        .dark-mode a {
+            color: #58a6ff;
+        }
+
+        /* Toggle button */
+        #dark-mode-toggle {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 8px 16px;
+            background: #0366d6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .dark-mode #dark-mode-toggle {
+            background: #58a6ff;
+        }
+
+        /* Respect system dark mode by default */
+        @media (prefers-color-scheme: dark) {
+            body:not(.light-mode) {
+                color: #c9d1d9;
+                background: #0d1117;
+            }
+
+            body:not(.light-mode) h1,
+            body:not(.light-mode) h2,
+            body:not(.light-mode) h3,
+            body:not(.light-mode) h4,
+            body:not(.light-mode) h5,
+            body:not(.light-mode) h6 {
+                border-bottom: 1px solid #30363d;
+            }
+
+            body:not(.light-mode) code {
+                background: #161b22;
+            }
+
+            body:not(.light-mode) pre {
+                background: #161b22;
+            }
+
+            body:not(.light-mode) th,
+            body:not(.light-mode) td {
+                border: 1px solid #30363d;
+            }
+
+            body:not(.light-mode) th {
+                background: #21262d;
+            }
+
+            body:not(.light-mode) a {
+                color: #58a6ff;
+            }
+
+            body:not(.light-mode) #dark-mode-toggle {
+                background: #58a6ff;
+            }
+        }
+
+        details {
+            margin: 1em 0;
+        }
+
+        summary {
+            cursor: pointer;
+            padding: 8px;
+            background: #f6f8fa;
+            border-radius: 6px;
+            user-select: none;
+        }
+
+        details[open] summary {
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        details[open] pre {
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+
+        .dark-mode summary {
+            background: #21262d;
+        }
+    </style> -->
+</head>
+
+<body>
+    <button id="dark-mode-toggle">Toggle Dark Mode</button>
+    <%- content %>
+</body>
+
+</html>

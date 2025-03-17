@@ -17,9 +17,11 @@ export default class Chat extends Repo {
         messageMedias: {
             select: {
                 id: true,
-                imageUrl: true,
+                url: true,
                 size: true,
-                mimeType: true
+                mimeType: true,
+                thumbnail: true,
+                duration: true
             }
         }
     }

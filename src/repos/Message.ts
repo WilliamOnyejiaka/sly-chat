@@ -66,7 +66,8 @@ export default class Message extends Repo {
                                 url: true,
                                 size: true,
                                 mimeType: true,
-                                thumbnail: true
+                                thumbnail: true,
+                                duration: true
                             }
                         }
                     }
