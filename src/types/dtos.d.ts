@@ -37,6 +37,18 @@ export interface UserDto {
     active: boolean,
     userType?: string,
     createdAt?: Date,
-    updatedAt?: DateTime,
+    updatedAt?: Date,
     profilePictureUrl: string
+}
+
+export interface ProductCommentDto {
+    id?: string,
+    content: string,
+    userId: number,
+    productId: number,
+    userType: string,
+    parentId?: string | null,
+    replies?: any[],
+    createdAt?: Date,
+    updatedAt?: Date,
 }

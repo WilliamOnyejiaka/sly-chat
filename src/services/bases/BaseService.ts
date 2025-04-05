@@ -91,7 +91,7 @@ export default class BaseService<T extends Repo = Repo> {
     }
 
 
-    public async getItemWithId(id: number, message200?: string) {
+    public async getWithIdgetItemWithId(id: number, message200?: string) {
         return await this.getItem(id, message200);
     }
 

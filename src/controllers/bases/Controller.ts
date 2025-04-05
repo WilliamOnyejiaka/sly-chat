@@ -7,8 +7,9 @@ export default class Controller {
 
     public static paginate<T extends BaseService>(service: T) {
         return async (req: Request, res: Response) => {
-            const { page, pageSize } = req.query;
-            const serviceResult = await service.paginate(page as any, pageSize as any);
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 10;
+            const serviceResult = await service.paginate(page, limit);
             res.status(serviceResult.statusCode).json(serviceResult.json);
         }
     }

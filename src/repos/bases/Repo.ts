@@ -35,7 +35,7 @@ export default class Repo implements Repository {
         return result.error ? result : this.repoResponse(false, 200, null, result.data > 0);
     }
 
-    public async getItemWithId(id: number) {
+    public async getItemWithId(id: number | string) {
         return await this.getItem({ id: id });
     }
 

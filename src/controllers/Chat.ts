@@ -139,7 +139,7 @@ export default class Chat {
         }
 
         const userId = res.locals.data.id;
-        const userType = res.locals.data.userType;
+        const userType = res.locals.userType;
         const facadeResult = await Chat.facade.httpGetUserChats(userId, userType);
         Controller.response(res, facadeResult);
     }

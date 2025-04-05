@@ -5,6 +5,7 @@ import Cloudinary from "./Cloudinary";
 import Chat from "./Chat";
 import Message from "./Message";
 import User from "./User";
+import ProductComment from "./ProductComment";
 
 export {
     Token,
@@ -13,5 +14,6 @@ export {
     Cloudinary,
     Chat,
     Message,
-    User
+    User,
+    ProductComment
 };

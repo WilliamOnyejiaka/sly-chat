@@ -96,3 +96,39 @@ model MessageMedia {
   messageId String   @db.ObjectId
   Message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
 }
+
+model ProductComment {
+  id          String           @id @default(auto()) @map("_id") @db.ObjectId
+  content     String
+  productId   Int              @unique
+  // userId    String    @db.ObjectId
+  // authorId      String      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      Int
+  userType    UserType
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  parentId    String?          @db.ObjectId
+  parent      ProductComment?  @relation("ProductCommentReplies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies     ProductComment[] @relation("ProductCommentReplies")
+  // User      User      @relation(fields: [userId], references: [id])
+  CommentLike CommentLike[]
+}
+
+model CommentLike {
+  id        String          @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String
+  userType  Int
+  commentId String          @db.ObjectId
+  comment   ProductComment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+}
+
+model ProductLike {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String
+  userType  UserType
+  productId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

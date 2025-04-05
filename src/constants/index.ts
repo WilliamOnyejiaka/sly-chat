@@ -36,7 +36,9 @@ export default function constants(key: string) {
         '200Customer': "Customer" + message200,
         '200Customers': "Customers" + message200,
         '200Users': "Users were retrieved successfully",
-        '200User': "User has been retrieved successfully"
+        '200User': "User has been retrieved successfully",
+        '200Comment': "Comment " + message200,
+        '200Comments': "Comments were retrieved successfully"
     }[key];
 }
 

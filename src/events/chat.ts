@@ -1,6 +1,5 @@
 import { Chat } from "../namespaces";
 import { ChatHandler } from "../handlers";
-import { ISocket } from "../types";
 
 const chat = new Chat();
 
