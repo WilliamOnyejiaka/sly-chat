@@ -23,6 +23,7 @@ const validateHttpJWT = (types: string[], tokenSecret: string, neededData: strin
             message: http('500')!,
             statusCode: 500
         });
+        
         return;
     }
 

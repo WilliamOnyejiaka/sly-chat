@@ -55,4 +55,13 @@ export default class Comment {
         const result = await Comment.service.paginateComments(page, limit, depth);
         Controller.response(res, result);
     }
+
+    public static async paginateReplies(req: Request, res: Response) {
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+        const depth = parseInt(req.query.depth as string) || 5;
+        const parentId = req.params.parentId;
+        const result = await Comment.service.paginateReplies(page, limit, depth, parentId);
+        Controller.response(res, result);
+    }
 }

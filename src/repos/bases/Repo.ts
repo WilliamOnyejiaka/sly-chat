@@ -107,7 +107,7 @@ export default class Repo implements Repository {
         }
     }
 
-    public async countTblRecords() {
+    public async countTblRecords(countFilter: any = {}) {
         try {
             const count = await (prisma[this.tblName] as any).count();
             return this.repoResponse(false, 200, null, count);
@@ -116,14 +116,14 @@ export default class Repo implements Repository {
         }
     }
 
-    public async paginate(skip: number, take: number, filter: any = {}) {
+    public async paginate(skip: number, take: number, filter: any = {}, countFilter: any = {}) {
         try {
             const items = await (prisma[this.tblName] as any).findMany({
                 skip,   // Skips the first 'skip' records
                 take,   // Fetches 'take' records
                 ...filter
             });
-            const totalItems = await (prisma[this.tblName] as any).count();
+            const totalItems = await (prisma[this.tblName] as any).count(countFilter);
             return this.repoResponse(false, 200, null, {
                 items: items,
                 totalItems: totalItems

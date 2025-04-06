@@ -5,6 +5,7 @@ import BaseService from "./bases/BaseService";
 import { ServiceResultDataType, UserType } from "../types/enums";
 import { ProductCommentDto, TransactionChat, TransactionMessage } from "../types/dtos";
 import { UploadedFiles } from "../types";
+import { getPagination } from "../utils";
 
 export default class ProductComment extends BaseService<ProductCommentRepo> {
 
@@ -12,31 +13,58 @@ export default class ProductComment extends BaseService<ProductCommentRepo> {
         super(new ProductCommentRepo())
     }
 
-    public async createComment(data: ProductCommentDto){
-        if(data.parentId){
+    public async createComment(data: ProductCommentDto) {
+        if (data.parentId) {
             const parentExists = await this.repo!.getItemWithId(data.parentId);
             const repoResultError = this.httpHandleRepoError(parentExists);
-            if(repoResultError) return repoResultError;
-            if(!parentExists.data) return this.httpResponseData(404,true,"Parent comment wa not found");
+            if (repoResultError) return repoResultError;
+            if (!parentExists.data) return this.httpResponseData(404, true, "Parent comment wa not found");
         }
-        return super.create<ProductCommentDto>(data,"Product Comment");
+        return super.create<ProductCommentDto>(data, "Product Comment");
     }
 
-    public async getWithId(id: string,depth: number){
+    public async getWithId(id: string, depth: number) {
         const include = this.buildInclude(depth);
-        const repoResult = await this.repo!.getWithId(id,include);
+        const repoResult = await this.repo!.getWithId(id, include);
         const repoResultError = this.httpHandleRepoError(repoResult);
         if (repoResultError) return repoResultError;
-        return super.httpResponseData(200,true,constants('200Comment')!,repoResult.data);
+        return super.httpResponseData(200, true, constants('200Comment')!, repoResult.data);
     }
 
-    public async paginateComments(page: number, pageSize: number,depth: number): Promise<{ statusCode: number; json: { error: boolean; message: string | null; data: any; }; }> {
+    public async paginateComments(page: number, pageSize: number, depth: number): Promise<{ statusCode: number; json: { error: boolean; message: string | null; data: any; }; }> {
         const skip = (page - 1) * pageSize;
         const take = pageSize;
-        const repoResult = await this.repo!.paginate(skip,take,{ where: {parent: null},include: this.buildInclude(depth)});
+        const repoResult = await this.repo!.paginate(skip, take, {
+            where: {
+                OR: [
+                    { parentId: null },          // Matches explicit null
+                    { parentId: { isSet: false } } // Matches missing fields
+                ],
+            }, include: this.buildInclude(depth)
+        }, {
+            where: {
+                OR: [
+                    { parentId: null },          // Matches explicit null
+                    { parentId: { isSet: false } } // Matches missing fields
+                ],
+            }
+        });
         const repoResultError = this.httpHandleRepoError(repoResult);
         if (repoResultError) return repoResultError;
-        return super.httpResponseData(200, true, constants('200Comments')!, repoResult.data); 
+        const totalRecords = repoResult.data.totalItems;
+        const pagination = getPagination(page, pageSize, totalRecords);
+        return super.httpResponseData(200, true, constants('200Comments')!, { data: repoResult.data, pagination });
+    }
+
+    public async paginateReplies(page: number, pageSize: number, depth: number, parentId: string): Promise<{ statusCode: number; json: { error: boolean; message: string | null; data: any; }; }> {
+        const skip = (page - 1) * pageSize;
+        const take = pageSize;
+        const repoResult = await this.repo!.paginate(skip, take, { where: { parentId: parentId }, include: this.buildInclude(depth) }, { where: { parentId: parentId } });
+        const repoResultError = this.httpHandleRepoError(repoResult);
+        if (repoResultError) return repoResultError;
+        const totalRecords = repoResult.data.totalItems;
+        const pagination = getPagination(page, pageSize, totalRecords);
+        return super.httpResponseData(200, true, constants('200Comments')!, { data: repoResult.data, pagination });
     }
 
     private buildInclude(depth: number) {

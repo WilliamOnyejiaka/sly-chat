@@ -107,7 +107,7 @@ model ProductComment {
   userType    UserType
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
-  parentId    String?          @db.ObjectId
+  parentId    String?          @db.ObjectId @default("")
   parent      ProductComment?  @relation("ProductCommentReplies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   replies     ProductComment[] @relation("ProductCommentReplies")
   // User      User      @relation(fields: [userId], references: [id])
