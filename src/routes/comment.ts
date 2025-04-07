@@ -6,8 +6,8 @@ import { createProductComment, productId } from "./../middlewares/routes/comment
 const comment: Router = Router();
 
 comment.post('/product/', createProductComment ,asyncHandler(Comment.createProductComment));
-comment.get('/product/:id', asyncHandler(Comment.getWithId));
-comment.get("/product/paginate/:productId", productId,asyncHandler(Comment.paginate));
+// comment.get('/product/:id', asyncHandler(Comment.getWithId));
+comment.get("/product/:productId", productId,asyncHandler(Comment.paginate));
 comment.get('/product/:productId/:parentId/replies', productId,asyncHandler(Comment.paginateReplies));
 
 
