@@ -31,11 +31,12 @@ export default class ProductComment extends BaseService<ProductCommentRepo> {
         return super.httpResponseData(200, true, constants('200Comment')!, repoResult.data);
     }
 
-    public async paginateComments(page: number, pageSize: number, depth: number): Promise<{ statusCode: number; json: { error: boolean; message: string | null; data: any; }; }> {
+    public async paginateComments(productId: number,page: number, pageSize: number, depth: number): Promise<{ statusCode: number; json: { error: boolean; message: string | null; data: any; }; }> {
         const skip = (page - 1) * pageSize;
         const take = pageSize;
         const repoResult = await this.repo!.paginate(skip, take, {
             where: {
+                productId: productId,
                 OR: [
                     { parentId: null },          // Matches explicit null
                     { parentId: { isSet: false } } // Matches missing fields
@@ -43,6 +44,7 @@ export default class ProductComment extends BaseService<ProductCommentRepo> {
             }, include: this.buildInclude(depth)
         }, {
             where: {
+                productId: productId,   
                 OR: [
                     { parentId: null },          // Matches explicit null
                     { parentId: { isSet: false } } // Matches missing fields
@@ -56,10 +58,10 @@ export default class ProductComment extends BaseService<ProductCommentRepo> {
         return super.httpResponseData(200, true, constants('200Comments')!, { data: repoResult.data, pagination });
     }
 
-    public async paginateReplies(page: number, pageSize: number, depth: number, parentId: string): Promise<{ statusCode: number; json: { error: boolean; message: string | null; data: any; }; }> {
+    public async paginateReplies(productId: number,page: number, pageSize: number, depth: number, parentId: string): Promise<{ statusCode: number; json: { error: boolean; message: string | null; data: any; }; }> {
         const skip = (page - 1) * pageSize;
         const take = pageSize;
-        const repoResult = await this.repo!.paginate(skip, take, { where: { parentId: parentId }, include: this.buildInclude(depth) }, { where: { parentId: parentId } });
+        const repoResult = await this.repo!.paginate(skip, take, { where: { parentId: parentId, productId: productId }, include: this.buildInclude(depth) }, { where: { parentId: parentId, productId: productId} });
         const repoResultError = this.httpHandleRepoError(repoResult);
         if (repoResultError) return repoResultError;
         const totalRecords = repoResult.data.totalItems;

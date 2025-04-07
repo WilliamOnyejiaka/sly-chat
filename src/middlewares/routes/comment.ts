@@ -19,3 +19,7 @@ export const createProductComment = [
         'content'
     ])
 ];
+
+export const productId = [
+    paramNumberIsValid('productId')
+];

@@ -68,7 +68,8 @@ function createApp() {
                 'presence': "Presence.md",
                 'general': "General.md",
                 'sendFile': "SendFile.md",
-                'chatRoutes': "ChatRoutes.md"
+                'chatRoutes': "ChatRoutes.md",
+                'commentRoutes': "CommentRoutes.md"
             }
 
             if (!(files as any)[query]) {
