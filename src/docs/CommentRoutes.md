@@ -58,6 +58,7 @@ The response is in JSON format and follows the schema below:
   }
 }
 ```
+
 ### Get Comment Replies
 
 ### GET /api/v1/comment/product/{productId}/{commentId}/replies
@@ -67,18 +68,18 @@ This endpoint retrieves the replies for a specific comment on a product.
 #### Request
 
 - Path Parameters
-    - productId (number): The ID of the product.
-    - commentId (string): The ID of the comment.
+  - productId (number): The ID of the product.
+  - commentId (string): The ID of the comment.
 - Query Parameters
-    - page (number): The page number of the results.
-    - limit (number): The maximum number of replies per page.
-    - depth (number): The depth of the replies to retrieve.
+  - page (number): The page number of the results.
+  - limit (number): The maximum number of replies per page.
+  - depth (number): The depth of the replies to retrieve.
 
 #### Response
 
 The response is in JSON format and follows the schema below:
 
-``` json
+```json
 {
   "error": "boolean",
   "message": "string",
@@ -110,8 +111,60 @@ The response is in JSON format and follows the schema below:
     }
   }
 }
-
- ```
+```
 
 The response includes an error flag, a message, and data containing an array of reply items with their respective details. The pagination information is also provided to navigate through the results.
 
+### Get Product Comments
+
+This endpoint retrieves comments for a specific product.
+
+#### Request
+
+- Method: GET
+- URL: `{{host}}/api/v1/comment/product/{productId}`
+- Path Parameters
+  - productId (number): The ID of the product.
+- Query Parameters:
+  - page (number, required): The page number for paginated results.
+  - limit (number, required): The maximum number of comments per page.
+  - depth (number, required): The depth of comment nesting.
+
+#### Response
+
+- Status: 200
+- Content-Type: application/json
+- Body:
+  ```json
+  {
+    "error": true,
+    "message": "",
+    "data": {
+      "data": {
+        "items": [
+          {
+            "id": "",
+            "content": "",
+            "productId": 0,
+            "userId": 0,
+            "userType": "",
+            "createdAt": "",
+            "updatedAt": "",
+            "parentId": null,
+            "replies": []
+          }
+        ],
+        "totalItems": 0
+      },
+      "pagination": {
+        "currentPage": 0,
+        "nextPage": null,
+        "prevPage": null,
+        "hasNext": true,
+        "hasPrev": true,
+        "totalPages": 0,
+        "totalRecords": 0
+      }
+    }
+  }
+  ```
