@@ -66,4 +66,11 @@ export default class Chat extends BaseService<ChatRepo> {
         if (repoResultError) return repoResultError;
         return super.responseData(dataType, 200, false, "Chat ids has been retrieved successfully", repoResult.data);
     }
+
+    public async deleteChat(chatId: string, userId: number, userType: string, dataType: ServiceResultDataType) {
+        const repoResult = await this.repo!.deleteChat(chatId, userId, userType.toUpperCase());
+        const repoResultError = super.handleRepoError(dataType, repoResult);
+        if (repoResultError) return repoResultError;
+        return super.responseData(dataType, 200, false, "Chat has been deleted successfully");
+    }
 }

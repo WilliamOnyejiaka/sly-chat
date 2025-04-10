@@ -210,4 +210,12 @@ export default class Chat extends Repo {
             return this.handleDatabaseError(error);
         }
     }
+
+    public async deleteChat(id: string, userId: number, userType: string) {
+        const where = userType === UserType.Customer.toUpperCase() ? { customerId: userId } : { vendorId: userId };
+        return this.delete({
+            id: id,
+            ...where
+        });
+    }
 }

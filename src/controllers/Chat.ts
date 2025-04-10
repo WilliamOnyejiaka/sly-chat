@@ -167,9 +167,25 @@ export default class Chat {
             Controller.handleValidationErrors(res, validationErrors);
             return;
         }
-
+        const userType = res.locals.userType as string;
+        const userId = Number(res.locals.data.id);
         const messageId = req.params.messageId;
-        const facadeResult = await Chat.facade.httpDeleteMessage(messageId);
+        const facadeResult = await Chat.facade.httpDeleteMessage(messageId, userId, userType);
+        Controller.response(res, facadeResult);
+    }
+
+    public static async deleteChat(req: Request, res: Response) {
+        const validationErrors = validationResult(req);
+
+        if (!validationErrors.isEmpty()) {
+            Controller.handleValidationErrors(res, validationErrors);
+            return;
+        }
+
+        const userType = res.locals.userType as string;
+        const userId = Number(res.locals.data.id);
+        const id = req.params.id;
+        const facadeResult = await Chat.facade.httpDeleteChat(id, userId, userType);
         Controller.response(res, facadeResult);
     }
 }

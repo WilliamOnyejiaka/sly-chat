@@ -1,14 +1,16 @@
+// server.ts
 import cluster from "cluster";
 import * as os from "os";
 import createApp from "./config/app";
 import { env } from "./config";
 import prisma from "./repos";
 
-const app = createApp();
 let environmentType = env('envType');
 const PORT = env('port');
 
 async function startServer() {
+    const app = await createApp();
+
     const numCpu = os.cpus().length;
 
     if (cluster.isPrimary) {
@@ -56,7 +58,7 @@ async function startServer() {
             await prisma.$connect();
             console.log('Connected to the database');
             // Start Express server
-            app.listen(PORT, () => console.log(`server running on port - ${PORT}`));
+            (await createApp()).listen(PORT, () => console.log(`server running on port - ${PORT}`));
         } catch (error) {
             console.error('Failed to connect to the database:', error);
             process.exit(1); // Exit if connection fails

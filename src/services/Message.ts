@@ -27,7 +27,7 @@ export default class Message extends BaseService<MessageRepo> {
         return super.responseData(dataType, 201, false, null, repoResult.data);
     }
 
-    public async deleteMessage(messageId: string, dataType: ServiceResultDataType) {
+    public async deleteMessage(messageId: string, userId: number, userType: string, dataType: ServiceResultDataType) {
         const repoResult = await this.repo!.deleteWithId(messageId);
         const repoResultError = super.handleRepoError(dataType, repoResult);
         if (repoResultError) return repoResultError;

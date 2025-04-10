@@ -1,7 +1,7 @@
 import { Socket } from "socket.io";
 import { OnlineCustomer, OnlineVendor } from "../cache";
 import { Chat, Message } from "../services";
-import { ISocket, ServiceData, ServiceResult, UploadedFiles } from "../types";
+import { ISocket, ServiceData, HttpData, UploadedFiles } from "../types";
 import { TransactionChat, TransactionMessage } from "../types/dtos";
 import { CdnFolders, ResourceType, ServiceResultDataType, UserType } from "../types/enums";
 import BaseFacade from "./bases/BaseFacade";
@@ -25,8 +25,8 @@ export default class ChatManagementFacade extends BaseFacade {
     }
 
 
-    public async httpGetUserChats(userId: number, userType: UserType): Promise<ServiceResult> {
-        return await this.getUserChats(userId, userType, ServiceResultDataType.HTTP) as ServiceResult;
+    public async httpGetUserChats(userId: number, userType: UserType): Promise<HttpData> {
+        return await this.getUserChats(userId, userType, ServiceResultDataType.HTTP) as HttpData;
     }
 
     public async socketGetUserChats(userId: number, userType: UserType): Promise<ServiceData> {
@@ -41,16 +41,16 @@ export default class ChatManagementFacade extends BaseFacade {
         return await this.chatService.getChat(chatId, ServiceResultDataType.SOCKET) as ServiceData;
     }
 
-    public async deleteMessage(messageId: string, dataType: ServiceResultDataType) {
-        return await this.messageService.deleteMessage(messageId, dataType);
+    public async deleteMessage(messageId: string, userId: number, userType: string, dataType: ServiceResultDataType) {
+        return await this.messageService.deleteMessage(messageId, userId, userType, dataType);
     }
 
-    public async httpDeleteMessage(messageId: string) {
-        return await this.deleteMessage(messageId, ServiceResultDataType.HTTP) as ServiceResult;
+    public async httpDeleteMessage(messageId: string, userId: number, userType: string,) {
+        return await this.deleteMessage(messageId, userId, userType, ServiceResultDataType.HTTP) as HttpData;
     }
 
-    public async socketDeleteMessage(messageId: string) {
-        return await this.deleteMessage(messageId, ServiceResultDataType.SOCKET) as ServiceData;
+    public async socketDeleteMessage(messageId: string, userId: number, userType: string,) {
+        return await this.deleteMessage(messageId, userId, userType, ServiceResultDataType.SOCKET) as ServiceData;
     }
 
     public async getUserChatsAndOfflineMessages(userId: number, userType: UserType): Promise<ServiceData> {
@@ -139,7 +139,7 @@ export default class ChatManagementFacade extends BaseFacade {
         return (await this.chatService.createChatWithMessage(newChat, newMessage, ServiceResultDataType.SOCKET)) as ServiceData;
     }
 
-    private async createMessage(userId: number, text: string, chatId: string, recipientOnline: boolean, senderType: any, dataType: ServiceResultDataType): Promise<ServiceData | ServiceResult> {
+    private async createMessage(userId: number, text: string, chatId: string, recipientOnline: boolean, senderType: any, dataType: ServiceResultDataType): Promise<ServiceData | HttpData> {
         return (await this.messageService.createMessage(userId, text, chatId, recipientOnline, senderType, dataType))
     }
 
@@ -147,7 +147,7 @@ export default class ChatManagementFacade extends BaseFacade {
         return (await this.createMessage(userId, text, chatId, recipientOnline, senderType, ServiceResultDataType.SOCKET)) as ServiceData
     }
 
-    private async markMessagesAsRead(chatId: string, senderType: any, dataType: ServiceResultDataType): Promise<ServiceData | ServiceResult> {
+    private async markMessagesAsRead(chatId: string, senderType: any, dataType: ServiceResultDataType): Promise<ServiceData | HttpData> {
         return (await this.messageService.markMessagesAsRead(chatId, senderType, dataType));
     }
 
@@ -166,14 +166,14 @@ export default class ChatManagementFacade extends BaseFacade {
         resourceType: ResourceType,
         folder: CdnFolders
     ) {
-        const chatResult = await this.chatService.getChatWithRoomId(newChat.productId, newChat.customerId, newChat.vendorId, ServiceResultDataType.HTTP) as ServiceResult;
+        const chatResult = await this.chatService.getChatWithRoomId(newChat.productId, newChat.customerId, newChat.vendorId, ServiceResultDataType.HTTP) as HttpData;
         if (chatResult.json.error) return chatResult;
         const chat = chatResult.json.data;
         const { uploadedFiles, failedFiles, publicIds } = await this.cloudinary.upload(files, resourceType, folder);
         if (uploadedFiles.length > 0) {
             if (chat) {
                 newMessage.chatId = chat.id;
-                const serviceResult = await this.messageService.createMessageWithMedia(newMessage, uploadedFiles, ServiceResultDataType.HTTP) as ServiceResult;
+                const serviceResult = await this.messageService.createMessageWithMedia(newMessage, uploadedFiles, ServiceResultDataType.HTTP) as HttpData;
                 if (!serviceResult.json.error) {
                     serviceResult.json.data = { message: serviceResult.json.data, isNewChat: false };
                     return serviceResult;
@@ -185,7 +185,7 @@ export default class ChatManagementFacade extends BaseFacade {
                 await this.cloudinary.deleteFiles(publicIds);
                 return this.service.httpResponseData(400, true, "All fields are required to create a new chat");
             }
-            const serviceResult = await this.chatService.createChatWithMedia(newChat, newMessage, uploadedFiles, ServiceResultDataType.HTTP) as ServiceResult;
+            const serviceResult = await this.chatService.createChatWithMedia(newChat, newMessage, uploadedFiles, ServiceResultDataType.HTTP) as HttpData;
             if (!serviceResult.json.error) {
                 serviceResult.json.data = { chat: serviceResult.json.data, isNewChat: true };
                 return serviceResult;
@@ -197,10 +197,14 @@ export default class ChatManagementFacade extends BaseFacade {
     }
 
     public async httpGetChatWithRoomId(productId: string, customerId: number, vendorId: number) {
-        return await this.chatService.getChatWithRoomId(productId, customerId, vendorId, ServiceResultDataType.HTTP) as ServiceResult;
+        return await this.chatService.getChatWithRoomId(productId, customerId, vendorId, ServiceResultDataType.HTTP) as HttpData;
     }
 
     public async socketGetChatWithRoomId(productId: string, customerId: number, vendorId: number) {
         return await this.chatService.getChatWithRoomId(productId, customerId, vendorId, ServiceResultDataType.SOCKET) as ServiceData;
+    }
+
+    public async httpDeleteChat(chatId: string, userId: number, userType: string): Promise<HttpData> {
+        return await this.chatService.deleteChat(chatId, userId, userType, ServiceResultDataType.HTTP) as HttpData;
     }
 }

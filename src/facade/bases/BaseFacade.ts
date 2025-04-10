@@ -1,7 +1,7 @@
 import { logger } from "../../config";
 import { HttpStatus } from "../../constants";
 import BaseService from "../../services/bases/BaseService";
-import { ServiceData, ServiceResult } from "../../types";
+import { ServiceData, HttpData } from "../../types";
 
 export default class BaseFacade {
 
@@ -14,7 +14,7 @@ export default class BaseFacade {
         return servicesResult.error ? this.service.socketResponseData(servicesResult.statusCode, servicesResult.error, servicesResult.message) : null;
     }
 
-    protected handleServiceError(serviceResult: ServiceResult) {
+    protected handleServiceError(serviceResult: HttpData) {
         if (serviceResult.json.error) {
             return serviceResult;
         }

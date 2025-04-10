@@ -1,18 +1,26 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import prisma from "..";
 import { http } from "../../constants";
 import Repository from "../../interfaces/Repository";
 import { logger } from "../../config";
 
-export default class Repo implements Repository {
+// Define a generic type for the repository response
+interface RepoResponse<T> {
+    error: boolean;
+    message: string | null;
+    type: number;
+    data: T;
+}
 
-    protected tblName: any;
+export default class Repo<T = any> implements Repository {
 
-    public constructor(tblName: string) {
+    protected tblName: keyof PrismaClient;
+
+    public constructor(tblName: keyof PrismaClient) {
         this.tblName = tblName;
     }
 
-    public async insert<T = any>(data: T) {
+    public async insert<T = any>(data: T): Promise<RepoResponse<T | any>> {
         try {
             const newItem = await (prisma[this.tblName] as any).create({ data: data });
             return this.repoResponse(false, 201, null, newItem);
@@ -116,7 +124,7 @@ export default class Repo implements Repository {
         }
     }
 
-    public async paginate(skip: number, take: number, filter: any = {}, countFilter: any = {}) {
+    public async paginate(skip: number, take: number, filter: any = {}, countFilter: any = {}): Promise<RepoResponse<{ items: T[], totalItems: any } | {}>> {
         try {
             const items = await (prisma[this.tblName] as any).findMany({
                 skip,   // Skips the first 'skip' records
@@ -127,7 +135,7 @@ export default class Repo implements Repository {
             return this.repoResponse(false, 200, null, {
                 items: items,
                 totalItems: totalItems
-            })
+            });
         } catch (error) {
             return this.handleDatabaseError(error);
         }
@@ -153,91 +161,116 @@ export default class Repo implements Repository {
         }
     }
 
-    protected repoResponse(error: boolean, type: number, message: string | null = null, data: any = {}) {
-        return {
-            error: error,
-            message: message,
-            type: type,
-            data: data
-        };
+    // Standardized response
+    protected repoResponse<TData>(
+        error: boolean,
+        type: number,
+        message: string | null,
+        data: TData
+    ): RepoResponse<TData> {
+        return { error, message, type, data: data };
     }
+
+    // protected repoResponse(error: boolean, type: number, message: string | null = null, data: any = {}) {
+    //     return {
+    //         error: error,
+    //         message: message,
+    //         type: type,
+    //         data: data
+    //     };
+    // }
 
     protected handleDatabaseError(error: any) {
         console.log(error);
 
         if (error.code === "P2002") {
             // Unique constraint violation
-            logger.error(`Unique constraint violation error for the ${this.tblName} table`);
-            return {
-                error: true,
-                message: "A record with this data already exists.",
-                type: 400,
-                data: {}
-            };
+            logger.error(`Unique constraint violation error for the ${this.tblName.toString()} table`);
+            return this.repoResponse(true, 400, "A record with this data already exists.",{});
+            // return {
+            //     error: true,
+            //     message: ,
+            //     type: 400,
+            //     data: {}
+            // };
         } else if (error.code === "P2025") {
-            logger.error(`Item was not found for the ${this.tblName} table`);
-            return {
-                error: true,
-                message: "Item was not found.",
-                type: 404,
-                data: {}
-            };
+            logger.error(`Item was not found for the ${this.tblName.toString()} table`);
+            return this.repoResponse(true, 400, "Item was not found.", {});
+
+            // return {
+            //     error: true,
+            //     message: "Item was not found.",
+            //     type: 404,
+            //     data: {}
+            // };
         } else if (error instanceof Prisma.PrismaClientKnownRequestError) {
             // Handle known Prisma errors
             switch (error.code) {
                 case "P2003":
                     // Foreign key constraint violation
-                    logger.error(`Foreign key constraint violation error for the ${this.tblName} table`);
-                    return {
-                        error: true,
-                        message: `Invalid foreign key reference. Please check related fields.`,
-                        type: 400,
-                        data: {}
-                    }
+                    logger.error(`Foreign key constraint violation error for the ${this.tblName.toString()} table`);
+                    return this.repoResponse(true, 400, "Item was not found.", {});
+
+                    // return {
+                    //     error: true,
+                    //     message: `Invalid foreign key reference. Please check related fields.`,
+                    //     type: 400,
+                    //     data: {}
+                    // }
                 case "P2001":
                     // Record not found
-                    logger.error(`Record not found for the ${this.tblName} table`);
-                    return {
-                        error: true,
-                        message: "The requested record could not be found.",
-                        type: 400,
-                        data: {}
-                    };
+                    logger.error(`Record not found for the ${this.tblName.toString()} table`);
+                    return this.repoResponse(true, 400, "Item was not found.", {});
+
+                    // return {
+                    //     error: true,
+                    //     message: "The requested record could not be found.",
+                    //     type: 400,
+                    //     data: {}
+                    // };
                 case "P2000":
                     // Value too long for a column
-                    logger.error(`Value too long for a column for the ${this.tblName} table`);
-                    return {
-                        error: true,
-                        message: "A value provided is too long for one of the fields.",
-                        type: 400,
-                        data: {}
-                    };
+                    logger.error(`Value too long for a column for the ${this.tblName.toString()} table`);
+                    return this.repoResponse(true, 400, "Item was not found.", {});
+
+                    // return {
+                    //     error: true,
+                    //     message: "A value provided is too long for one of the fields.",
+                    //     type: 400,
+                    //     data: {}
+                    // };
                 default:
-                    logger.error(`An unexpected database error occurred for the ${this.tblName} table`, error.message);
-                    return {
-                        error: true,
-                        message: "An unexpected database error occurred.",
-                        type: 400,
-                        data: {}
-                    };;
+                    logger.error(`An unexpected database error occurred for the ${this.tblName.toString()} table`, error.message);
+                    return this.repoResponse(true, 400, "Item was not found.", {});
+
+                    // return {
+                    //     error: true,
+                    //     message: "An unexpected database error occurred.",
+                    //     type: 400,
+                    //     data: {}
+                    // };
             }
         } else if (error instanceof Prisma.PrismaClientValidationError) {
-            logger.error(`Validation error in the ${this.tblName} table`);
-            return {
-                error: true,
-                message: 'Invalid data provided. Please check that all fields are correctly formatted.',
-                type: 400,
-                data: {}
-            }
+            logger.error(`Validation error in the ${this.tblName.toString()} table`);
+            return this.repoResponse(true, 400, "Item was not found.", {});
+
+            // return {
+            //     error: true,
+            //     message: 'Invalid data provided. Please check that all fields are correctly formatted.',
+            //     type: 400,
+            //     data: {}
+            // }
         }
 
         // Fallback for unexpected errors
         logger.error(error);
-        return {
-            error: true,
-            message: http("500"),
-            type: 500,
-            data: {}
-        };
+        return this.repoResponse(true, 400, "Item was not found.", {});
+
+        // return {
+        //     error: true,
+        //     message: http("500"),
+        //     type: 500,
+        //     data: {}
+        // };
     }
 }

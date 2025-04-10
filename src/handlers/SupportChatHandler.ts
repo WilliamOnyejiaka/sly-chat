@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import { ISocket } from "../types";
-import { EventList, Namespace, UserType } from "../types/enums";
+import { Events, Namespace, UserType } from "../types/enums";
 import Handler from "./Handler";
 import { PresenceFacade } from "../facade";
 import { OnlineCustomer, OnlineSupport, OnlineVendor } from "../cache";
@@ -72,8 +72,8 @@ export default class SupportChatHandler {
         // io.of(Namespace.PRESENCE).emit("userIsOnline", Handler.responseData(200, false, "User is online"));
     }
 
-    public static async sendMessage(io: Server, socket: ISocket, data: any){
-        
+    public static async sendMessage(io: Server, socket: ISocket, data: any) {
+
     }
 
     public static async disconnect(io: Server, socket: ISocket, data: any) {

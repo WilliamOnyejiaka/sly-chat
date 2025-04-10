@@ -1,3 +1,4 @@
+import { PrismaClient } from "@prisma/client";
 import prisma from "..";
 import { ImageRepository } from "../../interfaces/Repository";
 import Repo from "./Repo";
@@ -6,7 +7,7 @@ export default class ImageRepo extends Repo implements ImageRepository {
 
     protected parentIdName: string;
 
-    public constructor(tblName: string, parentIdName: string) {
+    public constructor(tblName: keyof PrismaClient, parentIdName: string) {
         super(tblName);
         this.parentIdName = parentIdName;
     }

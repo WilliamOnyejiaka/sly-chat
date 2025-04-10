@@ -1,3 +1,4 @@
+// app.ts
 import express, { Application, NextFunction, Request, Response } from "express";
 import morgan from "morgan";
 import { cloudinary, corsConfig, env, logger } from ".";
@@ -8,7 +9,7 @@ import { Server } from 'socket.io';
 import { chat, presence, supportChat } from "../events";
 import { ISocket } from "../types";
 import { user, chat as chatRoute, comment } from "../routes";
-import { Namespace } from "../types/enums";
+import { Namespace, IWorker } from "../types/enums";
 import { createClient } from "redis";
 import { createAdapter } from "@socket.io/redis-adapter";
 import { setupWorker } from "@socket.io/sticky";
@@ -18,23 +19,49 @@ import prisma from "../repos";
 import { marked } from 'marked';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import * as ejs from 'ejs';
+import { Queue, Worker, Job } from 'bullmq';
+import { parse } from 'url';
+import { SendMessageProcessor } from "../processors";
+import { UpdateChat } from "../processors/UpdateChat";
 
-function createApp() {
+function parseRedisUrl(url: string) {
+    const parsed = parse(url);
+    const [username, password] = parsed.auth ? parsed.auth.split(':') : [null, null];
+    return {
+        host: parsed.hostname || 'localhost',
+        port: parsed.port ? parseInt(parsed.port, 10) : 6379,
+        password: password || undefined,
+        username: username || undefined,
+    };
+}
+
+async function createApp() {
     const app: Application = express();
     const server = http.createServer(app);
 
     const pubClient = createClient({ url: env('redisURL')! });
     const subClient = pubClient.duplicate();
-    const io = new Server(server, { cors: { origin: "*" }, adapter: createAdapter(pubClient, subClient) });
+    const io = new Server(server, { cors: { origin: "*" } });
+    // const redisOptions = parseRedisUrl(REDIS_URL);
 
-    Promise.all([pubClient.connect(), subClient.connect()])
-        .then(() => {
-            console.log("Redis Adapter Connected");
-            // Setup sticky sessions after Redis connection
-            if (cluster.isWorker) setupWorker(io);
-        })
-        .catch(err => console.error("Redis Connection Error:", err));
+    try {
+        await Promise.all([pubClient.connect(), subClient.connect()]);
+        console.log("Redis clients connected");
+
+        // // Test Redis pub/sub
+        // await pubClient.publish("test-channel", "test-message");
+        // subClient.subscribe("test-channel", (message) => {
+        //     console.log(`Worker ${process.pid} received: ${message}`);
+        // });
+
+        io.adapter(createAdapter(pubClient, subClient));
+        console.log(`Worker ${process.pid} initialized Redis adapter`);
+
+        if (cluster.isWorker) setupWorker(io);
+    } catch (err) {
+        console.error(`Worker ${process.pid} - Redis Connection Error:`, err);
+        process.exit(1);
+    }
 
     const stream = { write: (message: string) => logger.http(message.trim()) };
 
@@ -87,6 +114,19 @@ function createApp() {
             });
         }
     });
+
+    const IWorkers: IWorker<any>[] = [
+        new SendMessageProcessor({ connection: { url: env('redisURL')! } }, io),
+        new UpdateChat({ connection: { url: env('redisURL')! } }, io),
+    ];
+
+    for (const IWorker of IWorkers) {
+        const worker = new Worker(IWorker.queueName, IWorker.process.bind(IWorker), IWorker.config);
+        if (IWorker.completed) worker.on('completed', IWorker.completed);
+        if (IWorker.failed) worker.on('failed', IWorker.failed);
+        if (IWorker.drained) worker.on('completed', IWorker.drained);
+    }
+
 
     const chatNamespace = io.of(Namespace.CHAT);
     const presenceNamespace = io.of(Namespace.PRESENCE);

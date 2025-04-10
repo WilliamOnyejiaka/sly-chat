@@ -1,4 +1,5 @@
 import { Socket } from "socket.io";
+import { Job } from 'bullmq';
 
 export interface UploadedImageData {
     mimeType: string;
@@ -18,7 +19,7 @@ export interface ISocket extends Socket {
 }
 
 export type ServiceData = { error: boolean, message: string | null, statusCode: number, data: any };
-export type ServiceResult = {
+export type HttpData = {
     json: {
         error: boolean,
         message: string | null,
@@ -39,4 +40,8 @@ export type UploadedFiles = {
 export type FailedFiles = {
     filename: string,
     error: string
+};
+
+export interface JobProcessor<T> {
+    process(job: Job<T, any, string>): Promise<void>;
 }

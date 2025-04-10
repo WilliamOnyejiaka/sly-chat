@@ -1,8 +1,21 @@
 import prisma from ".";
 import Repo from "./bases/Repo";
 import { TransactionMessage } from "../types/dtos";
+import { UserType } from "../types/enums";
 
-export default class Message extends Repo {
+interface MessageDto {
+    id?: string,
+    senderId: number,
+    text?: string,
+    timestamp?: Date,
+    read?: boolean,
+    recipientOnline: boolean,
+    chatId: string,
+    createdAt: Date,
+    updatedAt: Date
+};
+
+export default class Message extends Repo<MessageDto> {
 
     public constructor() {
         super('message');
@@ -118,5 +131,13 @@ export default class Message extends Repo {
         } catch (error) {
             return this.handleDatabaseError(error);
         }
+    }
+
+    public async deleteMessage(id: string, userId: number, userType: string) {
+        const where = userType === UserType.Customer.toUpperCase() ? { customerId: userId } : { vendorId: userId };
+        return this.delete({
+            id: id,
+            ...where
+        });
     }
 }

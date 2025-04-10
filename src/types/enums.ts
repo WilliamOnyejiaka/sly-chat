@@ -1,3 +1,4 @@
+import { Job } from "bullmq";
 
 export enum UserType {
     Admin = "admin",
@@ -5,7 +6,7 @@ export enum UserType {
     Customer = "customer",
 };
 
-export enum EventList {
+export enum Events {
     APP_ERROR = "appError",
 
 }
@@ -53,3 +54,25 @@ export enum AdminPermission {
     VENDOR_PORTAL_ACCESS = "vendor_portal_access",
     ANY = "any"
 };
+
+export interface IWorker<T> {
+    process: (job: Job<T>) => Promise<void>,
+    completed?: (job: Job<any, void, string>, result: void, prev: string) => void,
+    failed?: (job: Job<any, void, string> | undefined, error: Error, prev: string) => void,
+    drained?: () => void,
+    config: WorkerConfig,
+    queueName: string
+}
+
+export interface SendMessageJob {
+    socketId: string
+}
+
+export interface UpdateChatJob {
+    recipientSocketId: string,
+    recipientId: number,
+    recipientType: UserType
+}
+
+
+export interface WorkerConfig { connection: { url: string }, concurrency?: number, limiter?: { max: number, duration: number } };

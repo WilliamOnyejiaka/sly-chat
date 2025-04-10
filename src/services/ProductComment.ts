@@ -53,7 +53,8 @@ export default class ProductComment extends BaseService<ProductCommentRepo> {
         });
         const repoResultError = this.httpHandleRepoError(repoResult);
         if (repoResultError) return repoResultError;
-        const totalRecords = repoResult.data.totalItems;
+        const data: { items: any, totalItems: any } = repoResult.data as any;
+        const totalRecords = data.totalItems;
         const pagination = getPagination(page, pageSize, totalRecords);
         return super.httpResponseData(200, true, constants('200Comments')!, { data: repoResult.data, pagination });
     }
@@ -64,7 +65,8 @@ export default class ProductComment extends BaseService<ProductCommentRepo> {
         const repoResult = await this.repo!.paginate(skip, take, { where: { parentId: parentId, productId: productId }, include: this.buildInclude(depth) }, { where: { parentId: parentId, productId: productId} });
         const repoResultError = this.httpHandleRepoError(repoResult);
         if (repoResultError) return repoResultError;
-        const totalRecords = repoResult.data.totalItems;
+        const data: { items: any, totalItems: any } = repoResult.data as any;
+        const totalRecords = data.totalItems;
         const pagination = getPagination(page, pageSize, totalRecords);
         return super.httpResponseData(200, true, constants('200Comments')!, { data: repoResult.data, pagination });
     }

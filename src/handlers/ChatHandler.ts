@@ -4,7 +4,8 @@ import { Namespace, UserType } from "../types/enums";
 import Handler from "./Handler";
 import { ChatManagementFacade } from "../facade";
 import { TransactionChat, TransactionMessage } from "../types/dtos";
-import { EventList } from "./../types/enums";
+import { Events } from "./../types/enums";
+import { updateChat } from "../config/bullMQ";
 
 export default class ChatHandler {
 
@@ -72,7 +73,7 @@ export default class ChatHandler {
 
         const facadeResult = await ChatHandler.facade.socketGetChatWithRoomId(productId, customerId, vendorId);
         if (facadeResult.error) {
-            socket.emit(EventList.APP_ERROR, facadeResult);
+            socket.emit(Events.APP_ERROR, facadeResult);
             return;
         }
 
@@ -180,6 +181,8 @@ export default class ChatHandler {
                 const recipientSocketId = recipientOnlineData.chatSocketId;
                 chatNamespace.sockets.get(recipientSocketId)?.join(room); //💬 Forcing the the recipient to join the room 
                 socket.to(recipientSocketId).emit('newChat', Handler.responseData(200, false, chat));
+                const recipientType = userType === UserType.Customer ? UserType.Customer : UserType.Vendor;
+                await updateChat.add('updateChat', { recipientId, recipientType, recipientSocketId }, { jobId: `send-${Date.now()}`, priority: 1 });
                 console.log(`✅ Message sent directly to user ${recipientId} via socket ${recipientSocketId}`);
                 return;
             }
@@ -251,9 +254,9 @@ export default class ChatHandler {
         const room = `chat_${productId}_${vendorId}_${customerId}`;
         console.log(`🗑️ Deleting message ${messageId} in room ${room}`);
 
-        const facadeResult = await ChatHandler.facade.socketDeleteMessage(messageId);
+        const facadeResult = await ChatHandler.facade.socketDeleteMessage(messageId, userId, userType);
         if (facadeResult.error) {
-            socket.emit(EventList.APP_ERROR, facadeResult);
+            socket.emit(Events.APP_ERROR, facadeResult);
             return;
         }
 

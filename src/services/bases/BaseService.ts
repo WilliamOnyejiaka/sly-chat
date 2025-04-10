@@ -1,6 +1,6 @@
 import constants from "../../constants";
 import Repo from "../../repos/bases/Repo";
-import { ServiceResult } from "../../types";
+import { HttpData } from "../../types";
 import { ServiceResultDataType } from "../../types/enums";
 import { getPagination } from "../../utils";
 
@@ -36,7 +36,7 @@ export default class BaseService<T extends Repo = Repo> {
         };
     }
 
-    public toSocketResponseData(serviceResult: ServiceResult) {
+    public toSocketResponseData(serviceResult: HttpData) {
         return this.socketResponseData(serviceResult.statusCode, serviceResult.json.error, serviceResult.json.message, serviceResult.json.data)
     }
 
@@ -91,7 +91,7 @@ export default class BaseService<T extends Repo = Repo> {
     }
 
 
-    public async getWithIdgetItemWithId(id: number, message200?: string) {
+    public async getItemWithId(id: number, message200?: string) {
         return await this.getItem(id, message200);
     }
 
@@ -108,13 +108,13 @@ export default class BaseService<T extends Repo = Repo> {
         if (repoResult.error) {
             return this.httpResponseData(repoResult.type, true, repoResult.message!);
         }
-
-        const totalRecords = repoResult.data.totalItems;
+        const data: { items: any, totalItems: any } = repoResult.data as any;
+        const totalRecords = data.totalItems;
 
         const pagination = getPagination(page, pageSize, totalRecords);
 
         return this.httpResponseData(200, false, `Items were retrieved successfully`, { // TODO: make this more specific
-            data: repoResult.data.items,
+            data: data.items,
             pagination
         });
     }
