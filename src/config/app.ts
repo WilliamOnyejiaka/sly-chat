@@ -8,7 +8,7 @@ import http from 'http';
 import { Server } from 'socket.io';
 import { chat, presence, supportChat } from "../events";
 import { ISocket } from "../types";
-import { user, chat as chatRoute, comment } from "../routes";
+import { user, chat as chatRoute, comment, general } from "../routes";
 import { Namespace, IWorker } from "../types/enums";
 import { createClient } from "redis";
 import { createAdapter } from "@socket.io/redis-adapter";
@@ -23,17 +23,8 @@ import { Queue, Worker, Job } from 'bullmq';
 import { parse } from 'url';
 import { SendMessageProcessor } from "../processors";
 import { UpdateChat } from "../processors/UpdateChat";
-
-function parseRedisUrl(url: string) {
-    const parsed = parse(url);
-    const [username, password] = parsed.auth ? parsed.auth.split(':') : [null, null];
-    return {
-        host: parsed.hostname || 'localhost',
-        port: parsed.port ? parseInt(parsed.port, 10) : 6379,
-        password: password || undefined,
-        username: username || undefined,
-    };
-}
+import { loadMD } from "./../utils";
+import initializeIO from "./io";
 
 async function createApp() {
     const app: Application = express();
@@ -41,28 +32,7 @@ async function createApp() {
 
     const pubClient = createClient({ url: env('redisURL')! });
     const subClient = pubClient.duplicate();
-    const io = new Server(server, { cors: { origin: "*" } });
-    // const redisOptions = parseRedisUrl(REDIS_URL);
-
-    try {
-        await Promise.all([pubClient.connect(), subClient.connect()]);
-        console.log("Redis clients connected");
-
-        // // Test Redis pub/sub
-        // await pubClient.publish("test-channel", "test-message");
-        // subClient.subscribe("test-channel", (message) => {
-        //     console.log(`Worker ${process.pid} received: ${message}`);
-        // });
-
-        io.adapter(createAdapter(pubClient, subClient));
-        console.log(`Worker ${process.pid} initialized Redis adapter`);
-
-        if (cluster.isWorker) setupWorker(io);
-    } catch (err) {
-        console.error(`Worker ${process.pid} - Redis Connection Error:`, err);
-        process.exit(1);
-    }
-
+    const io = await initializeIO(server, pubClient, subClient);
     const stream = { write: (message: string) => logger.http(message.trim()) };
 
     app.use(express.urlencoded({ extended: true }));
@@ -73,47 +43,6 @@ async function createApp() {
     app.use(express.static(path.join(__dirname, './../../public')));
     app.set('view engine', 'ejs');
     app.set('views', path.join(__dirname, '../views'));
-
-    async function loadMD(file: string) {
-        // const mdFilePath = path.join(__dirname, '../docs/TransactionChat.md');
-        const mdFilePath = path.join(__dirname, '../docs/' + file);
-
-
-        // Read the markdown file
-        const markdownContent = await fs.readFile(mdFilePath, 'utf-8');
-
-        // Convert markdown to HTML
-        const htmlContent = marked.parse(markdownContent);
-        return htmlContent;
-    }
-
-    app.get('/docs', async (req: Request, res: Response) => {
-        try {
-            const query = req.query.doc as string;
-            const files = {
-                'chat': "TransactionChat.md",
-                'presence': "Presence.md",
-                'general': "General.md",
-                'sendFile': "SendFile.md",
-                'chatRoutes': "ChatRoutes.md",
-                'commentRoutes': "CommentRoutes.md"
-            }
-
-            if (!(files as any)[query]) {
-                res.render('docs', { title: "General Doc", content: await loadMD(files.general) });
-                return;
-            }
-
-            const doc = (files as any)[query];
-            const htmlContent = await loadMD(doc);
-            res.render('docs', { title: doc, content: htmlContent });
-        } catch (error) {
-            console.error('Error processing markdown:', error);
-            res.status(500).render('docs', {
-                content: '<h1>Error</h1><p>Failed to load markdown content</p>'
-            });
-        }
-    });
 
     const IWorkers: IWorker<any>[] = [
         new SendMessageProcessor({ connection: { url: env('redisURL')! } }, io),
@@ -204,16 +133,7 @@ async function createApp() {
         }
     });
 
-    app.get("/test", async (req: Request, res: Response) => {
-        console.log("Hello From chat");
-
-        res.status(200).json({
-            'error': false,
-            'message': "External Api",
-            'data': "hello World"
-        });
-    });
-
+    app.use(general);
     app.use("/api/v1/user", user);
     app.use("/api/v1/chat", validateHttpJWT(["customer", "vendor"], env("tokenSecret")!), chatRoute);
     app.use("/api/v1/comment", validateHttpJWT(["customer", "vendor"], env("tokenSecret")!), comment);

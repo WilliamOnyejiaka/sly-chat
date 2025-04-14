@@ -11,6 +11,7 @@ import CipherUtility from "./CipherUtility";
 import parseJson from "./parseJson";
 import getRoom from "./getRoom";
 import userIds from "./userIds";
+import loadMD from './loadMD';
 
 export {
     Password,
@@ -25,5 +26,6 @@ export {
     CipherUtility,
     parseJson,
     getRoom,
-    userIds
+    userIds,
+    loadMD
 };

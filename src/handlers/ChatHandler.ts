@@ -176,6 +176,7 @@ export default class ChatHandler {
 
             socket.join(room);
             console.log(`✅ New chat has been created`);
+            socket.emit('newSentChat', Handler.responseData(200, false, null, chat));
             chatNamespace.to(room).emit('receiveMessage', Handler.responseData(200, false, null, chat.messages));
             if (recipientOnlineData) {
                 const recipientSocketId = recipientOnlineData.chatSocketId;

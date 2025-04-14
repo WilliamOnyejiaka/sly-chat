@@ -10,13 +10,10 @@ const PORT = env('port');
 
 async function startServer() {
     const app = await createApp();
-
     const numCpu = os.cpus().length;
 
     if (cluster.isPrimary) {
-        for (let i = 0; i < numCpu; i++) {
-            cluster.fork();
-        }
+        for (let i = 0; i < numCpu; i++) cluster.fork();
 
         cluster.on('exit', (worker, code, signal) => {
             console.log(`worker ${worker.process.pid} died`);
@@ -24,26 +21,12 @@ async function startServer() {
             cluster.fork();
         });
 
-        cluster.on('online', (worker) => {
-            console.log(`Worker ${worker.process.pid} is online`);
-        });
+        cluster.on('online', (worker) => console.log(`Worker ${worker.process.pid} is online`));
     } else {
-        // app.listen(PORT, () => {
-        //     console.log(`pid - ${process.pid}`);
-
-        //     console.log(`server running on port - ${PORT}\n`)
-        // });
-
         try {
-            // Connect to the database
             await prisma.$connect();
             console.log(`Worker ${process.pid} has connected to the database`);
-
-            // Start Express server
-            app.listen(PORT, () => {
-                // console.log(`pid - ${process.pid}`);
-                console.log(`server running on port - ${PORT}\n`)
-            });
+            app.listen(PORT, () => console.log(`server running on port - ${PORT}\n`));
         } catch (error) {
             console.error('Failed to connect to the database:', error);
             process.exit(1); // Exit if connection fails
@@ -54,16 +37,13 @@ async function startServer() {
 (async () => {
     if (environmentType === "dev") {
         try {
-            // Connect to the database
             await prisma.$connect();
             console.log('Connected to the database');
-            // Start Express server
             (await createApp()).listen(PORT, () => console.log(`server running on port - ${PORT}`));
         } catch (error) {
             console.error('Failed to connect to the database:', error);
             process.exit(1); // Exit if connection fails
         }
-        // app.listen(PORT, () => console.log(`server running on port - ${PORT}`));
     } else {
         await startServer();
     }
