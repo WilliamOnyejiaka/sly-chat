@@ -12,6 +12,8 @@ import parseJson from "./parseJson";
 import getRoom from "./getRoom";
 import userIds from "./userIds";
 import loadMD from './loadMD';
+import StreamRouter from "./StreamRouter";
+import Streamer from "./Streamer";
 
 export {
     Password,
@@ -27,5 +29,7 @@ export {
     parseJson,
     getRoom,
     userIds,
-    loadMD
+    loadMD,
+    StreamRouter,
+    Streamer
 };

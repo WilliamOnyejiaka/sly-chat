@@ -1,6 +1,7 @@
 import Controller from "./bases/Controller";
 import { Request, Response } from "express";
 import { loadMD } from "../utils";
+import { Chat } from "../repos";
 
 export default class General {
 
@@ -31,6 +32,16 @@ export default class General {
                 content: '<h1>Error</h1><p>Failed to load markdown content</p>'
             });
         }
+    }
+
+    public static async clearChatTbl(req: Request, res: Response) {
+        const result = await (new Chat()).clearTable();
+        res.status(result.type).json({
+            error: result.error,
+            message: result.message,
+            data: result.data
+        });
+        return;
     }
 
 }

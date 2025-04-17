@@ -168,3 +168,32 @@ This endpoint retrieves comments for a specific product.
     }
   }
   ```
+
+### Get Product Comments
+
+This endpoint retrieves comments for a specific product.
+
+#### Request
+
+- Method: GET
+- URL: `{{host}}/api/v1/comment/product/like/{commentId}`
+- Path Parameters
+  - commentId (Object Id): The ID of the comment.
+
+#### Response
+
+- Status: 201
+- Content-Type: application/json
+- Body:
+  ```json
+  {
+    "error": false,
+    "message": "Action was taken",
+    "data": {
+      "action": "liked",
+      "totalLikes": 1
+    }
+  }
+  ```
+
+### If the a user has already liked a comment and this endpoint is called again, the endpoint will automatically unlike the comment

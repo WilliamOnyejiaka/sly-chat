@@ -1,4 +1,4 @@
-import { Socket } from "socket.io";
+import { Socket, Server } from "socket.io";
 import { Job } from 'bullmq';
 
 export interface UploadedImageData {
@@ -44,4 +44,14 @@ export type FailedFiles = {
 
 export interface JobProcessor<T> {
     process(job: Job<T, any, string>): Promise<void>;
+}
+
+export interface EventHandler {
+    (event: any, stream: string, id: string, io?: Server): Promise<void>;
+}
+
+export interface StreamGroup {
+    stream: string; // e.g., 'stream:profile'
+    consumerGroup: string; // e.g., 'profile-consumers'
+    handlers: Map<string, EventHandler>; // e.g., 'ProfileUpdated' -> handler
 }

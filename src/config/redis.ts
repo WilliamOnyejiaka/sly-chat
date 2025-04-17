@@ -2,7 +2,11 @@ import Redis from 'ioredis';
 import { env } from '.'; 
 import RedisStore from 'rate-limit-redis';
 
-const redisClient = new Redis(env('redisURL')!);
+// const redisClient = new Redis(env('redisURL')!);
+const redisClient = new Redis(env('redisURL')!, {
+    maxRetriesPerRequest: 10,
+    retryStrategy: (times) => Math.min(times * 50, 2000),
+});
 
 redisClient.on("connecting",() => {
     console.log("Redis Connecting...");

@@ -76,6 +76,15 @@ export default class Repo<T = any> implements Repository {
         }
     }
 
+    public async clearTable() {
+        try {
+            const result = await (prisma[this.tblName] as any).deleteMany({});
+            return this.repoResponse(false, 200, null, { recordCount: result.count });
+        } catch (error: any) {
+            return this.handleDatabaseError(error);
+        }
+    }
+
     public async delete(where: any) {
         try {
             const deletedData = await (prisma[this.tblName] as any).delete({
@@ -159,15 +168,6 @@ export default class Repo<T = any> implements Repository {
     ): RepoResponse<TData> {
         return { error, message, type, data: data };
     }
-
-    // protected repoResponse(error: boolean, type: number, message: string | null = null, data: any = {}) {
-    //     return {
-    //         error: error,
-    //         message: message,
-    //         type: type,
-    //         data: data
-    //     };
-    // }
 
     protected handleDatabaseError(error: any) {
         console.log(error);

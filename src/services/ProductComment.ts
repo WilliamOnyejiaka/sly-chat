@@ -91,7 +91,7 @@ export default class ProductComment extends BaseService<ProductCommentRepo> {
             const likeResult = await this.commentLikeRepo.toggleLike(userId, userType, commentId);
             const likeResultError = this.httpHandleRepoError(likeResult);
             if (likeResultError) return likeResultError;
-            return this.httpResponseData(201, false, null, likeResult.data);
+            return this.httpResponseData(200, false, "Action was taken", likeResult.data);
         }
         return this.httpResponseData(404, true, "Comment was not found");
     }
