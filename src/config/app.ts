@@ -1,7 +1,7 @@
 // app.ts
 import express, { Application, NextFunction, Request, Response } from "express";
 import morgan from "morgan";
-import { cloudinary, corsConfig, env, logger } from ".";
+import { cloudinary, corsConfig, env, logger, redisClient } from ".";
 import { validateJWT, validateUser, handleMulterErrors, secureApi, redisClientMiddleware, vendorIsActive, uploads, validateHttpJWT, adminAuthorization } from "./../middlewares";
 import cors from "cors";
 import http from 'http';
@@ -25,6 +25,8 @@ import { SendMessageProcessor } from "../processors";
 import { UpdateChat } from "../processors/UpdateChat";
 import { loadMD } from "./../utils";
 import initializeIO from "./io";
+import { PubSubRouter } from "../utils/Pub";
+import { StreamRouter } from "../utils/RStreams";
 
 async function createApp() {
     const app: Application = express();
@@ -44,6 +46,33 @@ async function createApp() {
     app.set('view engine', 'ejs');
     app.set('views', path.join(__dirname, '../views'));
 
+    const consumerName = `ecommerce-worker-${Math.random().toString(36).substring(7)}`;
+    const router = new StreamRouter(consumerName);
+
+    const orderGroup = router.group('order');
+    router.on(orderGroup, 'Created', async (event, stream, id, io) => {
+        console.log(event);
+    });
+
+    router.on(orderGroup, 'update', async (event, stream, id, io) => {
+        console.log(event);
+    });
+
+
+    const group = router.group('test');
+    router.on(group, 'Jest', async (event, stream, id, io) => {
+        console.log(io);
+        console.log(event);
+    });
+
+    // Start consuming streams
+    await router.listen(io);
+    console.log('Chat API StreamRouter is listening...');
+
+    // Start periodic stream cleanup (every hour, keep 1000 entries)
+    await router.startStreamCleanup(60 * 60 * 1000, 1000);
+    console.log('Started stream cleanup');
+
     const IWorkers: IWorker<any>[] = [
         new SendMessageProcessor({ connection: { url: env('redisURL')! } }, io),
         new UpdateChat({ connection: { url: env('redisURL')! } }, io),
@@ -53,7 +82,7 @@ async function createApp() {
         const worker = new Worker(IWorker.queueName, IWorker.process.bind(IWorker), IWorker.config);
         if (IWorker.completed) worker.on('completed', IWorker.completed);
         if (IWorker.failed) worker.on('failed', IWorker.failed);
-        if (IWorker.drained) worker.on('completed', IWorker.drained);
+        if (IWorker.drained) worker.on('drained', IWorker.drained);
     }
 
 

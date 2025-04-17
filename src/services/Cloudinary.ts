@@ -64,7 +64,7 @@ export default class Cloudinary extends BaseService {
                             url: url,
                             mimeType: file.mimetype,
                             thumbnail: thumbnail,
-                            duration: duration
+                            duration: String(duration)
                         });
                         publicIds.push(result.public_id);
                     } else {

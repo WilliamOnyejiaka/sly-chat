@@ -19,7 +19,6 @@ export default class Chat extends BaseService<ChatRepo> {
         return super.responseData(dataType, 201, false, "Chat has been created successfully", newChatResult.data);
     }
 
-
     public async createChatWithMedia(newChat: TransactionChat, newMessage: TransactionMessage, uploadedFiles: UploadedFiles[], dataType: ServiceResultDataType) {
         const repoResult = await this.repo!.insertChatWithMessageAndMedias(newChat, newMessage, uploadedFiles);
         const repoResultError = super.handleRepoError(dataType, repoResult);

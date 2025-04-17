@@ -15,6 +15,7 @@ interface RepoResponse<T> {
 export default class Repo<T = any> implements Repository {
 
     protected tblName: keyof PrismaClient;
+    protected prisma = prisma;
 
     public constructor(tblName: keyof PrismaClient) {
         this.tblName = tblName;

@@ -3,6 +3,7 @@ import Chat from "./Chat";
 import Message from "./Message";
 import User from "./User";
 import ProductComment from "./ProductComment";
+import CommentLike from "./CommentLike";
 
 const prisma: PrismaClient = new PrismaClient();
 
@@ -12,5 +13,6 @@ export {
     Chat,
     Message,
     User,
-    ProductComment
+    ProductComment,
+    CommentLike
 };

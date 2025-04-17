@@ -1,5 +1,5 @@
 import constants, { http, urls } from "../constants";
-import { ProductComment as ProductCommentRepo } from "../repos";
+import { CommentLike, ProductComment as ProductCommentRepo } from "../repos";
 import { CustomerCache } from "../cache";
 import BaseService from "./bases/BaseService";
 import { ServiceResultDataType, UserType } from "../types/enums";
@@ -8,6 +8,8 @@ import { UploadedFiles } from "../types";
 import { getPagination } from "../utils";
 
 export default class ProductComment extends BaseService<ProductCommentRepo> {
+
+    public commentLikeRepo = new CommentLike();
 
     public constructor() {
         super(new ProductCommentRepo())
@@ -31,7 +33,7 @@ export default class ProductComment extends BaseService<ProductCommentRepo> {
         return super.httpResponseData(200, true, constants('200Comment')!, repoResult.data);
     }
 
-    public async paginateComments(productId: number,page: number, pageSize: number, depth: number): Promise<{ statusCode: number; json: { error: boolean; message: string | null; data: any; }; }> {
+    public async paginateComments(productId: number, page: number, pageSize: number, depth: number): Promise<{ statusCode: number; json: { error: boolean; message: string | null; data: any; }; }> {
         const skip = (page - 1) * pageSize;
         const take = pageSize;
         const repoResult = await this.repo!.paginate(skip, take, {
@@ -44,7 +46,7 @@ export default class ProductComment extends BaseService<ProductCommentRepo> {
             }, include: this.buildInclude(depth)
         }, {
             where: {
-                productId: productId,   
+                productId: productId,
                 OR: [
                     { parentId: null },          // Matches explicit null
                     { parentId: { isSet: false } } // Matches missing fields
@@ -59,10 +61,10 @@ export default class ProductComment extends BaseService<ProductCommentRepo> {
         return super.httpResponseData(200, true, constants('200Comments')!, { data: repoResult.data, pagination });
     }
 
-    public async paginateReplies(productId: number,page: number, pageSize: number, depth: number, parentId: string): Promise<{ statusCode: number; json: { error: boolean; message: string | null; data: any; }; }> {
+    public async paginateReplies(productId: number, page: number, pageSize: number, depth: number, parentId: string): Promise<{ statusCode: number; json: { error: boolean; message: string | null; data: any; }; }> {
         const skip = (page - 1) * pageSize;
         const take = pageSize;
-        const repoResult = await this.repo!.paginate(skip, take, { where: { parentId: parentId, productId: productId }, include: this.buildInclude(depth) }, { where: { parentId: parentId, productId: productId} });
+        const repoResult = await this.repo!.paginate(skip, take, { where: { parentId: parentId, productId: productId }, include: this.buildInclude(depth) }, { where: { parentId: parentId, productId: productId } });
         const repoResultError = this.httpHandleRepoError(repoResult);
         if (repoResultError) return repoResultError;
         const data: { items: any, totalItems: any } = repoResult.data as any;
@@ -79,5 +81,18 @@ export default class ProductComment extends BaseService<ProductCommentRepo> {
             current = current.replies.include;
         }
         return include;
+    }
+
+    public async like(commentId: string, userId: number, userType: string): Promise<{ statusCode: number; json: { error: boolean; message: string | null; data: any; }; }> {
+        const repoResult = await this.repo!.getWithId(commentId, {});
+        const repoResultError = this.httpHandleRepoError(repoResult);
+        if (repoResultError) return repoResultError;
+        if (repoResult.data) {
+            const likeResult = await this.commentLikeRepo.toggleLike(userId, userType, commentId);
+            const likeResultError = this.httpHandleRepoError(likeResult);
+            if (likeResultError) return likeResultError;
+            return this.httpResponseData(201, false, null, likeResult.data);
+        }
+        return this.httpResponseData(404, true, "Comment was not found");
     }
 }

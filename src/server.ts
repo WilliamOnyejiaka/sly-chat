@@ -10,7 +10,7 @@ const PORT = env('port');
 
 async function startServer() {
     const app = await createApp();
-    const numCpu = os.cpus().length;
+    const numCpu = (os.cpus().length) - 1; // TODO: note this
 
     if (cluster.isPrimary) {
         for (let i = 0; i < numCpu; i++) cluster.fork();
