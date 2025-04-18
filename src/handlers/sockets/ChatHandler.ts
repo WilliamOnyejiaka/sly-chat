@@ -1,11 +1,11 @@
 import { Server } from "socket.io";
-import { ISocket } from "../types";
-import { Namespace, UserType } from "../types/enums";
+import { ISocket } from "../../types";
+import { Namespace, UserType } from "../../types/enums";
 import Handler from "./Handler";
-import { ChatManagementFacade } from "../facade";
-import { TransactionChat, TransactionMessage } from "../types/dtos";
-import { Events } from "./../types/enums";
-import { updateChat } from "../config/bullMQ";
+import { ChatManagementFacade } from "../../facade";
+import { TransactionChat, TransactionMessage } from "../../types/dtos";
+import { Events } from "../../types/enums";
+import { updateChat } from "../../config/bullMQ";
 
 export default class ChatHandler {
 

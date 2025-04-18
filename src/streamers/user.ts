@@ -1,10 +1,14 @@
 import { Streamer } from "../utils";
 import { streamRouter } from "../config";
+import { UserHandler } from "./../handlers/streamers";
+import { StreamGroups, StreamEvents, UserType } from "../types/enums";
 
-const userBluePrint = new Streamer(streamRouter.group('user'));
+const userStreamer = new Streamer(streamRouter.group(StreamGroups.USER));
 
-userBluePrint.on('vendor-signup', async (event, stream, id, io) => {
-    console.log(event);
-});
+userStreamer.on('customer:create', UserHandler.createCustomer().bind(UserHandler));
+userStreamer.on('vendor:create', UserHandler.createVendor().bind(UserHandler));
+userStreamer.on('admin:create', UserHandler.createAdmin().bind(UserHandler));
 
-export default userBluePrint;
+userStreamer.on(StreamEvents.UPLOAD_PROFILE_PIC, UserHandler.upload.bind(UserHandler));
+
+export default userStreamer;

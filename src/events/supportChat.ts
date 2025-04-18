@@ -1,5 +1,5 @@
 import { SupportChat } from "../namespaces";
-import { ChatHandler } from "../handlers";
+import { ChatHandler } from "../handlers/sockets";
 
 const supportChat = new SupportChat();
 

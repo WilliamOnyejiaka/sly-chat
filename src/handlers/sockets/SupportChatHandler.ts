@@ -1,9 +1,9 @@
 import { Server } from "socket.io";
-import { ISocket } from "../types";
-import { Events, Namespace, UserType } from "../types/enums";
+import { ISocket } from "../../types";
+import { Events, Namespace, UserType } from "../../types/enums";
 import Handler from "./Handler";
-import { PresenceFacade } from "../facade";
-import { OnlineCustomer, OnlineSupport, OnlineVendor } from "../cache";
+import { PresenceFacade } from "../../facade";
+import { OnlineCustomer, OnlineSupport, OnlineVendor } from "../../cache";
 
 
 export default class SupportChatHandler {

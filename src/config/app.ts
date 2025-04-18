@@ -25,7 +25,7 @@ import { SendMessageProcessor } from "../processors";
 import { UpdateChat } from "../processors/UpdateChat";
 import { loadMD } from "./../utils";
 import initializeIO from "./io";
-import userBluePrint from "./../streamers/user";
+import userStreamer from "./../streamers/user";
 import orderStreamer from "./../streamers/order";
 
 
@@ -86,7 +86,7 @@ async function createApp() {
     //     console.log(event);
     // });
 
-    streamRouter.initializeStreamer(userBluePrint);
+    streamRouter.initializeStreamer(userStreamer);
     streamRouter.initializeStreamer(orderStreamer);
 
     // await streamRouter.redis.xadd(

@@ -35,10 +35,11 @@ export interface UserDto {
     email: string,
     verified: boolean,
     active: boolean,
-    userType?: string,
+    phoneNumber: string,
+    userType: string,
     createdAt?: Date,
     updatedAt?: Date,
-    profilePictureUrl: string
+    profilePictureUrl?: string
 }
 
 export interface ProductCommentDto {

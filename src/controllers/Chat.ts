@@ -5,7 +5,7 @@ import { ChatManagementFacade } from "../facade";
 import { CdnFolders, Namespace, ResourceType } from "../types/enums";
 import { TransactionChat, TransactionMessage } from "../types/dtos";
 import { Server } from "socket.io";
-import Handler from "../handlers/Handler";
+import Handler from "../handlers/sockets/Handler";
 import { userIds, getRoom } from "../utils";
 
 export default class Chat {

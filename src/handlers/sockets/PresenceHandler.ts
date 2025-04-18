@@ -1,8 +1,8 @@
 import { Server } from "socket.io";
-import { ISocket } from "../types";
-import { Namespace, UserType } from "../types/enums";
+import { ISocket } from "../../types";
+import { Namespace, UserType } from "../../types/enums";
 import Handler from "./Handler";
-import { PresenceFacade } from "../facade";
+import { PresenceFacade } from "../../facade";
 
 
 export default class PresenceHandler {

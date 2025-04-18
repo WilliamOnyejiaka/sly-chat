@@ -2,7 +2,7 @@ import { Server } from "socket.io";
 import { Job } from "bullmq";
 import { Events, Namespace, WorkerConfig, IWorker, UpdateChatJob } from "../types/enums";
 import { ChatManagementFacade } from "../facade";
-import Handler from "../handlers/Handler";
+import Handler from "../handlers/sockets/Handler";
 
 export class UpdateChat implements IWorker<UpdateChatJob> {
 

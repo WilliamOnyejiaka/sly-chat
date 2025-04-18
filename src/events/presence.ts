@@ -1,5 +1,5 @@
 import { Presence } from "../namespaces";
-import { PresenceHandler } from "../handlers";
+import { PresenceHandler } from "../handlers/sockets";
 
 const presence = new Presence();
 
