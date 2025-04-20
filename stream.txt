@@ -12,7 +12,7 @@ export default class StreamRouter {
         batchSize: 50, // Configurable batch size for xreadgroup
         maxLen: 100, // Default stream length cap
         dlqMaxLen: 500, // DLQ size cap
-        // cleanupIntervalMs: 300000, // 5 minutes
+        cleanupIntervalMs: 300000, // 5 minutes
         retryMaxAttempts: 2, // Retry failed events twice
         retryBaseDelayMs: 1000, // Initial retry delay
         retryMaxDelayMs: 60000, // Max retry delay (1 minute)
@@ -87,6 +87,8 @@ export default class StreamRouter {
             }
             this.consumeStream(stream, group, consumerName, io);
         }
+        this.startDlqCleanup();
+        this.startDlqReprocessing(consumerName, io);
     }
 
     private async consumeStream(stream: string, group: StreamGroup, consumerName: string, io?: Server) {
@@ -214,29 +216,34 @@ export default class StreamRouter {
         }
     }
 
-    public async startDlqReprocessing() {
+    private async startDlqReprocessing(consumerName: string, io?: Server) {
         const dlqStream = 'stream:dead-letter';
-        try {
-            const dlqLen = await this.redis.xlen(dlqStream);
-            this.metrics.dlqLength.set(dlqLen);
-            if (dlqLen > 0) {
-                const result = await this.reprocessDeadLetter(100, true);
-                console.log(`Reprocessed ${result.processed} of ${result.total} DLQ events`);
+        while (true) {
+            try {
+                const dlqLen = await this.redis.xlen(dlqStream);
+                this.metrics.dlqLength.set(dlqLen);
+                if (dlqLen > 0) {
+                    await this.reprocessDeadLetter(100, true);
+                }
+                await new Promise((resolve) => setTimeout(resolve, 60000)); // Reprocess every 1 minute
+            } catch (err) {
+                console.error('Error in DLQ reprocessing loop:', err);
+                await new Promise((resolve) => setTimeout(resolve, 5000));
             }
-        } catch (err) {
-            console.error('Error in DLQ reprocessing cron:', err);
         }
     }
 
-    public async startDlqCleanup() {
-        try {
-            await this.redis.xtrim('stream:dead-letter', 'MAXLEN', '~', this.config.dlqMaxLen);
-            await this.redis.xtrim('stream:permanent-failures', 'MAXLEN', '~', this.config.dlqMaxLen);
-            this.metrics.dlqLength.set(await this.redis.xlen('stream:dead-letter'));
-            console.log('Trimmed DLQ and permanent failures');
-        } catch (err) {
-            logger.error('Error during DLQ cleanup:', err);
-        }
+    private startDlqCleanup() {
+        setInterval(async () => {
+            try {
+                await this.redis.xtrim('stream:dead-letter', 'MAXLEN', '~', this.config.dlqMaxLen);
+                await this.redis.xtrim('stream:permanent-failures', 'MAXLEN', '~', this.config.dlqMaxLen);
+                this.metrics.dlqLength.set(await this.redis.xlen('stream:dead-letter'));
+                console.log('Trimmed DLQ and permanent failures');
+            } catch (err) {
+                logger.error('Error during DLQ cleanup:', err);
+            }
+        }, this.config.cleanupIntervalMs);
     }
 
     async getStreamMemoryInfo() {

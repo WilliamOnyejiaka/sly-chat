@@ -1,7 +1,7 @@
 // app.ts
 import express, { Application, NextFunction, Request, Response } from "express";
 import morgan from "morgan";
-import { cloudinary, corsConfig, env, logger, redisClient, streamRouter } from ".";
+import { cloudinary, corsConfig, env, logger, redisClient, streamRouter, cronJobs } from ".";
 import { validateJWT, validateUser, handleMulterErrors, secureApi, redisClientMiddleware, vendorIsActive, uploads, validateHttpJWT, adminAuthorization } from "./../middlewares";
 import cors from "cors";
 import http from 'http';
@@ -11,13 +11,11 @@ import { ISocket } from "../types";
 import { user, chat as chatRoute, comment, general } from "../routes";
 import { Namespace, IWorker } from "../types/enums";
 import { createClient } from "redis";
-import { createAdapter } from "@socket.io/redis-adapter";
-import { setupWorker } from "@socket.io/sticky";
+
 import cluster from "cluster";
 import compression from 'compression';
 import prisma from "../repos";
-import { marked } from 'marked';
-import * as fs from 'fs/promises';
+
 import * as path from 'path';
 import { Queue, Worker, Job } from 'bullmq';
 import { parse } from 'url';
@@ -47,60 +45,8 @@ async function createApp() {
     app.set('view engine', 'ejs');
     app.set('views', path.join(__dirname, '../views'));
 
-    // const orderGroup = streamRouter.group('user');
-    // streamRouter.register(orderGroup, 'vendor-signup', async (event, stream, id, io) => {
-    //     console.log(event);
-    // });
-
-    // const troup = streamRouter.group('test');
-    // streamRouter.register(troup, 'vendor-signup', async (event, stream, id, io) => {
-    //     console.log(event);
-    // });
-
-    // const oed = streamRouter.group('order');
-    // streamRouter.register(oed, 'vendor-signup', async (event, stream, id, io) => {
-    //     console.log(event);
-    // });
-
-    // streamRouter.register(oed, 'vendor-signup', async (event, stream, id, io) => {
-    //     console.log(event);
-    // });
-
-
-
-
-
-    // const orderGroup = streamRouter.group('user');
-    // streamRouter.on(orderGroup, 'vendor-signup', async (event, stream, id, io) => {
-    //     console.log(event);
-    // });
-
-    // streamRouter.on(orderGroup, 'update', async (event, stream, id, io) => {
-    //     console.log(event);
-    // });
-
-
-    // const group = streamRouter.group('test');
-    // streamRouter.on(group, 'Jest', async (event, stream, id, io) => {
-    //     console.log(io);
-    //     console.log(event);
-    // });
-
     streamRouter.initializeStreamer(userStreamer);
     streamRouter.initializeStreamer(orderStreamer);
-
-    // await streamRouter.redis.xadd(
-    //     'stream:dead-letter',
-    //     '*',
-    //     'data',
-    //     JSON.stringify({
-    //         event: { type: 'ProfileUpdated', payload: { userId: 789, name: 'Bob' } },
-    //         error: 'Test error',
-    //         originalStream: 'stream:nonexistent'
-    //     })
-    // );
-    // await streamRouter.reprocessDeadLetter();
-
 
     // Start consuming streams
     const consumerName = `ecommerce-worker-${Math.random().toString(36).substring(7)}`;
@@ -108,7 +54,7 @@ async function createApp() {
     console.log('Chat API StreamRouter is listening...');
 
     // Start periodic stream cleanup (every hour, keep 1000 entries)
-    await streamRouter.startStreamCleanup(60 * 60 * 1000, 1000);
+    // await streamRouter.startStreamCleanup(60 * 60 * 1000, 1000);
     console.log('Started stream cleanup');
 
     const IWorkers: IWorker<any>[] = [
@@ -243,6 +189,10 @@ async function createApp() {
 
     process.on('SIGTERM', shutdown);
     process.on('SIGINT', shutdown);
+
+    if(cluster.isPrimary){
+        cronJobs.start();
+    }
 
     return server;
 }
