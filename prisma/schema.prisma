@@ -26,17 +26,10 @@ model User {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
   profilePictureUrl String?
-  Product           Product[]
 
   @@unique([userId, userType])
 }
 
-model Product {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
-  productId Int
-  userId    String @db.ObjectId
-  User      User   @relation(fields: [userId], references: [id])
-}
 
 enum SenderType {
   VENDOR

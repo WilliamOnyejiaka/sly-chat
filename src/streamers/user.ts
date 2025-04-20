@@ -1,7 +1,7 @@
 import { Streamer } from "../utils";
 import { streamRouter } from "../config";
 import { UserHandler } from "./../handlers/streamers";
-import { StreamGroups, StreamEvents, UserType } from "../types/enums";
+import { StreamGroups, StreamEvents } from "../types/enums";
 
 const userStreamer = new Streamer(streamRouter.group(StreamGroups.USER));
 

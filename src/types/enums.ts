@@ -75,14 +75,15 @@ export interface UpdateChatJob {
 }
 
 export enum StreamGroups {
-    USER = "user"
+    USER = "user",
+    STORE = "store"
 };
 
 export enum StreamEvents {
     USER_CREATE = 'create',
-    UPLOAD_PROFILE_PIC = 'upload:profile-pic'
+    UPLOAD_PROFILE_PIC = 'upload:profile-pic',
+    STORE_CREATE = "create"
 };
-
 
 
 export interface WorkerConfig { connection: { url: string }, concurrency?: number, limiter?: { max: number, duration: number } };
