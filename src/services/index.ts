@@ -6,6 +6,7 @@ import Chat from "./Chat";
 import Message from "./Message";
 import User from "./User";
 import ProductComment from "./ProductComment";
+import Store from "./Store";
 
 export {
     Token,
@@ -15,5 +16,6 @@ export {
     Chat,
     Message,
     User,
-    ProductComment
+    ProductComment,
+    Store
 };

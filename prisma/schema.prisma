@@ -14,7 +14,7 @@ enum UserType {
 }
 
 model User {
-  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  id                String          @id @default(auto()) @map("_id") @db.ObjectId
   userId            Int
   firstName         String
   lastName          String
@@ -23,13 +23,27 @@ model User {
   active            Boolean
   userType          UserType
   phoneNumber       String
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
   profilePictureUrl String?
+  Store             Store[]
+  StoreFollower     StoreFollower[]
 
   @@unique([userId, userType])
 }
 
+model Store {
+  id            String          @id @default(auto()) @map("_id") @db.ObjectId
+  name          String          @unique
+  vendorId      Int             @unique
+  storeId       Int             @unique
+  userType      UserType        @default(VENDOR)
+  user          User            @relation(fields: [vendorId, userType], references: [userId, userType], onDelete: Cascade)
+  storeLogoUrl  String?
+  createdAt     DateTime
+  updatedAt     DateTime
+  StoreFollower StoreFollower[]
+}
 
 enum SenderType {
   VENDOR
@@ -139,4 +153,15 @@ model ProductLike {
   updatedAt DateTime @updatedAt
 
   @@unique([userId, productId, userType])
+}
+
+model StoreFollower {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  storeId    Int
+  store      Store    @relation(fields: [storeId], references: [storeId], onDelete: Cascade)
+  customerId Int
+  userType   UserType @default(CUSTOMER)
+  user       User     @relation(fields: [customerId, userType], references: [userId, userType], onDelete: Cascade)
+
+  @@unique([storeId, customerId])
 }

@@ -23,8 +23,7 @@ import { SendMessageProcessor } from "../processors";
 import { UpdateChat } from "../processors/UpdateChat";
 import { loadMD } from "./../utils";
 import initializeIO from "./io";
-import userStreamer from "./../streamers/user";
-import orderStreamer from "./../streamers/order";
+import { storeStreamer, userStreamer } from "../streamers";
 
 
 async function createApp() {
@@ -46,7 +45,7 @@ async function createApp() {
     app.set('views', path.join(__dirname, '../views'));
 
     streamRouter.initializeStreamer(userStreamer);
-    streamRouter.initializeStreamer(orderStreamer);
+    streamRouter.initializeStreamer(storeStreamer);
 
     // Start consuming streams
     const consumerName = `ecommerce-worker-${Math.random().toString(36).substring(7)}`;
@@ -190,7 +189,7 @@ async function createApp() {
     process.on('SIGTERM', shutdown);
     process.on('SIGINT', shutdown);
 
-    if(cluster.isPrimary){
+    if (cluster.isPrimary) {
         cronJobs.start();
     }
 

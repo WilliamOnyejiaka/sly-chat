@@ -1,3 +1,4 @@
 import UserHandler from "./UserHandler";
+import StoreHandler from "./StoreHandler";
 
-export { UserHandler };
+export { UserHandler, StoreHandler };

@@ -115,7 +115,7 @@ export default class Repo<T = any> implements Repository {
 
     public async countTblRecords(countFilter: any = {}) {
         try {
-            const count = await (prisma[this.tblName] as any).count();
+            const count = await (prisma[this.tblName] as any).count(countFilter);
             return this.repoResponse(false, 200, null, count);
         } catch (error) {
             return this.handleDatabaseError(error);

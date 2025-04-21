@@ -53,3 +53,13 @@ export interface ProductCommentDto {
     createdAt?: Date,
     updatedAt?: Date,
 }
+
+export interface StoreDto {
+    id?: string,
+    name: string,
+    vendorId: number,
+    storeId: number,
+    storeLogoUrl?: string,
+    createdAt: Date,
+    updatedAt: Date
+};

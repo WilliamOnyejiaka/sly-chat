@@ -4,7 +4,6 @@ import { CustomerCache } from "../cache";
 import BaseService from "./bases/BaseService";
 import { ServiceResultDataType, UserType } from "../types/enums";
 import { ProductCommentDto, TransactionChat, TransactionMessage } from "../types/dtos";
-import { UploadedFiles } from "../types";
 import { getPagination } from "../utils";
 
 export default class ProductComment extends BaseService<ProductCommentRepo> {
