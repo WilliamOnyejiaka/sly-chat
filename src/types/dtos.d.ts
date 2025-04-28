@@ -1,17 +1,12 @@
 
 export interface TransactionChat {
     id?: string
-    productId: string,
+    productId: number,
     vendorId: number,
     customerId: number,
-    customerProfilePic?: string,
-    productPrice?: string,
-    productName?: string,
-    storeName?: string,
-    customerName?: string,
+    storeId: number,
     lastMessageAt?: DateTime,
-    storeLogoUrl?: string,
-    productImageUrl?: string,
+    createdAt?: DateTime,
 };
 
 export interface TransactionMessage {
@@ -36,7 +31,6 @@ export interface UserDto {
     verified: boolean,
     active: boolean,
     phoneNumber: string,
-    userType: string,
     createdAt?: Date,
     updatedAt?: Date,
     profilePictureUrl?: string

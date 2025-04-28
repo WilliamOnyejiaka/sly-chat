@@ -4,9 +4,9 @@ import OTP from "./OTP";
 import Cloudinary from "./Cloudinary";
 import Chat from "./Chat";
 import Message from "./Message";
-import User from "./User";
-import ProductComment from "./ProductComment";
 import Store from "./Store";
+import Customer from "./Customer";
+import Vendor from "./Vendor";
 
 export {
     Token,
@@ -15,7 +15,7 @@ export {
     Cloudinary,
     Chat,
     Message,
-    User,
-    ProductComment,
-    Store
+    Vendor,
+    Store,
+    Customer
 };

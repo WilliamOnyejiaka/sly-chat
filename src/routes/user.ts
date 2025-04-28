@@ -5,8 +5,8 @@ import { User } from "../controllers";
 
 const user: Router = Router();
 
-user.post("/vendor", createVendor, asyncHandler(User.createVendor()));
-user.post("/customer", createCustomer, asyncHandler(User.createCustomer()));
+// user.post("/vendor", createVendor, asyncHandler(User.createVendor()));
+// user.post("/customer", createCustomer, asyncHandler(User.createCustomer()));
 
 
 export default user;

@@ -2,11 +2,12 @@ import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import Controller from "./bases/Controller";
 import { ChatManagementFacade } from "../facade";
-import { CdnFolders, Namespace, ResourceType } from "../types/enums";
+import { CdnFolders, Namespace, ResourceType, UserType } from "../types/enums";
 import { TransactionChat, TransactionMessage } from "../types/dtos";
 import { Server } from "socket.io";
 import Handler from "../handlers/sockets/Handler";
 import { userIds, getRoom } from "../utils";
+import { updateChat } from "../config/bullMQ";
 
 export default class Chat {
 
@@ -30,13 +31,7 @@ export default class Chat {
                 recipientId,
                 productId,
                 text,
-                storeName,
-                customerName,
-                storeLogoUrl,
-                customerProfilePic,
-                productPrice,
-                productName,
-                productImageUrl,
+                storeId
             } = req.body;
 
             recipientId = Number(recipientId);
@@ -63,16 +58,11 @@ export default class Chat {
             };
 
             const newChat: TransactionChat = {
-                storeName,
-                customerName,
+                storeId: Number(storeId),
                 customerId,
-                customerProfilePic,
                 vendorId,
-                storeLogoUrl,
-                productId,
-                productImageUrl,
-                productName,
-                productPrice
+                productId: Number(productId),
+
             };
 
             const facadeResult = await Chat.facade.createChatWithMedia(
@@ -103,16 +93,47 @@ export default class Chat {
 
             console.log(`💬 Creating new chat for room `);
             chatNamespace.sockets.get(userSocketId)?.join(room);
+            const chat = data.chat;
+            const vendorProfile = chat.vendor;
+            const customerProfile = chat.customer;
+            delete chat.vendor;
+            delete chat.customer;
+
+            let senderChat;
+            let recipientChat;
+            if (userType === UserType.Customer) {
+                senderChat = {
+                    ...chat,
+                    vendor: vendorProfile
+                };
+                recipientChat = {
+                    ...chat,
+                    customer: customerProfile
+                };
+            } else {
+                senderChat = {
+                    ...chat,
+                    customer: customerProfile
+                };
+                recipientChat = {
+                    ...chat,
+                    vendor: vendorProfile
+                };
+            }
+
+            chatNamespace.sockets.get(userSocketId)?.emit('newSentChat', Handler.responseData(200, false, null, senderChat));
             chatNamespace.to(room).emit('receiveMedia', Handler.responseData(200, false, null, data.chat.messages));
             if (recipientIsOnline) {
                 chatNamespace.sockets.get(recipientSocketId)?.join(room); //💬 Forcing the the recipient to join the room 
-                chatNamespace.sockets.get(recipientSocketId)?.emit('newChat', Handler.responseData(200, false, data.chat));
+                chatNamespace.sockets.get(recipientSocketId)?.emit('newChat', Handler.responseData(200, false, recipientChat));
+                const recipientType = userType === UserType.Customer ? UserType.Vendor : UserType.Customer;
+                await updateChat.add('updateChat', { recipientId, recipientType, recipientSocketId }, { jobId: `send-${Date.now()}`, priority: 1 });
                 console.log(`✅ Message sent directly to user ${recipientId} via socket ${recipientSocketId}`);
             }
             res.status(201).json({
                 error: false,
                 message: "New chat has been created",
-                data: data.chat
+                data: senderChat
             });
             return;
         }
@@ -152,7 +173,7 @@ export default class Chat {
             return;
         }
 
-        const productId = req.params.productId;
+        const productId = Number(req.params.productId);
         const customerId = Number(req.params.customerId);
         const vendorId = Number(req.params.vendorId);
 

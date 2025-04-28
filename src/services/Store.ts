@@ -1,10 +1,9 @@
 import BaseService from "./bases/BaseService";
-import { StoreFollower, Store as StoreRepo } from "../repos";
+import { Store as StoreRepo } from "../repos";
 import { StoreDto, UserDto } from "../types/dtos";
 
 export default class Store extends BaseService<StoreRepo> {
 
-    private readonly storeFollowerRepo = new StoreFollower();
 
     public constructor() {
         super(new StoreRepo());
@@ -36,19 +35,5 @@ export default class Store extends BaseService<StoreRepo> {
         const repoResultError = super.httpHandleRepoError(repoResult);
         if (repoResultError) return repoResultError;
         return super.httpResponseData(200, false, "Store has been deleted successfully", repoResult.data);
-    }
-
-    public async follow(storeId: number, customerId: number, action: "follow" | "unfollow") {
-        if (action == "follow") {
-            const repoResult = await this.storeFollowerRepo.follow(customerId, storeId);
-            const repoResultError = super.httpHandleRepoError(repoResult);
-            if (repoResultError) return repoResultError;
-            return super.httpResponseData(200, false, "Store has been followed successfully", repoResult.data);
-        } else {
-            const repoResult = await this.storeFollowerRepo.unfollow(customerId, storeId);
-            const repoResultError = super.httpHandleRepoError(repoResult);
-            if (repoResultError) return repoResultError;
-            return super.httpResponseData(200, false, "Store has been unfollowed successfully", repoResult.data);
-        }
     }
 }

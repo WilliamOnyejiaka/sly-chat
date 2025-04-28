@@ -16,5 +16,4 @@ This key should be put in the `'x-api-key'` header and this key is for the route
 - [Presence](/docs?doc=presence)
 - [SendFile](/docs?doc=sendFile)
 - [ChatRoutes](/docs?doc=chatRoutes)
-- [CommentRoutes](/docs?doc=commentRoutes)
 

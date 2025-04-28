@@ -8,7 +8,6 @@ const storeStreamer = new Streamer(streamRouter.group(StreamGroups.STORE));
 storeStreamer.on(StreamEvents.STORE_CREATE, StoreHandler.create.bind(StoreHandler));
 storeStreamer.on(StreamEvents.DELETE, StoreHandler.delete.bind(StoreHandler));
 storeStreamer.on(StreamEvents.UPLOAD, StoreHandler.upload.bind(StoreHandler));
-storeStreamer.on(StreamEvents.FOLLOW, StoreHandler.follow.bind(StoreHandler));
 
 
 export default storeStreamer;

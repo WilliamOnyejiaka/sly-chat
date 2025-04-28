@@ -90,72 +90,73 @@ export default class StreamRouter {
     }
 
     private async consumeStream(stream: string, group: StreamGroup, consumerName: string, io?: Server) {
-        let retryDelay = this.config.retryBaseDelayMs;
-        let retryCounts = new Map<string, number>(); // Track retries per event ID
+        const retryCounts = new Map<string, number>();
+
+        const concurrency = 5;
+        const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
         while (true) {
             try {
                 const streamLen = await this.redis.xlen(stream);
                 this.metrics.streamLength.set({ stream }, streamLen);
                 if (streamLen === 0) {
-                    await new Promise((resolve) => setTimeout(resolve, 5000));
+                    await delay(3000);
                     continue;
                 }
 
                 const results: any = await this.redis.xreadgroup(
-                    'GROUP',
-                    group.consumerGroup,
-                    consumerName,
-                    'COUNT',
-                    this.config.batchSize,
-                    'BLOCK',
-                    2000,
-                    'STREAMS',
-                    stream,
-                    '>'
+                    'GROUP', group.consumerGroup, consumerName,
+                    'COUNT', this.config.batchSize,
+                    'BLOCK', 2000,
+                    'STREAMS', stream, '>'
                 );
 
-                if (results) {
-                    const pipeline = this.redis.pipeline();
-                    for (const [streamName, entries] of results) {
-                        for (const [id, fields] of entries) {
-                            const event = JSON.parse(fields[1]);
-                            const handler = group.handlers.get(event.type);
-                            if (handler) {
-                                try {
-                                    // TODO: Offload to worker pool for parallel processing
-                                    await handler(event, streamName, id, io);
-                                    pipeline.xack(stream, group.consumerGroup, id);
-                                    if (this.config.deleteAfterAck) {
-                                        pipeline.xdel(stream, id);
-                                    }
-                                    retryCounts.delete(id);
-                                } catch (err: any) {
-                                    console.error(`Error handling event ${id} on ${stream}:`, err);
-                                    this.metrics.processingErrors.inc({ stream });
-                                    const retries = (retryCounts.get(id) || 0) + 1;
-                                    retryCounts.set(id, retries);
-                                    if (retries >= this.config.retryMaxAttempts) {
-                                        pipeline.xadd(
-                                            'stream:dead-letter',
-                                            'MAXLEN', '~', this.config.dlqMaxLen,
-                                            '*',
-                                            'data',
-                                            JSON.stringify({ event, error: err.message, originalStream: stream })
-                                        );
-                                        retryCounts.delete(id);
-                                    }
-                                }
+                if (!results) continue;
+
+                const [streamName, entries] = results[0];
+
+                const chunks = Array.from({ length: Math.ceil(entries.length / concurrency) }, (_, i) =>
+                    entries.slice(i * concurrency, (i + 1) * concurrency)
+                );
+
+                for (const chunk of chunks) {
+                    await Promise.allSettled(chunk.map(async ([id, fields]: any) => {
+                        const data = JSON.parse(fields[1]);
+                        const eventType = data.type;
+                        const handler = group.handlers.get(eventType)
+                            || Array.from(group.handlers.entries()).find(([key]) => new RegExp(key).test(eventType))?.[1];
+
+                        if (!handler) return;
+
+                        try {
+                            await handler(data, streamName, id, io);
+                            const pipe = this.redis.pipeline().xack(stream, group.consumerGroup, id);
+                            if (this.config.deleteAfterAck) pipe.xdel(stream, id);
+                            await pipe.exec();
+                            retryCounts.delete(id);
+                        } catch (err: any) {
+                            const retries = (retryCounts.get(id) || 0) + 1;
+                            retryCounts.set(id, retries);
+                            this.metrics.processingErrors.inc({ stream });
+
+                            if (retries >= this.config.retryMaxAttempts) {
+                                await this.redis.xadd(
+                                    'stream:dead-letter',
+                                    'MAXLEN', '~', this.config.dlqMaxLen,
+                                    '*', 'data',
+                                    JSON.stringify({ event: data, error: err.message, originalStream: stream })
+                                );
+                                retryCounts.delete(id);
+                            } else {
+                                const backoff = Math.min(this.config.retryBaseDelayMs * 2 ** retries, this.config.retryMaxDelayMs);
+                                await delay(backoff);
                             }
                         }
-                    }
-                    await pipeline.exec();
+                    }));
                 }
-                retryDelay = this.config.retryBaseDelayMs;
             } catch (err) {
-                console.error(`Error reading stream ${stream}:`, err);
-                await new Promise((resolve) => setTimeout(resolve, retryDelay));
-                retryDelay = Math.min(retryDelay * 2, this.config.retryMaxDelayMs);
+                console.error(`Stream ${stream} read error:`, err);
+                await delay(2000);
             }
         }
     }

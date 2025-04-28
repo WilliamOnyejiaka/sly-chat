@@ -6,9 +6,11 @@ const sendMedia = [
     validateFileUpload,
     validateBody([
         'recipientId',
-        'productId'
+        'productId',
+        'storeId'
     ]),
-    bodyNumberIsValid('recipientId')
+    bodyNumberIsValid('recipientId'),
+    bodyNumberIsValid('storeId')
 ];
 
 export const sendImage = [

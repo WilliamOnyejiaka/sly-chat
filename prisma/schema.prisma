@@ -13,36 +13,47 @@ enum UserType {
   ADMIN
 }
 
-model User {
-  id                String          @id @default(auto()) @map("_id") @db.ObjectId
-  userId            Int
+model Customer {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId        Int      @unique
   firstName         String
   lastName          String
   email             String
   verified          Boolean
   active            Boolean
-  userType          UserType
   phoneNumber       String
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
   profilePictureUrl String?
-  Store             Store[]
-  StoreFollower     StoreFollower[]
+  chat              Chat[]
+}
 
-  @@unique([userId, userType])
+model Vendor {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId          Int      @unique
+  firstName         String
+  lastName          String
+  email             String
+  verified          Boolean
+  active            Boolean
+  phoneNumber       String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  profilePictureUrl String?
+  store             Store[]
+  chat              Chat[]
 }
 
 model Store {
-  id            String          @id @default(auto()) @map("_id") @db.ObjectId
-  name          String          @unique
-  vendorId      Int             @unique
-  storeId       Int             @unique
-  userType      UserType        @default(VENDOR)
-  user          User            @relation(fields: [vendorId, userType], references: [userId, userType], onDelete: Cascade)
-  storeLogoUrl  String?
-  createdAt     DateTime
-  updatedAt     DateTime
-  StoreFollower StoreFollower[]
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  name         String   @unique
+  vendorId     Int      @unique
+  storeId      Int      @unique
+  storeLogoUrl String?
+  createdAt    DateTime
+  updatedAt    DateTime
+  vendor       Vendor   @relation(fields: [vendorId], references: [userId], onDelete: Cascade)
+  chat         Chat[]
 }
 
 enum SenderType {
@@ -67,21 +78,17 @@ model SupportChat {
 }
 
 model Chat {
-  id                 String    @id @default(auto()) @map("_id") @db.ObjectId
-  productId          String
-  vendorId           Int
-  customerId         Int
-  productImageUrl    String
-  productPrice       String
-  productName        String
-  storeLogoUrl       String?
-  customerProfilePic String?
-  customerName       String
-  storeName          String
-  lastMessageAt      DateTime  @default(now())
-  messages           Message[]
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  productId     Int
+  vendorId      Int
+  customerId    Int
+  storeId       Int
+  lastMessageAt DateTime  @default(now())
+  messages      Message[]
+  createdAt     DateTime  @default(now())
+  store         Store     @relation(fields: [storeId], references: [storeId])
+  vendor        Vendor    @relation(fields: [vendorId], references: [userId], onDelete: Cascade)
+  customer      Customer  @relation(fields: [customerId], references: [userId], onDelete: Cascade)
 }
 
 model Message {
@@ -97,7 +104,7 @@ model Message {
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   messageMedias   MessageMedia[]
-  supportChat     SupportChat?   @relation(fields: [supportChatId], references: [id])
+  supportChat     SupportChat?   @relation(fields: [supportChatId], references: [id], onDelete: Cascade)
   supportChatId   String?        @db.ObjectId
 }
 
@@ -113,55 +120,4 @@ model MessageMedia {
   updatedAt DateTime @updatedAt
   messageId String   @db.ObjectId
   Message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
-}
-
-model ProductComment {
-  id          String           @id @default(auto()) @map("_id") @db.ObjectId
-  content     String
-  productId   Int              @unique
-  // userId    String    @db.ObjectId
-  // authorId      String      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      Int
-  userType    UserType
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  parentId    String?          @default("") @db.ObjectId
-  parent      ProductComment?  @relation("ProductCommentReplies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  replies     ProductComment[] @relation("ProductCommentReplies")
-  // User      User      @relation(fields: [userId], references: [id])
-  CommentLike CommentLike[]
-}
-
-model CommentLike {
-  id        String          @id @default(auto()) @map("_id") @db.ObjectId
-  userId    Int
-  userType  UserType
-  commentId String          @db.ObjectId
-  comment   ProductComment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
-
-  @@unique([userId, commentId, userType])
-}
-
-model ProductLike {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId    Int
-  userType  UserType
-  productId Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([userId, productId, userType])
-}
-
-model StoreFollower {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  storeId    Int
-  store      Store    @relation(fields: [storeId], references: [storeId], onDelete: Cascade)
-  customerId Int
-  userType   UserType @default(CUSTOMER)
-  user       User     @relation(fields: [customerId, userType], references: [userId, userType], onDelete: Cascade)
-
-  @@unique([storeId, customerId])
 }

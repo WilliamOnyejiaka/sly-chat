@@ -1,0 +1,71 @@
+
+    // private async consumeStream(stream: string, group: StreamGroup, consumerName: string, io?: Server) {
+    //     let retryDelay = this.config.retryBaseDelayMs;
+    //     let retryCounts = new Map<string, number>(); // Track retries per event ID
+
+    //     while (true) {
+    //         try {
+    //             const streamLen = await this.redis.xlen(stream);
+    //             this.metrics.streamLength.set({ stream }, streamLen);
+    //             if (streamLen === 0) {
+    //                 await new Promise((resolve) => setTimeout(resolve, 5000));
+    //                 continue;
+    //             }
+
+    //             const results: any = await this.redis.xreadgroup(
+    //                 'GROUP',
+    //                 group.consumerGroup,
+    //                 consumerName,
+    //                 'COUNT',
+    //                 this.config.batchSize,
+    //                 'BLOCK',
+    //                 2000,
+    //                 'STREAMS',
+    //                 stream,
+    //                 '>'
+    //             );
+
+    //             if (results) {
+    //                 const pipeline = this.redis.pipeline();
+    //                 for (const [streamName, entries] of results) {
+    //                     for (const [id, fields] of entries) {
+    //                         const event = JSON.parse(fields[1]);
+    //                         const handler = group.handlers.get(event.type);
+    //                         if (handler) {
+    //                             try {
+    //                                 // TODO: Offload to worker pool for parallel processing
+    //                                 await handler(event, streamName, id, io);
+    //                                 pipeline.xack(stream, group.consumerGroup, id);
+    //                                 if (this.config.deleteAfterAck) {
+    //                                     pipeline.xdel(stream, id);
+    //                                 }
+    //                                 retryCounts.delete(id);
+    //                             } catch (err: any) {
+    //                                 console.error(`Error handling event ${id} on ${stream}:`, err);
+    //                                 this.metrics.processingErrors.inc({ stream });
+    //                                 const retries = (retryCounts.get(id) || 0) + 1;
+    //                                 retryCounts.set(id, retries);
+    //                                 if (retries >= this.config.retryMaxAttempts) {
+    //                                     pipeline.xadd(
+    //                                         'stream:dead-letter',
+    //                                         'MAXLEN', '~', this.config.dlqMaxLen,
+    //                                         '*',
+    //                                         'data',
+    //                                         JSON.stringify({ event, error: err.message, originalStream: stream })
+    //                                     );
+    //                                     retryCounts.delete(id);
+    //                                 }
+    //                             }
+    //                         }
+    //                     }
+    //                 }
+    //                 await pipeline.exec();
+    //             }
+    //             retryDelay = this.config.retryBaseDelayMs;
+    //         } catch (err) {
+    //             console.error(`Error reading stream ${stream}:`, err);
+    //             await new Promise((resolve) => setTimeout(resolve, retryDelay));
+    //             retryDelay = Math.min(retryDelay * 2, this.config.retryMaxDelayMs);
+    //         }
+    //     }
+    // }

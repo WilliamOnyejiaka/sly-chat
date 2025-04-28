@@ -24,6 +24,7 @@ export class UpdateChat implements IWorker<UpdateChatJob> {
             namespace.to(recipientSocketId).emit('appError', allChats);
             return;
         }
+
         namespace.to(recipientSocketId).emit('updateChat', Handler.responseData(200, false, allChats.message, allChats.data));
     }
 }

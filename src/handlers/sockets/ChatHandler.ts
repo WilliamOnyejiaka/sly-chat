@@ -113,16 +113,10 @@ export default class ChatHandler {
             recipientId,
             productId,
             text,
-            storeName,
-            customerName,
-            storeLogoUrl,
-            customerProfilePic,
-            productPrice,
-            productName,
-            productImageUrl
+            storeId
         } = data;
 
-        if (!recipientId || !text || !productId) {
+        if (!recipientId || !text || !productId || !storeId) {
             socket.emit('appError', Handler.responseData(400, true, "Invalid data provided"));
             return;
         }
@@ -151,16 +145,10 @@ export default class ChatHandler {
             console.log(`💬 Creating new chat for room `);
 
             const newChat: TransactionChat = {
-                productId: productId as string,
+                productId,
                 vendorId,
                 customerId,
-                customerProfilePic,
-                productPrice,
-                productName,
-                storeName,
-                customerName,
-                storeLogoUrl,
-                productImageUrl,
+                storeId
             };
             const newMessage: TransactionMessage = { senderId: userId, text, recipientOnline, senderType };
 
@@ -176,13 +164,39 @@ export default class ChatHandler {
 
             socket.join(room);
             console.log(`✅ New chat has been created`);
-            socket.emit('newSentChat', Handler.responseData(200, false, null, chat));
+            const vendorProfile = chat.vendor;
+            const customerProfile = chat.customer;
+            delete chat.vendor;
+            delete chat.customer;
+
+            let senderChat;
+            let recipientChat;
+            if (senderType === UserType.Customer.toUpperCase()) {
+                senderChat = {
+                    ...chat,
+                    vendor: vendorProfile
+                };
+                recipientChat = {
+                    ...chat,
+                    customer: customerProfile
+                };
+            } else {
+                senderChat = {
+                    ...chat,
+                    customer: customerProfile
+                };
+                recipientChat = {
+                    ...chat,
+                    vendor: vendorProfile
+                };
+            }
+            socket.emit('newSentChat', Handler.responseData(200, false, null, senderChat));
             chatNamespace.to(room).emit('receiveMessage', Handler.responseData(200, false, null, chat.messages));
             if (recipientOnlineData) {
                 const recipientSocketId = recipientOnlineData.chatSocketId;
                 chatNamespace.sockets.get(recipientSocketId)?.join(room); //💬 Forcing the the recipient to join the room 
-                socket.to(recipientSocketId).emit('newChat', Handler.responseData(200, false, chat));
-                const recipientType = userType === UserType.Customer ? UserType.Customer : UserType.Vendor;
+                socket.to(recipientSocketId).emit('newChat', Handler.responseData(200, false, recipientChat));
+                const recipientType = userType === UserType.Customer ? UserType.Vendor : UserType.Customer;
                 await updateChat.add('updateChat', { recipientId, recipientType, recipientSocketId }, { jobId: `send-${Date.now()}`, priority: 1 });
                 console.log(`✅ Message sent directly to user ${recipientId} via socket ${recipientSocketId}`);
                 return;

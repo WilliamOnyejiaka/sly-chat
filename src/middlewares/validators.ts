@@ -3,7 +3,7 @@ import { emailValidator, numberValidator, phoneNumberValidator, zipCodeValidator
 import constants, { HttpStatus } from "../constants";
 // import UserRepo from "../repos/bases/UserRepo";
 import Repo from "../repos/bases/Repo";
-import { User } from "../repos";
+import  UserRepo  from "../repos/bases/UserRepo";
 import { UserType } from "../types/enums";
 
 const errorDetails = (message: string, statusCode: number) => {
@@ -36,7 +36,7 @@ const isValidEmail = (value: string) => {
     return true;
 }
 
-const emailExists = (repo: User, userType: UserType) => async (value: string) => {
+const emailExists = (repo: any, userType: UserType) => async (value: string) => {
     const repoResult = await repo.userEmailExists(value, userType.toUpperCase());
 
     if (repoResult.error) {
@@ -112,7 +112,7 @@ const validateQueryNumber = (name: string) => (value: string) => {
 export const passwordIsValid = body('password').custom(isValidPassword); // Custom password validation
 export const phoneNumberIsValid = body('phoneNumber').custom(isValidPhoneNumber);
 export const emailIsValid = body('email').custom(isValidEmail);
-export const userEmailExists = (repo: User, userType: UserType) => body('email').custom(emailExists(repo, userType));
+export const userEmailExists = (repo: any, userType: UserType) => body('email').custom(emailExists(repo, userType));
 export const zipCodeIsValid = body('zip').custom(isValidZipCode);
 export const tokenIsPresent = header('Authorization').custom(isTokenPresent);
 export const paramNumberIsValid = (paramName: string) => param(paramName).custom(isValidNumber(paramName));

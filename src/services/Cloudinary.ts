@@ -2,7 +2,7 @@ import { cloudinary, logger } from "../config";
 import BaseService from "./bases/BaseService";
 import { http, imageFolders } from "../constants";
 import { CdnFolders, ResourceType } from "../types/enums";
-import { UploadedFiles, FailedFiles } from "./../types";
+import { UploadedFiles, FailedFiles } from "../types";
 import { compressImage } from "../utils";
 
 export default class Cloudinary extends BaseService {
@@ -20,59 +20,97 @@ export default class Cloudinary extends BaseService {
         });
     }
 
-    public async upload(files: Express.Multer.File[], resourceType: ResourceType, folder: CdnFolders) {
+    public async upload(
+        files: Express.Multer.File[],
+        resourceType: ResourceType,
+        folder: CdnFolders
+    ) {
         const uploadedFiles: UploadedFiles[] = [];
         const failedFiles: FailedFiles[] = [];
         const publicIds: string[] = [];
 
+        const MAX_RETRIES = 3;
+        const RETRY_DELAY = (attempt: number) => new Promise(res => setTimeout(res, 500 * Math.pow(2, attempt))); // Exponential backoff
+
         await Promise.all(
             files.map(async (file) => {
-                try {
-                    const buffer = resourceType === ResourceType.IMAGE ? await compressImage(file) : { error: false, buffer: file.buffer };
-                    if (!buffer.error) {
-                        const result: any = await new Promise((resolve, reject) => {
-                            const baseDetails = {
-                                resource_type: resourceType,
-                                folder: folder,
-                                timeout: 100000,
-                            };
-                            const uploadStreamDetails = resourceType === ResourceType.VIDEO ?
-                                {
-                                    ...baseDetails,
-                                    eager: [
-                                        { format: "jpg", transformation: [{ width: 300, height: 200, crop: "thumb", start_offset: "auto" }] }
-                                    ]
-                                } : baseDetails;
+                let attempt = 0;
+                let success = false;
 
-                            const stream = cloudinary.uploader.upload_stream(
-                                uploadStreamDetails,
-                                (error, result) => {
-                                    if (error) reject(error);
-                                    else resolve(result);
-                                }
-                            );
-                            stream.end(buffer.buffer);
-                        });
+                while (attempt < MAX_RETRIES && !success) {
+                    try {
+                        const buffer = resourceType === ResourceType.IMAGE
+                            ? await compressImage(file)
+                            : { error: false, buffer: file.buffer };
 
-                        const thumbnail = resourceType === ResourceType.VIDEO && result.eager ? result.eager[0].secure_url : null;
-                        const url = resourceType === ResourceType.IMAGE ? this.getUrl(result.public_id) : result.url;
-                        const duration = resourceType === ResourceType.VIDEO ? result.duration : null;
+                        if (!buffer.error) {
+                            const result: any = await new Promise((resolve, reject) => {
+                                const baseDetails = {
+                                    resource_type: resourceType,
+                                    folder: folder,
+                                    timeout: 100000,
+                                };
+                                const uploadStreamDetails = resourceType === ResourceType.VIDEO
+                                    ? {
+                                        ...baseDetails,
+                                        eager: [
+                                            {
+                                                format: "jpg",
+                                                transformation: [
+                                                    { width: 300, height: 200, crop: "thumb", start_offset: "auto" }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                    : baseDetails;
 
-                        uploadedFiles.push({
-                            publicId: result.public_id,
-                            size: String(result.bytes),
-                            url: url,
-                            mimeType: file.mimetype,
-                            thumbnail: thumbnail,
-                            duration: String(duration)
-                        });
-                        publicIds.push(result.public_id);
-                    } else {
-                        failedFiles.push({ filename: file.originalname, error: "Failed to compress image." });
+                                const stream = cloudinary.uploader.upload_stream(
+                                    uploadStreamDetails,
+                                    (error, result) => {
+                                        if (error) reject(error);
+                                        else resolve(result);
+                                    }
+                                );
+                                stream.end(buffer.buffer);
+                            });
+
+                            const thumbnail = resourceType === ResourceType.VIDEO && result.eager
+                                ? result.eager[0].secure_url
+                                : null;
+
+                            const url = resourceType === ResourceType.IMAGE
+                                ? this.getUrl(result.public_id)
+                                : result.url;
+
+                            const duration = resourceType === ResourceType.VIDEO
+                                ? result.duration
+                                : null;
+
+                            uploadedFiles.push({
+                                publicId: result.public_id,
+                                size: String(result.bytes),
+                                url: url,
+                                mimeType: file.mimetype,
+                                thumbnail: thumbnail,
+                                duration: duration
+                            });
+
+                            publicIds.push(result.public_id);
+                            success = true;
+                        } else {
+                            failedFiles.push({ filename: file.originalname, error: "Failed to compress image." });
+                            break; // Don't retry if image compression fails
+                        }
+                    } catch (error: any) {
+                        attempt++;
+                        if (attempt >= MAX_RETRIES) {
+                            console.error(`Upload failed for ${file.originalname}:`, error);
+                            failedFiles.push({ filename: file.originalname, error: error.message });
+                        } else {
+                            console.warn(`Retrying upload for ${file.originalname} (Attempt ${attempt})...`);
+                            await RETRY_DELAY(attempt); // Wait before retrying
+                        }
                     }
-                } catch (error: any) {
-                    console.error(`Upload failed for ${file.originalname}:`, error);
-                    failedFiles.push({ filename: file.originalname, error: error.message });
                 }
             })
         );
@@ -80,13 +118,14 @@ export default class Cloudinary extends BaseService {
         return { uploadedFiles, failedFiles, publicIds };
     }
 
+
     public async deleteFiles(publicIds: string[]) {
         try {
             const result = await cloudinary.api.delete_resources(publicIds);
-            return result;
+            return this.httpResponseData(200, false, "Files were deleted", result);
         } catch (error) {
             console.error(error);
-            return false;
+            return this.httpResponseData(500, true, "Something went wrong");
         }
     }
 

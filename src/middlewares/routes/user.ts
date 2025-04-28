@@ -1,4 +1,4 @@
-import { User } from "../../repos";
+// import { User } from "../../repos";
 import { UserType } from "../../types/enums";
 import validateBody from "../validateBody";
 import {
@@ -10,7 +10,7 @@ import {
     zipCodeIsValid
 } from "../validators";
 
-const user = new User();
+// const user = new User();
 
 const createUser = [
     validateBody([
@@ -25,10 +25,10 @@ const createUser = [
 
 export const createVendor = [
     ...createUser,
-    userEmailExists(user, UserType.Vendor)
+    // userEmailExists(user, UserType.Vendor)
 ];
 
 export const createCustomer = [
     ...createUser,
-    userEmailExists(user, UserType.Customer)
+    // userEmailExists(user, UserType.Customer)
 ];

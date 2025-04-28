@@ -21,7 +21,7 @@ export default class ChatManagementFacade extends BaseFacade {
     }
 
     private async getUserChats(userId: number, userType: UserType, dataType: ServiceResultDataType) {
-        return await this.chatService.getUserChats(userId, userType, dataType);
+        return await this.chatService.getUserChatsWithMessages(userId, userType, dataType);
     }
 
 
@@ -181,10 +181,10 @@ export default class ChatManagementFacade extends BaseFacade {
                 await this.cloudinary.deleteFiles(publicIds);
                 return serviceResult;
             }
-            if (!newChat.storeName || !newChat.customerName || !newChat.productPrice || !newChat.productName || !newChat.productImageUrl) {
-                await this.cloudinary.deleteFiles(publicIds);
-                return this.service.httpResponseData(400, true, "All fields are required to create a new chat");
-            }
+            // if (!newChat.storeName || !newChat.customerName || !newChat.productPrice || !newChat.productName || !newChat.productImageUrl) {
+            //     await this.cloudinary.deleteFiles(publicIds);
+            //     return this.service.httpResponseData(400, true, "All fields are required to create a new chat");
+            // }
             const serviceResult = await this.chatService.createChatWithMedia(newChat, newMessage, uploadedFiles, ServiceResultDataType.HTTP) as HttpData;
             if (!serviceResult.json.error) {
                 serviceResult.json.data = { chat: serviceResult.json.data, isNewChat: true };
@@ -196,11 +196,11 @@ export default class ChatManagementFacade extends BaseFacade {
         return this.service.httpResponseData(500, true, "Something went wrong", failedFiles);
     }
 
-    public async httpGetChatWithRoomId(productId: string, customerId: number, vendorId: number) {
+    public async httpGetChatWithRoomId(productId: number, customerId: number, vendorId: number) {
         return await this.chatService.getChatWithRoomId(productId, customerId, vendorId, ServiceResultDataType.HTTP) as HttpData;
     }
 
-    public async socketGetChatWithRoomId(productId: string, customerId: number, vendorId: number) {
+    public async socketGetChatWithRoomId(productId: number, customerId: number, vendorId: number) {
         return await this.chatService.getChatWithRoomId(productId, customerId, vendorId, ServiceResultDataType.SOCKET) as ServiceData;
     }
 

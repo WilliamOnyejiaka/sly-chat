@@ -44,18 +44,12 @@ export default class Chat extends Repo {
 
     public async insertChatWithMessage(newChat: TransactionChat, newMessage: any) {
         try {
-            const newItem = await prisma.chat.create({
+            const newItem = await this.prisma.chat.create({
                 data: {
                     vendorId: newChat.vendorId,
                     productId: newChat.productId,
-                    productImageUrl: newChat.productImageUrl!,
-                    storeLogoUrl: newChat.storeLogoUrl!,
-                    storeName: newChat.storeName!,
-                    customerProfilePic: newChat.customerProfilePic,
                     customerId: newChat.customerId,
-                    customerName: newChat.customerName!,
-                    productName: newChat.productName!,
-                    productPrice: newChat.productPrice!,
+                    storeId: newChat.storeId,
                     messages: {
                         create: {
                             text: newMessage.text,
@@ -69,7 +63,24 @@ export default class Chat extends Repo {
                     messages: {
                         select: this.messageSelect,
                         orderBy: { updatedAt: 'desc' }
-                    }
+                    },
+                    vendor: {
+                        select: {
+                            id: true,
+                            userId: true,
+                            firstName: true,
+                            lastName: true,
+                            profilePictureUrl: true,
+                            email: true,
+                            verified: true,
+                            phoneNumber: true,
+                            active: true,
+                            createdAt: true,
+                            updatedAt: true,
+                            store: true
+                        }
+                    },
+                    customer: true
                 }
             });
             return this.repoResponse(false, 201, null, newItem);
@@ -84,14 +95,8 @@ export default class Chat extends Repo {
                 data: {
                     vendorId: newChat.vendorId,
                     productId: newChat.productId,
-                    productImageUrl: newChat.productImageUrl!,
-                    storeLogoUrl: newChat.storeLogoUrl,
-                    storeName: newChat.storeName!,
-                    customerProfilePic: newChat.customerProfilePic,
                     customerId: newChat.customerId,
-                    customerName: newChat.customerName!,
-                    productName: newChat.productName!,
-                    productPrice: newChat.productPrice!,
+                    storeId: newChat.storeId,
                     messages: {
                         create: {
                             text: newMessage.text,
@@ -110,7 +115,24 @@ export default class Chat extends Repo {
                     messages: {
                         select: this.messageSelect,
                         orderBy: { updatedAt: 'desc' }
-                    }
+                    },
+                    vendor: {
+                        select: {
+                            id: true,
+                            userId: true,
+                            firstName: true,
+                            lastName: true,
+                            profilePictureUrl: true,
+                            email: true,
+                            verified: true,
+                            phoneNumber: true,
+                            active: true,
+                            createdAt: true,
+                            updatedAt: true,
+                            store: true
+                        }
+                    },
+                    customer: true
                 }
             });
             return this.repoResponse(false, 201, null, newItem);
@@ -129,7 +151,8 @@ export default class Chat extends Repo {
                     messages: {
                         select: this.messageSelect,
                         orderBy: { updatedAt: 'desc' }
-                    }
+                    },
+                    customer: true
                 }
             });
             return this.repoResponse(false, 200, null, items);
@@ -138,7 +161,7 @@ export default class Chat extends Repo {
         }
     }
 
-    public async getChatWithRoomId(productId: string, customerId: number, vendorId: number) {
+    public async getChatWithRoomId(productId: number, customerId: number, vendorId: number) {
         try {
             const items = await prisma.chat.findFirst({
                 where: { productId, customerId, vendorId },
@@ -165,6 +188,22 @@ export default class Chat extends Repo {
                     messages: {
                         select: this.messageSelect,
                         orderBy: { updatedAt: 'desc' },
+                    },
+                    vendor: {
+                        select: {
+                            id: true,
+                            userId: true,
+                            firstName: true,
+                            lastName: true,
+                            profilePictureUrl: true,
+                            email: true,
+                            verified: true,
+                            phoneNumber: true,
+                            active: true,
+                            createdAt: true,
+                            updatedAt: true,
+                            store: true
+                        }
                     }
                 },
 

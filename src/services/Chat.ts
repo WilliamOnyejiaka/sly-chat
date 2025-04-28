@@ -26,20 +26,23 @@ export default class Chat extends BaseService<ChatRepo> {
         return super.responseData(dataType, 201, false, null, repoResult.data);
     }
 
-    public async getChatWithRoomId(productId: string, customerId: number, vendorId: number, dataType: ServiceResultDataType) {
+    public async getChatWithRoomId(productId: number, customerId: number, vendorId: number, dataType: ServiceResultDataType) {
         const repoResult = await this.repo!.getChatWithRoomId(productId, customerId, vendorId);
         const repoResultError = super.handleRepoError(dataType, repoResult);
         if (repoResultError) return repoResultError;
         return super.responseData(dataType, 201, false, "Chat has been retrieved successfully", repoResult.data);
     }
 
-    public async getUserChats(userId: number, userType: UserType, dataType: ServiceResultDataType) {
-        const repoResult = await (userType == UserType.Customer ? this.repo!.getCustomerChatsWithMessages(userId) : this.repo!.getVendorChatsWithMessages(userId));
-        const repoResultError = super.handleRepoError(dataType, repoResult);
-        if (repoResultError) return repoResultError;
+    // public async getUserChats(userId: number, userType: UserType, dataType: ServiceResultDataType) {
+    //     const repoResult = await (userType == UserType.Customer ? this.repo!.getCustomerChatsWithMessages(userId) : this.repo!.getVendorChatsWithMessages(userId));
+    //     const repoResultError = super.handleRepoError(dataType, repoResult);
+    //     if (repoResultError) return repoResultError;
 
-        return super.responseData(dataType, 200, false, "Chats has been retrieved successfully", repoResult.data);
-    }
+    //     console.log(repoResult);
+        
+
+    //     return super.responseData(dataType, 200, false, "Chats has been retrieved successfully", repoResult.data);
+    // }
 
     public async getChat(chatId: string, dataType: ServiceResultDataType) {
         const repoResult = await this.repo!.getChatWithMessages({ id: chatId })

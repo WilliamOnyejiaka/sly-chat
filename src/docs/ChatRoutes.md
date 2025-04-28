@@ -23,16 +23,9 @@ Upon a successful request, the server responds with a status code of 201 and a J
   - `productId` (string): The product's identifier associated with the chat.
   - `vendorId` (number): The vendor's identifier.
   - `customerId` (number): The customer's identifier.
-  - `productImageUrl` (string): URL of the product's image.
-  - `productPrice` (string): The price of the product.
-  - `productName` (string): The name of the product.
-  - `storeLogoUrl` (string): URL of the store's logo.
-  - `customerProfilePic` (string): URL of the customer's profile picture.
-  - `customerName` (string): The name of the customer.
-  - `storeName` (string): The name of the store.
+  - `storeId` (number): The vendor's store.
   - `lastMessageAt` (string): Timestamp of the last message in the chat.
   - `createdAt` (string): Timestamp of the chat's creation.
-  - `updatedAt` (string): Timestamp of the chat's last update.
   - `messages` (array): Array of messages exchanged in the chat.
     - `senderId` (number): The identifier of the message sender.
     - `text` (string): The content of the message.
@@ -55,13 +48,7 @@ This endpoint allows the client to send an image in a chat conversation.
 
 - `productId` (text): The ID of the product.
 - `recipientId` (text): The ID of the recipient.
-- `storeName` (text): The name of the store.
-- `productName` (text): The name of the product.
-- `productPrice` (text): The price of the product.
-- `productImageUrl` (text): The URL of the product image.
-- `customerName` (text): The name of the customer.
-- `storeLogo` (text): The URL of the store's logo.
-- `customerProfilePic` (text): The URL of the customer's profile picture.
+- `storeId` (text): The ID of the store.
 - `image` (file): The image file to be sent.(It can be any name)
 
 #### Response
@@ -81,16 +68,9 @@ This route has two responses.
     "productId": "1234567987",
     "vendorId": 2,
     "customerId": 2,
-    "productImageUrl": "productImageUrl",
-    "productPrice": "2390",
-    "productName": "Apple",
-    "storeLogoUrl": null,
-    "customerProfilePic": null,
-    "customerName": "customerName",
-    "storeName": "Jay Tech",
+    "storeId": 8,
     "lastMessageAt": "2025-03-10T15:42:45.796Z",
     "createdAt": "2025-03-10T15:42:45.796Z",
-    "updatedAt": "2025-03-10T15:42:45.796Z",
     "messages": [
       {
         "id": "67cf08754860a5c46bd0fd72",
@@ -111,22 +91,23 @@ This route has two responses.
           }
         ]
       }
-    ]
+    ],
+    "customer": {
+      "id": "680f9806bc5c3ba5f87ffff2",
+      "userId": 4,
+      "firstName": "William",
+      "lastName": "Lock 7",
+      "profilePictureUrl": null,
+      "email": "williamonyejiakddda2021@gmail.com",
+      "verified": false,
+      "phoneNumber": "sdxlkkshhjbdjhddfdfnfss",
+      "active": true,
+      "updatedAt": "2025-04-28T15:00:20.655Z"
   }
 }
 ```
 
 2. If a chat already exits, it just creates a new message and emits `receiveMedia` to both users like the `receiveMessage` event in the socket.
-
-The following fields are not required for this type of response:
-
-- `storeName`
-- `productName`
-- `productPrice`
-- `productImageUrl`
-- `customerName`
-- `storeLogo`
-- `customerProfilePic`
 
 #### The Response
 
@@ -153,7 +134,30 @@ The following fields are not required for this type of response:
         "mimeType": "image/jpeg",
         "thumbnail": "https://res.cloudinary.com/dyjhe7cg2/image/upload/so_1/v1/chat-cdn/chat-videos/nsfgzariz5eyamocmfls?_a=BAMCkGRg0"
       }
-    ]
+    ],
+    "vendor": {
+      "id": "680f9806bc5c3ba5f87ffff2",
+      "userId": 4,
+      "firstName": "William",
+      "lastName": "Lock 7",
+      "profilePictureUrl": null,
+      "email": "williamonyejiakddda2021@gmail.com",
+      "verified": false,
+      "phoneNumber": "sdxlkkshhjbdjhddfdfnfss",
+      "active": true,
+      "updatedAt": "2025-04-28T15:00:20.655Z",
+      "store": [
+        {
+          "id": "680f98fac7fe6cd09231fe63",
+          "name": "Wonderds",
+          "vendorId": 4,
+          "storeId": 7,
+          "storeLogoUrl": null,
+          "createdAt": "2025-04-28T15:04:26.541Z",
+          "updatedAt": "2025-04-28T15:04:26.541Z"
+        }
+      ]
+    }
   }
 }
 ```

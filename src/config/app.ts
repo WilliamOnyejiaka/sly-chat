@@ -8,7 +8,7 @@ import http from 'http';
 import { Server } from 'socket.io';
 import { chat, presence, supportChat } from "../events";
 import { ISocket } from "../types";
-import { user, chat as chatRoute, comment, general } from "../routes";
+import { user, chat as chatRoute, general } from "../routes";
 import { Namespace, IWorker } from "../types/enums";
 import { createClient } from "redis";
 
@@ -148,7 +148,6 @@ async function createApp() {
     app.use(general);
     app.use("/api/v1/user", user);
     app.use("/api/v1/chat", validateHttpJWT(["customer", "vendor"], env("tokenSecret")!), chatRoute);
-    app.use("/api/v1/comment", validateHttpJWT(["customer", "vendor"], env("tokenSecret")!), comment);
 
     app.post("/test2", adminAuthorization(['support']), async (req: Request, res: Response) => {
         res.status(200).json({

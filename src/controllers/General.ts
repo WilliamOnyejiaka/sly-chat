@@ -13,8 +13,7 @@ export default class General {
                 'presence': "Presence.md",
                 'general': "General.md",
                 'sendFile': "SendFile.md",
-                'chatRoutes': "ChatRoutes.md",
-                'commentRoutes': "CommentRoutes.md"
+                'chatRoutes': "ChatRoutes.md"
             };
 
             if (!(files as any)[query]) {

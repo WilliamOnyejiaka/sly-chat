@@ -17,35 +17,28 @@ const validateHttpJWT = (types: string[], tokenSecret: string, neededData: strin
     const cache = new TokenBlackList();
     const isBlacklistedResult = await cache.get(token);
 
-    if (isBlacklistedResult.error) {
-        socket.emit('appError', {
-            error: true,
-            message: http('500')!,
-            statusCode: 500
-        });
-        
-        return;
-    }
+    if (isBlacklistedResult.error) return next({
+        statusCode: 401,
+        message: "User Id is missing",
+        type: "MISSING_KEY"
+    });
 
-    if (isBlacklistedResult.data) {
-        socket.emit('appError', {
-            error: true,
-            message: "Token is invalid",
-            statusCode: 401
-        });
-        return;
-    }
+
+    if (isBlacklistedResult.data) return next({
+        error: true,
+        message: "Token is invalid",
+        statusCode: 401
+    });
 
     const tokenValidationResult: any = Token.validateToken(token, types, tokenSecret);
 
     if (tokenValidationResult.error) {
         const statusCode = tokenValidationResult.message == http("401") ? 401 : 400;
-        socket.emit('appError', {
+        return next({
             error: true,
             message: tokenValidationResult.message,
             statusCode: statusCode
         });
-        return;
     }
 
     socket.locals = {};
@@ -53,7 +46,7 @@ const validateHttpJWT = (types: string[], tokenSecret: string, neededData: strin
         socket.locals[item] = tokenValidationResult.data[item];
     }
     socket.locals['userType'] = tokenValidationResult.data['types'][0];
-    
+
     next();
 }
 
