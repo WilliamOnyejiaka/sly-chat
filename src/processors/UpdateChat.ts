@@ -3,6 +3,7 @@ import { Job } from "bullmq";
 import { Events, Namespace, WorkerConfig, IWorker, UpdateChatJob } from "../types/enums";
 import { ChatManagementFacade } from "../facade";
 import Handler from "../handlers/sockets/Handler";
+import { ChatPagination } from "../types";
 
 export class UpdateChat implements IWorker<UpdateChatJob> {
 
@@ -18,7 +19,15 @@ export class UpdateChat implements IWorker<UpdateChatJob> {
 
     public async process(job: Job<UpdateChatJob>) {
         const { recipientSocketId, recipientId, recipientType } = job.data;
-        const allChats = await this.facade.socketGetUserChats(recipientId, recipientType);
+        const pagination: ChatPagination = {
+            page: 1,
+            limit: 10,
+            message: {
+                page: 1,
+                limit: 10
+            }
+        };
+        const allChats = await this.facade.socketGetUserChats(recipientId, recipientType, pagination); // TODO: handle this
         const namespace = this.io.of(Namespace.CHAT);
         if (allChats.error) {
             namespace.to(recipientSocketId).emit('appError', allChats);

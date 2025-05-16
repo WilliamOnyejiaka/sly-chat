@@ -4,7 +4,8 @@ import { CustomerCache } from "../cache";
 import BaseService from "./bases/BaseService";
 import { ServiceResultDataType, UserType } from "../types/enums";
 import { TransactionChat, TransactionMessage } from "../types/dtos";
-import { UploadedFiles } from "../types";
+import { ChatLimit, ChatPagination, MessageLimit, MessagePagination, UploadedFiles } from "../types";
+import { getPagination } from "../utils";
 
 export default class Chat extends BaseService<ChatRepo> {
 
@@ -26,11 +27,23 @@ export default class Chat extends BaseService<ChatRepo> {
         return super.responseData(dataType, 201, false, null, repoResult.data);
     }
 
-    public async getChatWithRoomId(productId: number, customerId: number, vendorId: number, dataType: ServiceResultDataType) {
-        const repoResult = await this.repo!.getChatWithRoomId(productId, customerId, vendorId);
+    private paginateMessages(messages: any[], pagination: MessagePagination) {
+        const totalRecords = messages.length;
+        const paginationData = getPagination(pagination.page, pagination.limit, totalRecords);
+        return paginationData;
+    }
+
+    public async getChatWithRoomId(productId: number, customerId: number, vendorId: number, pagination: MessagePagination, dataType: ServiceResultDataType) {
+        const messageLimit: MessageLimit = this.messageLimit(pagination);
+        const repoResult = await this.repo!.getChatWithRoomId(productId, customerId, vendorId, messageLimit);
         const repoResultError = super.handleRepoError(dataType, repoResult);
         if (repoResultError) return repoResultError;
-        return super.responseData(dataType, 201, false, "Chat has been retrieved successfully", repoResult.data);
+        let data = repoResult.data as any;
+        if (data && data.messages) {
+            const messagePagination = this.paginateMessages(data.messages, pagination);
+            data = { ...data, pagination: messagePagination }
+        }
+        return super.responseData(dataType, 201, false, "Chat has been retrieved successfully", data);
     }
 
     // public async getUserChats(userId: number, userType: UserType, dataType: ServiceResultDataType) {
@@ -39,7 +52,7 @@ export default class Chat extends BaseService<ChatRepo> {
     //     if (repoResultError) return repoResultError;
 
     //     console.log(repoResult);
-        
+
 
     //     return super.responseData(dataType, 200, false, "Chats has been retrieved successfully", repoResult.data);
     // }
@@ -52,14 +65,19 @@ export default class Chat extends BaseService<ChatRepo> {
         return super.responseData(dataType, 200, false, "Chats has been retrieved successfully", repoResult.data);
     }
 
-    public async getUserChatsWithMessages(userId: number, userType: UserType, dataType: ServiceResultDataType) {
+    public async getUserChatsWithMessages(userId: number, userType: UserType, pagination: ChatPagination, dataType: ServiceResultDataType) {
+        const chatLimit: ChatLimit = this.chatLimit(pagination);
         const repoResult = userType === UserType.Customer
-            ? await this.repo!.getCustomerChatsWithMessages(userId)
-            : await this.repo!.getVendorChatsWithMessages(userId);
+            ? await this.repo!.getCustomerChatsWithMessages(userId, chatLimit)
+            : await this.repo!.getVendorChatsWithMessages(userId, chatLimit);
 
         const repoResultError = super.handleRepoError(dataType, repoResult);
         if (repoResultError) return repoResultError;
-        return super.responseData(dataType, 200, false, "Chats and messages has been retrieved successfully", repoResult.data);
+        const data = repoResult.data as any;
+        const totalRecords = data.totalItems;
+        const items = data.items;
+        const paginationData = getPagination(pagination.page, pagination.limit, totalRecords);
+        return super.responseData(dataType, 200, false, "Chats and messages has been retrieved successfully", { items, pagination: paginationData });
     }
 
     public async getChatIds(userId: number, userType: UserType, dataType: ServiceResultDataType) {

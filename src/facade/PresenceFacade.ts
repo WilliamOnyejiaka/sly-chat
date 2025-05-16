@@ -2,7 +2,7 @@ import { OnlineCustomer, OnlineVendor, OnlineAdmin } from "../cache";
 import BaseFacade from "./bases/BaseFacade";
 import { ServiceResultDataType, UserType } from "../types/enums";
 import { Chat } from "../services";
-import { ServiceData } from "../types";
+import { ChatPagination, ServiceData } from "../types";
 
 export default class PresenceFacade extends BaseFacade {
 
@@ -49,9 +49,17 @@ export default class PresenceFacade extends BaseFacade {
     }
 
     public async getUserTransactionChatRooms(userId: number, userType: UserType): Promise<ServiceData> {
-        if (userType == UserType.Admin) return this.service.socketResponseData(200, false,null,[]);
+        if (userType == UserType.Admin) return this.service.socketResponseData(200, false, null, []);
+        const pagination: ChatPagination = {
+            page: 1,
+            limit: 10,
+            message: {
+                page: 1,
+                limit: 10
+            }
+        };
 
-        const serviceResult = await this.chatService.getUserChatsWithMessages(userId, userType, ServiceResultDataType.SOCKET) as ServiceData;
+        const serviceResult = await this.chatService.getUserChatsWithMessages(userId, userType, pagination, ServiceResultDataType.SOCKET) as ServiceData; // TODO: handle this
         if (serviceResult.error) return serviceResult;
         return serviceResult
     }

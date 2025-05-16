@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import { ISocket } from "../../types";
+import { ChatPagination, ISocket, MessagePagination } from "../../types";
 import { Namespace, UserType } from "../../types/enums";
 import Handler from "./Handler";
 import { ChatManagementFacade } from "../../facade";
@@ -23,8 +23,16 @@ export default class ChatHandler {
             socket.disconnect(true);
             return;
         }
+        const pagination: ChatPagination = {
+            page: 1,
+            limit: 10,
+            message: {
+                page: 1,
+                limit: 10
+            }
+        };
 
-        const getUserChatsAndOfflineMessages = await ChatHandler.facade.getUserChatsAndOfflineMessages(userId, userType);
+        const getUserChatsAndOfflineMessages = await ChatHandler.facade.getUserChatsAndOfflineMessages(userId, userType, pagination);
         if (getUserChatsAndOfflineMessages.error) {
             socket.emit('appError', getUserChatsAndOfflineMessages);
             return;
@@ -50,8 +58,16 @@ export default class ChatHandler {
     public static async joinRooms(io: Server, socket: ISocket, data: any) {
         const userId = socket.locals.data.id;
         const userType = socket.locals.userType;
+        const pagination: ChatPagination = {
+            page: 1,
+            limit: 10,
+            message: {
+                page: 1,
+                limit: 10
+            }
+        };
 
-        const facadeResult = await ChatHandler.facade.socketGetUserChats(Number(userId), userType);
+        const facadeResult = await ChatHandler.facade.socketGetUserChats(Number(userId), userType, pagination);
         if (facadeResult.error) {
             socket.emit('appError', facadeResult);
             return;
@@ -67,11 +83,16 @@ export default class ChatHandler {
         const userId = socket.locals.data.id;
         const userType = socket.locals.userType;
         const senderType = (userType as string).toUpperCase();
-        const { productId, recipientId } = data;
+        let { productId, recipientId, page, limit } = data;
+        const pagination: MessagePagination = {
+            page: page,
+            limit: limit
+        };
+
         const [customerId, vendorId] = userType === UserType.Customer ? [userId, recipientId] : [recipientId, userId];
         const room = `chat_${productId}_${vendorId}_${customerId}`;
 
-        const facadeResult = await ChatHandler.facade.socketGetChatWithRoomId(productId, customerId, vendorId);
+        const facadeResult = await ChatHandler.facade.socketGetChatWithRoomId(productId, customerId, vendorId, pagination);
         if (facadeResult.error) {
             socket.emit(Events.APP_ERROR, facadeResult);
             return;
@@ -132,15 +153,23 @@ export default class ChatHandler {
         const recipientOnlineData = statusResult.data;
         const recipientOnline = !!recipientOnlineData;
         const room = `chat_${productId}_${vendorId}_${customerId}`;
-        const facadeResult = await ChatHandler.facade.socketGetChatWithRoomId(productId, customerId, vendorId);
+        const pagination: ChatPagination = {
+            page: 1,
+            limit: 10,
+            message: {
+                page: 1,
+                limit: 10
+            }
+        };
+        const facadeResult = await ChatHandler.facade.socketGetChatWithRoomId(productId, customerId, vendorId, pagination);
         if (facadeResult.error) {
             socket.emit('appError', facadeResult);
             return;
         }
 
-        console.log(room);
+        console.log(facadeResult);
 
-        let chat = facadeResult.data;
+        let chat = facadeResult.data.items;
         if (!chat) {
             console.log(`💬 Creating new chat for room `);
 
@@ -230,7 +259,16 @@ export default class ChatHandler {
     public static async markAsRead(io: Server, socket: ISocket, data: any) {
         const userId = Number(socket.locals.data.id);
         const userType = socket.locals.userType;
-        const { productId, recipientId } = data;
+        const { productId, recipientId, page, limit, messagePage, messageLimit } = data;
+        const pagination: ChatPagination = {
+            page: page,
+            limit: limit,
+            message: {
+                page: messagePage,
+                limit: messageLimit
+            }
+        };
+
         const [customerId, vendorId] = userType === UserType.Customer ? [userId, recipientId] : [recipientId, userId];
         const room = `chat_${productId}_${vendorId}_${customerId}`;
 
@@ -238,7 +276,7 @@ export default class ChatHandler {
             `👀 User ${userId} marking messages as read in room ${room}`
         );
 
-        const facadeResult = await ChatHandler.facade.socketGetChatWithRoomId(productId, customerId, vendorId);
+        const facadeResult = await ChatHandler.facade.socketGetChatWithRoomId(productId, customerId, vendorId, pagination);
         if (facadeResult.error) {
             socket.emit('appError', facadeResult);
             return;
@@ -306,9 +344,29 @@ export default class ChatHandler {
     public static async getUserChats(io: Server, socket: ISocket, data: any) {
         const userId = Number(socket.locals.data.id);
         const userType = socket.locals.userType;
+        const { page, limit, messagePage, messageLimit } = data;
+        const arr = [page, limit, messagePage, messageLimit];
+        const isValid = arr.every(item => typeof item === "number" && item !== undefined);
+        if (!isValid) {
+            socket.emit(Events.APP_ERROR, {
+                error: true,
+                message: "All values are required and all must be integers",
+                data: {}
+            });
+            return;
+        }
 
         const message = "Chats has been sent successfully";
-        const facadeResult = await ChatHandler.facade.socketGetUserChats(userId, userType);
+        const pagination: ChatPagination = {
+            page: page,
+            limit: limit,
+            message: {
+                page: messagePage,
+                limit: messageLimit
+            }
+        };
+
+        const facadeResult = await ChatHandler.facade.socketGetUserChats(userId, userType, pagination);
         if (facadeResult.error) {
             socket.emit('appError', facadeResult);
             return;
@@ -325,8 +383,14 @@ export default class ChatHandler {
         try {
             const userId = Number(socket.locals.data.id);
             const userType = socket.locals.userType;
-
-            const facadeResult = await ChatHandler.facade.socketGetUserChats(userId, userType);
+            const pagination: ChatPagination = {
+                page: 1,
+                limit: 10,
+                message: {
+                    page: 1,
+                    limit: 10
+                }
+            }; const facadeResult = await ChatHandler.facade.socketGetUserChats(userId, userType, pagination); // TODO: handle this bro, this ain't right
             if (facadeResult.error) {
                 socket.emit('appError', facadeResult);
                 return;

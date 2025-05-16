@@ -1,8 +1,10 @@
-import BaseCache from "./BaseCache";
+import { logger } from "../config";
+import { UserType } from "../types/enums";
+import UserCache from "./bases/UserCache";
 
-export default class VendorCache extends BaseCache {
+export default class VendorCache extends UserCache {
 
     public constructor() {
-        super('vendor', 2_592_000);
+        super(UserType.Vendor);
     }
 }

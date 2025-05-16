@@ -1,8 +1,10 @@
+import { UserType } from "@prisma/client";
 import constants from "../../constants";
 import Repo from "../../repos/bases/Repo";
-import { HttpData } from "../../types";
+import { ChatLimit, ChatPagination, HttpData, MessageLimit, MessagePagination } from "../../types";
 import { ServiceResultDataType } from "../../types/enums";
 import { getPagination } from "../../utils";
+import UserRepo from "../../repos/bases/UserRepo";
 
 export default class BaseService<T extends Repo = Repo> {
 
@@ -10,6 +12,53 @@ export default class BaseService<T extends Repo = Repo> {
 
     constructor(repo?: T) {
         this.repo = repo;
+    }
+
+    protected skipAndTake(page: number, limit: number) {
+        const skip = (page - 1) * limit;
+        const take = limit;
+        return { skip, take }
+    }
+
+    protected chatLimit(pagination: ChatPagination): ChatLimit {
+        const chatLimit: ChatLimit = {
+            ...this.skipAndTake(pagination.page, pagination.limit),
+            message: { ...this.skipAndTake(pagination.message.page, pagination.message.limit) }
+        }
+        return chatLimit;
+    }
+
+    protected messageLimit(pagination: MessagePagination): MessageLimit {
+        const messageLimit: MessageLimit = {
+            ...this.skipAndTake(pagination.page, pagination.limit),
+        }
+        return messageLimit;
+    }
+
+    public sanitizeUserData(data: any, userType: UserType, repo: UserRepo) {
+        let cacheData;
+        if (userType === UserType.VENDOR) {
+            let storeDetails = data.storeDetails[0];
+            storeDetails.storeLogo = storeDetails.storeLogo.length > 0 ? storeDetails.storeLogo[0].imageUrl : null;
+            cacheData = { ...data };
+            cacheData.storeDetails = JSON.stringify(storeDetails);
+            if (data.oAuthDetails) {
+                cacheData.oAuthDetails = JSON.stringify(data.oAuthDetails);
+            }
+            return { data, cacheData };
+        } else if (userType === UserType.CUSTOMER) {
+            let address = data.Address[0];
+            data.Address = address;
+            cacheData = { ...data };
+            cacheData.Address = JSON.stringify(address);
+            if (data.oAuthDetails) {
+                cacheData.oAuthDetails = JSON.stringify(data.oAuthDetails);
+            }
+            return { data, cacheData };
+        } else {
+            return { data, cacheData: data }
+        }
+
     }
 
     public responseData(dataType: ServiceResultDataType, statusCode: number, error: boolean, message: string | null, data: any = {}) {

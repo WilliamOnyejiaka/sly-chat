@@ -5,7 +5,7 @@ import { http } from '../constants';
 const vendorIsActive = async (req: Request, res: Response, next: NextFunction) => {
     const id = res.locals.data.id;
     const cache = new VendorCache();
-    const cacheResult = await cache.get(String(id));
+    const cacheResult = await cache.get(id);
     if (cacheResult.error) {
         res.status(500).json({
             error: true,

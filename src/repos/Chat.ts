@@ -3,6 +3,7 @@ import prisma from ".";
 import Repo from "./bases/Repo";
 import { TransactionChat } from "../types/dtos";
 import { UserType } from "../types/enums";
+import { ChatLimit, MessageLimit } from "../types";
 
 export default class Chat extends Repo {
 
@@ -25,7 +26,7 @@ export default class Chat extends Repo {
                 duration: true
             }
         }
-    }
+    };
 
     public constructor() {
         super('chat');
@@ -141,74 +142,168 @@ export default class Chat extends Repo {
         }
     }
 
-    public async getVendorChatsWithMessages(userId: number) {
+    public async getVendorChatsWithMessages(userId: number, pagination: ChatLimit) {
         try {
-            const items = await prisma.chat.findMany({
-                where: {
+            const data = await this.prisma.$transaction(async (tx): Promise<{ items: any, totalItems: number }> => {
+                const where = {
                     vendorId: userId
-                },
-                include: {
-                    messages: {
-                        select: this.messageSelect,
-                        orderBy: { updatedAt: 'desc' }
-                    },
-                    customer: true
-                }
-            });
-            return this.repoResponse(false, 200, null, items);
-        } catch (error) {
-            return this.handleDatabaseError(error);
-        }
-    }
-
-    public async getChatWithRoomId(productId: number, customerId: number, vendorId: number) {
-        try {
-            const items = await prisma.chat.findFirst({
-                where: { productId, customerId, vendorId },
-                include: {
-                    messages: {
-                        select: this.messageSelect,
-                        orderBy: { updatedAt: 'desc' }
+                };
+                const items = await tx.chat.findMany({
+                    skip: pagination.skip,
+                    take: pagination.take,
+                    where: where,
+                    include: {
+                        messages: {
+                            ...pagination.message,
+                            select: {
+                                id: true,
+                                senderId: true,
+                                text: true,
+                                timestamp: true,
+                                read: true,
+                                recipientOnline: true,
+                                chatId: true,
+                                senderType: true,
+                                messageMedias: {
+                                    select: {
+                                        id: true,
+                                        url: true,
+                                        size: true,
+                                        mimeType: true,
+                                        thumbnail: true,
+                                        duration: true
+                                    }
+                                }
+                            },
+                            orderBy: { updatedAt: 'desc' }
+                        },
+                        customer: true
                     }
-                }
+                });
+
+                const totalItems = await tx.chat.count({ where: where })
+                return { items, totalItems };
             });
-            return this.repoResponse(false, 200, null, items);
+
+            return this.repoResponse(false, 200, null, data);
         } catch (error) {
             return this.handleDatabaseError(error);
         }
     }
-    public async getCustomerChatsWithMessages(userId: number) {
+    public async getChatWithRoomId(productId: number, customerId: number, vendorId: number, pagination: MessageLimit) {
         try {
-            const items = await prisma.chat.findMany({
-                where: {
-                    customerId: userId
-                },
-                orderBy: { lastMessageAt: 'desc' },
+            const where = { productId, customerId, vendorId };
+
+            const data = await this.prisma.chat.findFirst({
+                where: where,
                 include: {
                     messages: {
-                        select: this.messageSelect,
-                        orderBy: { updatedAt: 'desc' },
-                    },
-                    vendor: {
+                        ...pagination,
                         select: {
                             id: true,
-                            userId: true,
-                            firstName: true,
-                            lastName: true,
-                            profilePictureUrl: true,
-                            email: true,
-                            verified: true,
-                            phoneNumber: true,
-                            active: true,
-                            createdAt: true,
-                            updatedAt: true,
-                            store: true
-                        }
+                            senderId: true,
+                            text: true,
+                            timestamp: true,
+                            read: true,
+                            recipientOnline: true,
+                            chatId: true,
+                            senderType: true,
+                            messageMedias: {
+                                select: {
+                                    id: true,
+                                    url: true,
+                                    size: true,
+                                    mimeType: true,
+                                    thumbnail: true,
+                                    duration: true
+                                }
+                            }
+                        },
+                        orderBy: { updatedAt: 'desc' }
                     }
-                },
-
+                }
             });
-            return this.repoResponse(false, 200, null, items);
+            return this.repoResponse(false, 200, null, data);
+        } catch (error) {
+            return this.handleDatabaseError(error);
+        }
+    }
+
+    // public async getChatWithRoomId(productId: number, customerId: number, vendorId: number) {
+    //     try {
+    //         const items = await prisma.chat.findFirst({
+    //             where: { productId, customerId, vendorId },
+    //             include: {
+    //                 messages: {
+    //                     select: this.messageSelect,
+    //                     orderBy: { updatedAt: 'desc' }
+    //                 }
+    //             }
+    //         });
+    //         return this.repoResponse(false, 200, null, items);
+    //     } catch (error) {
+    //         return this.handleDatabaseError(error);
+    //     }
+    // }
+    public async getCustomerChatsWithMessages(userId: number, pagination: ChatLimit) {
+        try {
+            const data = await this.prisma.$transaction(async (tx): Promise<{ items: any, totalItems: number }> => {
+                const where = {
+                    customerId: userId
+                };
+                const items = await tx.chat.findMany({
+                    where: where,
+                    skip: pagination.skip,
+                    take: pagination.take,
+                    orderBy: { lastMessageAt: 'desc' },
+                    include: {
+                        messages: {
+                            ...pagination.message,
+                            select: {
+                                id: true,
+                                senderId: true,
+                                text: true,
+                                timestamp: true,
+                                read: true,
+                                recipientOnline: true,
+                                chatId: true,
+                                senderType: true,
+                                messageMedias: {
+                                    select: {
+                                        id: true,
+                                        url: true,
+                                        size: true,
+                                        mimeType: true,
+                                        thumbnail: true,
+                                        duration: true
+                                    }
+                                }
+                            },
+                            orderBy: { updatedAt: 'desc' }
+                        },
+                        vendor: {
+                            select: {
+                                id: true,
+                                userId: true,
+                                firstName: true,
+                                lastName: true,
+                                profilePictureUrl: true,
+                                email: true,
+                                verified: true,
+                                phoneNumber: true,
+                                active: true,
+                                createdAt: true,
+                                updatedAt: true,
+                                store: true
+                            }
+                        }
+                    },
+                });
+                const totalItems = await tx.chat.count({ where: where })
+                return { items, totalItems };
+            });
+
+            return this.repoResponse(false, 200, null, data);
         } catch (error) {
             return this.handleDatabaseError(error);
         }

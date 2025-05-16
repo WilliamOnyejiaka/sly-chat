@@ -1,12 +1,12 @@
 import { NextFunction, Response, Request } from "express";
 import constants, { http } from "../constants";
-import Repository from "../interfaces/Repository";
-import Cache from "../interfaces/Cache";
-import BaseCache from "../cache/BaseCache";
+import UserCache from "../cache/bases/UserCache";
+import UserRepo from "../repos/bases/UserRepo";
+import BaseService from "../services/bases/BaseService";
 
-const validateUser = <T extends BaseCache, U extends Repository>(cache: T, repo: U) => async (req: Request, res: Response, next: NextFunction) => {
+const validateUser = <T extends UserCache, U extends UserRepo>(cache: T, repo: U) => async (req: Request, res: Response, next: NextFunction) => {
     const id = res.locals.data.id;
-    const cacheResult = await cache.get(String(id));
+    const cacheResult = await cache.get(id);
 
     if (cacheResult.error) {
         res.status(500).json({
@@ -17,8 +17,8 @@ const validateUser = <T extends BaseCache, U extends Repository>(cache: T, repo:
 
     }
 
-    if (!cacheResult.data) {
-        const user = await repo.getUserWithId!(id);
+    if (Object.keys(cacheResult.data).length === 0) {
+        const user = await repo.getUserProfile(id);
 
         if (user.error) {
             res.status(404).json({
@@ -35,7 +35,11 @@ const validateUser = <T extends BaseCache, U extends Repository>(cache: T, repo:
             });
             return;
         } else {
-            cache.set(id, user.data);
+            const service = new BaseService();
+            const userType = res.locals.userType;
+            const { data, cacheData } = service.sanitizeUserData(user.data, userType, repo);
+
+            await cache.set(id, cacheData); //* Keep an eye on this
             next();
             return;
 

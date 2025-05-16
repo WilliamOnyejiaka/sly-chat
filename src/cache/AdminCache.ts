@@ -1,8 +1,9 @@
-import BaseCache from "./BaseCache";
+import { UserType } from "../types/enums";
+import UserCache from "./bases/UserCache";
 
-export default class AdminCache extends BaseCache {
+export default class AdminCache extends UserCache {
 
     public constructor() {
-        super('admin', 2_592_000);
+        super(UserType.Admin);
     }
 }

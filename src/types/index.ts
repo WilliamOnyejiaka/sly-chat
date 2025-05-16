@@ -55,3 +55,25 @@ export interface StreamGroup {
     consumerGroup: string; // e.g., 'profile-consumers'
     handlers: Map<string, EventHandler>; // e.g., 'ProfileUpdated' -> handler
 }
+
+export interface ChatPagination {
+    page: number,
+    limit: number,
+    message: MessagePagination
+}
+
+export interface MessagePagination {
+    page: number,
+    limit: number,
+}
+
+export interface ChatLimit {
+    skip: number,
+    take: number,
+    message: MessageLimit
+}
+
+export interface MessageLimit {
+    skip: number,
+    take: number,
+}

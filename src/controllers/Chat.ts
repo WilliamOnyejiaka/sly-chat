@@ -8,6 +8,7 @@ import { Server } from "socket.io";
 import Handler from "../handlers/sockets/Handler";
 import { userIds, getRoom } from "../utils";
 import { updateChat } from "../config/bullMQ";
+import { ChatPagination } from "../types";
 
 export default class Chat {
 
@@ -64,13 +65,22 @@ export default class Chat {
                 productId: Number(productId),
 
             };
+            const pagination: ChatPagination = {
+                page: 1,
+                limit: 10,
+                message: {
+                    page: 1,
+                    limit: 10
+                }
+            };
 
             const facadeResult = await Chat.facade.createChatWithMedia(
                 newChat,
                 newMessage,
                 req.files as Express.Multer.File[],
                 resourceType,
-                folder
+                folder,
+                pagination
             );
 
             if (facadeResult.json.error) {
@@ -161,7 +171,19 @@ export default class Chat {
 
         const userId = res.locals.data.id;
         const userType = res.locals.userType;
-        const facadeResult = await Chat.facade.httpGetUserChats(userId, userType);
+        const page = Number(req.query.page);
+        const limit = Number(req.query.limit);
+        const messagePage = Number(req.query.messagePage);
+        const messageLimit = Number(req.query.messageLimit);
+        const pagination: ChatPagination = {
+            page: page,
+            limit: limit,
+            message: {
+                page: messagePage,
+                limit: messageLimit
+            }
+        };
+        const facadeResult = await Chat.facade.httpGetUserChats(userId, userType, pagination);
         Controller.response(res, facadeResult);
     }
 
@@ -176,8 +198,20 @@ export default class Chat {
         const productId = Number(req.params.productId);
         const customerId = Number(req.params.customerId);
         const vendorId = Number(req.params.vendorId);
+        const page = Number(req.query.page);
+        const limit = Number(req.query.limit);
+        const messagePage = Number(req.query.messagePage);
+        const messageLimit = Number(req.query.messageLimit);
+        const pagination: ChatPagination = {
+            page: page,
+            limit: limit,
+            message: {
+                page: messagePage,
+                limit: messageLimit
+            }
+        };
 
-        const facadeResult = await Chat.facade.httpGetChatWithRoomId(productId, customerId, vendorId);
+        const facadeResult = await Chat.facade.httpGetChatWithRoomId(productId, customerId, vendorId, pagination);
         Controller.response(res, facadeResult);
     }
 

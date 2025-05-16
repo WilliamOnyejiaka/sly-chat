@@ -1,7 +1,7 @@
 import { Socket } from "socket.io";
 import { OnlineCustomer, OnlineVendor } from "../cache";
 import { Chat, Message } from "../services";
-import { ISocket, ServiceData, HttpData, UploadedFiles } from "../types";
+import { ISocket, ServiceData, HttpData, UploadedFiles, ChatPagination, MessagePagination } from "../types";
 import { TransactionChat, TransactionMessage } from "../types/dtos";
 import { CdnFolders, ResourceType, ServiceResultDataType, UserType } from "../types/enums";
 import BaseFacade from "./bases/BaseFacade";
@@ -20,17 +20,17 @@ export default class ChatManagementFacade extends BaseFacade {
         super();
     }
 
-    private async getUserChats(userId: number, userType: UserType, dataType: ServiceResultDataType) {
-        return await this.chatService.getUserChatsWithMessages(userId, userType, dataType);
+    private async getUserChats(userId: number, userType: UserType, pagination: ChatPagination, dataType: ServiceResultDataType) {
+        return await this.chatService.getUserChatsWithMessages(userId, userType, pagination, dataType);
     }
 
 
-    public async httpGetUserChats(userId: number, userType: UserType): Promise<HttpData> {
-        return await this.getUserChats(userId, userType, ServiceResultDataType.HTTP) as HttpData;
+    public async httpGetUserChats(userId: number, userType: UserType, pagination: ChatPagination): Promise<HttpData> {
+        return await this.getUserChats(userId, userType, pagination, ServiceResultDataType.HTTP) as HttpData;
     }
 
-    public async socketGetUserChats(userId: number, userType: UserType): Promise<ServiceData> {
-        return await this.getUserChats(userId, userType, ServiceResultDataType.SOCKET) as ServiceData;
+    public async socketGetUserChats(userId: number, userType: UserType, pagination: ChatPagination): Promise<ServiceData> {
+        return await this.getUserChats(userId, userType, pagination, ServiceResultDataType.SOCKET) as ServiceData;
     }
 
     public async httpGetChat(chatId: string) {
@@ -53,13 +53,15 @@ export default class ChatManagementFacade extends BaseFacade {
         return await this.deleteMessage(messageId, userId, userType, ServiceResultDataType.SOCKET) as ServiceData;
     }
 
-    public async getUserChatsAndOfflineMessages(userId: number, userType: UserType): Promise<ServiceData> {
+    public async getUserChatsAndOfflineMessages(userId: number, userType: UserType, pagination: ChatPagination): Promise<ServiceData> {
         const dataType = ServiceResultDataType.SOCKET;
-        const serviceResult = await this.chatService.getUserChatsWithMessages(userId, userType, dataType) as ServiceData;
+        const serviceResult = await this.chatService.getUserChatsWithMessages(userId, userType, pagination, dataType) as ServiceData;
         const serviceResultError = super.handleSocketFacadeResultError(serviceResult);
         if (serviceResultError) return serviceResultError;
 
-        const chat = serviceResult.data;
+        const chat = serviceResult.data.items;
+        // console.log(chat);
+
         let offlineMessages = chat.flatMap((item: any) => item.messages.filter((message: any) => message.recipientOnline === false));
 
         const chatIds = offlineMessages.map((item: any) => item.chatId);
@@ -164,9 +166,10 @@ export default class ChatManagementFacade extends BaseFacade {
         newMessage: TransactionMessage,
         files: Express.Multer.File[],
         resourceType: ResourceType,
-        folder: CdnFolders
+        folder: CdnFolders,
+        pagination: ChatPagination
     ) {
-        const chatResult = await this.chatService.getChatWithRoomId(newChat.productId, newChat.customerId, newChat.vendorId, ServiceResultDataType.HTTP) as HttpData;
+        const chatResult = await this.chatService.getChatWithRoomId(newChat.productId, newChat.customerId, newChat.vendorId, pagination, ServiceResultDataType.HTTP) as HttpData;
         if (chatResult.json.error) return chatResult;
         const chat = chatResult.json.data;
         const { uploadedFiles, failedFiles, publicIds } = await this.cloudinary.upload(files, resourceType, folder);
@@ -196,12 +199,12 @@ export default class ChatManagementFacade extends BaseFacade {
         return this.service.httpResponseData(500, true, "Something went wrong", failedFiles);
     }
 
-    public async httpGetChatWithRoomId(productId: number, customerId: number, vendorId: number) {
-        return await this.chatService.getChatWithRoomId(productId, customerId, vendorId, ServiceResultDataType.HTTP) as HttpData;
+    public async httpGetChatWithRoomId(productId: number, customerId: number, vendorId: number, pagination: ChatPagination) {
+        return await this.chatService.getChatWithRoomId(productId, customerId, vendorId, pagination, ServiceResultDataType.HTTP) as HttpData;
     }
 
-    public async socketGetChatWithRoomId(productId: number, customerId: number, vendorId: number) {
-        return await this.chatService.getChatWithRoomId(productId, customerId, vendorId, ServiceResultDataType.SOCKET) as ServiceData;
+    public async socketGetChatWithRoomId(productId: number, customerId: number, vendorId: number, pagination: MessagePagination) {
+        return await this.chatService.getChatWithRoomId(productId, customerId, vendorId, pagination, ServiceResultDataType.SOCKET) as ServiceData;
     }
 
     public async httpDeleteChat(chatId: string, userId: number, userType: string): Promise<HttpData> {
