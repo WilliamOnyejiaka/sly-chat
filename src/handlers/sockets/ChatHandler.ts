@@ -224,7 +224,7 @@ export default class ChatHandler {
             if (recipientOnlineData) {
                 const recipientSocketId = recipientOnlineData.chatSocketId;
                 chatNamespace.sockets.get(recipientSocketId)?.join(room); //💬 Forcing the the recipient to join the room 
-                socket.to(recipientSocketId).emit('newChat', Handler.responseData(200, false, recipientChat));
+                socket.to(recipientSocketId).emit('newChat', Handler.responseData(200, false,null ,recipientChat));
                 const recipientType = userType === UserType.Customer ? UserType.Vendor : UserType.Customer;
                 await updateChat.add('updateChat', { recipientId, recipientType, recipientSocketId }, { jobId: `send-${Date.now()}`, priority: 1 });
                 console.log(`✅ Message sent directly to user ${recipientId} via socket ${recipientSocketId}`);
