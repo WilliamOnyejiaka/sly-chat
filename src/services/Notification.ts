@@ -2,7 +2,7 @@ import { Notification as NotificationRepo } from "../repos";
 import { UserSocket } from "../cache";
 import BaseService from "./bases/BaseService";
 import { Server } from "socket.io";
-import { Namespaces, UserType } from "../types/enums";
+import { Namespaces, UserType, NotificationStatus, NotificationEvents } from "../types/enums";
 import { logger } from "../config";
 
 export default class Notification extends BaseService<NotificationRepo> {
@@ -28,7 +28,8 @@ export default class Notification extends BaseService<NotificationRepo> {
         const notificationData: any = {
             ...userData,
             channel: 'PUSH',
-            status: isOnline ? 'PENDING' : 'SENT',
+            // type: '', like,comment,post
+            status: isOnline ? NotificationStatus.SENT : NotificationStatus.PENDING,
             priority: 1,
             content: JSON.stringify(data)
         };
@@ -42,10 +43,7 @@ export default class Notification extends BaseService<NotificationRepo> {
 
         if (isOnline) {
             const notificationNamespace = io.of(Namespaces.NOTIFICATION);
-            notificationData.status = "sent";
-            // notificationNamespace?.to(socketId)?.emit('notification', { data: notificationData });
-
-            notificationNamespace?.to(socketId)?.emit('notification', { data: repoResult.data });
+            notificationNamespace?.to(socketId)?.emit(NotificationEvents.NOTIFICATION, { data: repoResult.data });
             logger.info(`notification for ${userType}:${userId} has been emitted`);
         }
 

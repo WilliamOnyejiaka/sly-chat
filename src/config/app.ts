@@ -23,7 +23,7 @@ import { SendMessageProcessor } from "../processors";
 import { UpdateChat } from "../processors/UpdateChat";
 import { loadMD } from "./../utils";
 import initializeIO from "./io";
-import { storeStreamer, userStreamer, productStreamer } from "../streamers";
+import { storeStreamer, userStreamer, productStreamer, notificationStreamer } from "../streamers";
 
 
 async function createApp() {
@@ -47,6 +47,7 @@ async function createApp() {
     streamRouter.initializeStreamer(userStreamer);
     streamRouter.initializeStreamer(storeStreamer);
     streamRouter.initializeStreamer(productStreamer);
+    streamRouter.initializeStreamer(notificationStreamer);
 
     // Start consuming streams
     const consumerName = `ecommerce-worker-${Math.random().toString(36).substring(7)}`;

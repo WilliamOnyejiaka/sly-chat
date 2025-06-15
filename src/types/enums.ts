@@ -17,6 +17,10 @@ export enum Namespaces {
     SUPPORTCHAT = '/supportChat'
 }
 
+export enum NotificationEvents {
+    NOTIFICATION = "notification"
+}
+
 export enum ServiceResultDataType {
     HTTP = 'http',
     SOCKET = 'socket'
@@ -77,7 +81,8 @@ export interface UpdateChatJob {
 export enum StreamGroups {
     USER = "user",
     STORE = "store",
-    PRODUCT = "product"
+    PRODUCT = "product",
+    NOTIFICATION = "notification"
 };
 
 export enum StreamEvents {
@@ -88,6 +93,11 @@ export enum StreamEvents {
     UPLOAD = "upload",
     FOLLOW = "follow"
 };
+
+export enum NotificationStatus {
+    SENT = "SENT",
+    PENDING = "PENDING"
+}
 
 
 export interface WorkerConfig { connection: { url: string }, concurrency?: number, limiter?: { max: number, duration: number } };
