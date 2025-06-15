@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import { Job } from "bullmq";
-import { Events, Namespace, WorkerConfig, IWorker, SendMessageJob } from "../types/enums";
+import { Events, Namespaces, WorkerConfig, IWorker, SendMessageJob } from "../types/enums";
 
 export class SendMessageProcessor implements IWorker<SendMessageJob> {
 
@@ -17,6 +17,6 @@ export class SendMessageProcessor implements IWorker<SendMessageJob> {
         const { socketId } = job.data;
         const socket = this.io.sockets.sockets.get(socketId)!;
         console.log("Hello - ", socketId);
-        this.io.of(Namespace.CHAT).to(socketId).emit(Events.APP_ERROR, { message: "Hello" })
+        this.io.of(Namespaces.CHAT).to(socketId).emit(Events.APP_ERROR, { message: "Hello" })
     }
 }

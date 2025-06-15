@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import { Job } from "bullmq";
-import { Events, Namespace, WorkerConfig, IWorker, UpdateChatJob } from "../types/enums";
+import { Events, Namespaces, WorkerConfig, IWorker, UpdateChatJob } from "../types/enums";
 import { ChatManagementFacade } from "../facade";
 import Handler from "../handlers/sockets/Handler";
 import { ChatPagination } from "../types";
@@ -28,7 +28,7 @@ export class UpdateChat implements IWorker<UpdateChatJob> {
             }
         };
         const allChats = await this.facade.socketGetUserChats(recipientId, recipientType, pagination); // TODO: handle this
-        const namespace = this.io.of(Namespace.CHAT);
+        const namespace = this.io.of(Namespaces.CHAT);
         if (allChats.error) {
             namespace.to(recipientSocketId).emit('appError', allChats);
             return;

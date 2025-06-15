@@ -4,6 +4,7 @@ import Message from "./Message";
 import Store from "./Store";
 import Vendor from "./Vendor";
 import Customer from "./Customer";
+import Notification from "./Notification";
 
 const prisma: PrismaClient = new PrismaClient();
 
@@ -14,5 +15,6 @@ export {
     Message,
     Store,
     Customer,
-    Vendor  
+    Vendor,
+    Notification
 };

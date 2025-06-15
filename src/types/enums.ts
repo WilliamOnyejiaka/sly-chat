@@ -10,7 +10,7 @@ export enum Events {
     APP_ERROR = "appError",
 
 }
-export enum Namespace {
+export enum Namespaces {
     CHAT = '/chat',
     PRESENCE = '/presence',
     NOTIFICATION = '/notification',
@@ -76,7 +76,8 @@ export interface UpdateChatJob {
 
 export enum StreamGroups {
     USER = "user",
-    STORE = "store"
+    STORE = "store",
+    PRODUCT = "product"
 };
 
 export enum StreamEvents {

@@ -7,6 +7,7 @@ import OnlineVendor from "./OnlineVendor";
 import OnlineCustomer from "./OnlineCustomer";
 import OnlineAdmin from "./OnlineAdmin";
 import OnlineSupport from "./OnlineSupport";
+import UserSocket from "./UserSocket";
 
 export {
     OTPCache,
@@ -14,8 +15,9 @@ export {
     TokenBlackList,
     CustomerCache,
     AdminCache,
-    OnlineVendor,
-    OnlineCustomer,
-    OnlineAdmin,
-    OnlineSupport
+    UserSocket
+    // OnlineVendor,
+    // OnlineCustomer,
+    // OnlineAdmin,
+    // OnlineSupport
 };

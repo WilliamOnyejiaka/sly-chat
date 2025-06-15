@@ -14,34 +14,36 @@ enum UserType {
 }
 
 model Customer {
-  id                String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId        Int      @unique
+  id                String         @id @default(auto()) @map("_id") @db.ObjectId
+  userId            Int            @unique
   firstName         String
   lastName          String
   email             String
   verified          Boolean
   active            Boolean
   phoneNumber       String
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
   profilePictureUrl String?
   chat              Chat[]
+  Notification      Notification[]
 }
 
 model Vendor {
-  id                String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId          Int      @unique
+  id                String         @id @default(auto()) @map("_id") @db.ObjectId
+  userId            Int            @unique
   firstName         String
   lastName          String
   email             String
   verified          Boolean
   active            Boolean
   phoneNumber       String
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
   profilePictureUrl String?
   store             Store[]
   chat              Chat[]
+  Notification      Notification[]
 }
 
 model Store {
@@ -120,4 +122,32 @@ model MessageMedia {
   updatedAt DateTime @updatedAt
   messageId String   @db.ObjectId
   Message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+}
+
+enum NotificationChannel {
+  EMAIL
+  PUSH
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model Notification {
+  id         String              @id @default(auto()) @map("_id") @db.ObjectId
+  vendorId   Int?
+  customerId Int?
+  channel    NotificationChannel @default(PUSH)
+  content    Json
+  status     String
+  priority   Int                 @default(1)
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+  vendor     Vendor?             @relation(fields: [vendorId], references: [userId], onDelete: Cascade)
+  customer   Customer?           @relation(fields: [customerId], references: [userId], onDelete: Cascade)
+
+  @@index([vendorId])
+  @@index([customerId])
 }

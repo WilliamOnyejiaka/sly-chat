@@ -7,6 +7,7 @@ import Message from "./Message";
 import Store from "./Store";
 import Customer from "./Customer";
 import Vendor from "./Vendor";
+import Notification from "./Notification";
 
 export {
     Token,
@@ -17,5 +18,6 @@ export {
     Message,
     Vendor,
     Store,
-    Customer
+    Customer,
+    Notification
 };

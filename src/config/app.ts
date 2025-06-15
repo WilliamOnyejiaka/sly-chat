@@ -6,10 +6,10 @@ import { validateJWT, validateUser, handleMulterErrors, secureApi, redisClientMi
 import cors from "cors";
 import http from 'http';
 import { Server } from 'socket.io';
-import { chat, presence, supportChat } from "../events";
+import { chat, notification, supportChat } from "../events";
 import { ISocket } from "../types";
 import { user, chat as chatRoute, general } from "../routes";
-import { Namespace, IWorker } from "../types/enums";
+import { Namespaces, IWorker } from "../types/enums";
 import { createClient } from "redis";
 
 import cluster from "cluster";
@@ -23,7 +23,7 @@ import { SendMessageProcessor } from "../processors";
 import { UpdateChat } from "../processors/UpdateChat";
 import { loadMD } from "./../utils";
 import initializeIO from "./io";
-import { storeStreamer, userStreamer } from "../streamers";
+import { storeStreamer, userStreamer, productStreamer } from "../streamers";
 
 
 async function createApp() {
@@ -46,6 +46,7 @@ async function createApp() {
 
     streamRouter.initializeStreamer(userStreamer);
     streamRouter.initializeStreamer(storeStreamer);
+    streamRouter.initializeStreamer(productStreamer);
 
     // Start consuming streams
     const consumerName = `ecommerce-worker-${Math.random().toString(36).substring(7)}`;
@@ -54,7 +55,7 @@ async function createApp() {
 
     // Start periodic stream cleanup (every hour, keep 1000 entries)
     // await streamRouter.startStreamCleanup(60 * 60 * 1000, 1000);
-    console.log('Started stream cleanup');
+    // console.log('Started stream cleanup');
 
     const IWorkers: IWorker<any>[] = [
         new SendMessageProcessor({ connection: { url: env('redisURL')! } }, io),
@@ -69,17 +70,15 @@ async function createApp() {
     }
 
 
-    const chatNamespace = io.of(Namespace.CHAT);
-    const presenceNamespace = io.of(Namespace.PRESENCE);
-    const supportChatNamespace = io.of(Namespace.SUPPORTCHAT);
-    const notificationNamespace = io.of(Namespace.NOTIFICATION);
+    const chatNamespace = io.of(Namespaces.CHAT);
+    const supportChatNamespace = io.of(Namespaces.SUPPORTCHAT);
+    const notificationNamespace = io.of(Namespaces.NOTIFICATION);
 
     chatNamespace.use(validateJWT(["customer", "vendor"], env("tokenSecret")!));
-    presenceNamespace.use(validateJWT(["customer", "vendor", "admin"], env("tokenSecret")!));
     notificationNamespace.use(validateJWT(["customer", "vendor", "admin"], env("tokenSecret")!));
 
     chat.initialize(chatNamespace, io);
-    presence.initialize(presenceNamespace, io);
+    notification.initialize(notificationNamespace, io);
     supportChat.initialize(supportChatNamespace, io);
 
     app.use((req: Request, res: Response, next: NextFunction) => {
@@ -98,7 +97,6 @@ async function createApp() {
 
             // Get Socket.IO connection counts per namespace
             const chatConnections = (await chatNamespace.fetchSockets()).length;
-            const presenceConnections = (await presenceNamespace.fetchSockets()).length;
             const supportConnections = (await supportChatNamespace.fetchSockets()).length;
             const notificationConnections = (await notificationNamespace.fetchSockets()).length;
 
@@ -114,7 +112,6 @@ async function createApp() {
                     total: io.engine.clientsCount,
                     namespaces: {
                         chat: chatConnections,
-                        presence: presenceConnections,
                         supportChat: supportConnections,
                         notification: notificationConnections
                     }
@@ -188,9 +185,7 @@ async function createApp() {
     process.on('SIGTERM', shutdown);
     process.on('SIGINT', shutdown);
 
-    if (cluster.isPrimary) {
-        cronJobs.start();
-    }
+    if (cluster.isPrimary) cronJobs.start();
 
     return server;
 }

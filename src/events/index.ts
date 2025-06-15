@@ -1,10 +1,10 @@
 import chat from "./chat";
-import presence from "./presence";
+import notification from "./notification";
 import supportChat from "./supportChat";
 
 
 export {
     chat,
-    presence,
+    notification,
     supportChat
 };

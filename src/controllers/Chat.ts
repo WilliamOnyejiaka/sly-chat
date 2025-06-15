@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import Controller from "./bases/Controller";
 import { ChatManagementFacade } from "../facade";
-import { CdnFolders, Namespace, ResourceType, UserType } from "../types/enums";
+import { CdnFolders, Namespaces, ResourceType, UserType } from "../types/enums";
 import { TransactionChat, TransactionMessage } from "../types/dtos";
 import { Server } from "socket.io";
 import Handler from "../handlers/sockets/Handler";
@@ -26,7 +26,7 @@ export default class Chat {
             const userId = Number(res.locals.data.id);
             const userType = res.locals.userType;
             const io: Server = res.locals.io;
-            const chatNamespace = io.of(Namespace.CHAT);
+            const chatNamespace = io.of(Namespaces.CHAT);
 
             let {
                 recipientId,
@@ -38,7 +38,7 @@ export default class Chat {
             recipientId = Number(recipientId);
             const { customerId, vendorId } = userIds(userId, recipientId, userType);
             const room = getRoom(productId, customerId, vendorId);
-            const usersOnlineStatusResult = await Chat.facade.getUsersOnlineStatus(String(userId), String(recipientId), userType);
+            const usersOnlineStatusResult = await Chat.facade.getUsersOnlineStatus(Number(userId), Number(recipientId), userType);
             if (usersOnlineStatusResult.error) {
                 Controller.rawResponse(
                     res, usersOnlineStatusResult.statusCode,

@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import { ISocket } from "../../types";
-import { Events, Namespace, UserType } from "../../types/enums";
+import { Events, Namespaces, UserType } from "../../types/enums";
 import Handler from "./Handler";
 import { PresenceFacade } from "../../facade";
 import { OnlineCustomer, OnlineSupport, OnlineVendor } from "../../cache";
@@ -102,7 +102,7 @@ export default class SupportChatHandler {
 
             console.log('User chat rooms', rooms);
 
-            if (rooms.length > 0) io.of(Namespace.CHAT).to(rooms).emit('userIsOffline', Handler.responseData(200, false, "User has gone offline"));
+            if (rooms.length > 0) io.of(Namespaces.CHAT).to(rooms).emit('userIsOffline', Handler.responseData(200, false, "User has gone offline"));
             console.log(`User disconnected: userId - ${userId} , userType - ${userType} , socketId - ${socket.id}`);
         } catch (error) {
             console.error("❌ Error in disconnect:", error);

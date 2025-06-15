@@ -1,4 +1,4 @@
 import ChatHandler from "./ChatHandler";
-import PresenceHandler from "./PresenceHandler";
+import NotificationHandler from "./NotificationHandler";
 
-export { ChatHandler, PresenceHandler };
+export { ChatHandler, NotificationHandler };

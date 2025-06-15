@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import { ChatPagination, ISocket, MessagePagination } from "../../types";
-import { Namespace, UserType } from "../../types/enums";
+import { Namespaces, UserType } from "../../types/enums";
 import Handler from "./Handler";
 import { ChatManagementFacade } from "../../facade";
 import { TransactionChat, TransactionMessage } from "../../types/dtos";
@@ -14,10 +14,10 @@ export default class ChatHandler {
     public static async onConnection(io: Server, socket: ISocket) {
         console.log("User connected: ", socket.id);
         const userId = Number(socket.locals.data.id);
-        const userType = socket.locals.userType;
+        const userType = socket.locals.userType as UserType;
         console.log(`User id ${userId} , user type ${userType}`);
 
-        const onlineCacheUpdated = await ChatHandler.facade.updateOnlineCache(String(userId), userType, socket);
+        const onlineCacheUpdated = await ChatHandler.facade.updateChatSocketCache(userId, userType, socket);
         if (onlineCacheUpdated.error) {
             socket.emit('appError', onlineCacheUpdated);
             socket.disconnect(true);
@@ -50,7 +50,7 @@ export default class ChatHandler {
         console.log("✅ Rooms has been joint");
 
 
-        io.of(Namespace.CHAT).to(rooms).emit("userIsOnline", Handler.responseData(200, false, "User is online"));
+        io.of(Namespaces.CHAT).to(rooms).emit("userIsOnline", Handler.responseData(200, false, "User is online"));
         socket.emit('offlineMessages', Handler.responseData(200, false, "Offline messages has been sent successfully", offlineMessages));
         socket.emit('userChats', Handler.responseData(200, false, "Chats have been sent successfully", chat));
     }
@@ -128,7 +128,7 @@ export default class ChatHandler {
         const userId = Number(socket.locals.data.id);
         const userType = socket.locals.userType;
         const senderType = (userType as string).toUpperCase();
-        const chatNamespace = io.of(Namespace.CHAT);
+        const chatNamespace = io.of(Namespaces.CHAT);
 
         let {
             recipientId,
@@ -222,9 +222,9 @@ export default class ChatHandler {
             socket.emit('newSentChat', Handler.responseData(200, false, null, senderChat));
             chatNamespace.to(room).emit('receiveMessage', Handler.responseData(200, false, null, chat.messages));
             if (recipientOnlineData) {
-                const recipientSocketId = recipientOnlineData.chatSocketId;
+                const recipientSocketId = recipientOnlineData.chat;
                 chatNamespace.sockets.get(recipientSocketId)?.join(room); //💬 Forcing the the recipient to join the room 
-                socket.to(recipientSocketId).emit('newChat', Handler.responseData(200, false,null ,recipientChat));
+                socket.to(recipientSocketId).emit('newChat', Handler.responseData(200, false, null, recipientChat));
                 const recipientType = userType === UserType.Customer ? UserType.Vendor : UserType.Customer;
                 await updateChat.add('updateChat', { recipientId, recipientType, recipientSocketId }, { jobId: `send-${Date.now()}`, priority: 1 });
                 console.log(`✅ Message sent directly to user ${recipientId} via socket ${recipientSocketId}`);
@@ -313,7 +313,7 @@ export default class ChatHandler {
             return;
         }
 
-        io.of(Namespace.CHAT).to(room).emit('messageDeleted', Handler.responseData(200, false, "Message has been deleted successfully"));
+        io.of(Namespaces.CHAT).to(room).emit('messageDeleted', Handler.responseData(200, false, "Message has been deleted successfully"));
         console.log(
             `✅ Message ${messageId} deleted successfully from room ${room}`
         );
