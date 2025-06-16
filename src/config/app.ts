@@ -49,15 +49,6 @@ async function createApp() {
     streamRouter.initializeStreamer(productStreamer);
     streamRouter.initializeStreamer(notificationStreamer);
 
-    // Start consuming streams
-    const consumerName = `ecommerce-worker-${Math.random().toString(36).substring(7)}`;
-    await streamRouter.listen(consumerName, io);
-    console.log('Chat API StreamRouter is listening...');
-
-    // Start periodic stream cleanup (every hour, keep 1000 entries)
-    // await streamRouter.startStreamCleanup(60 * 60 * 1000, 1000);
-    // console.log('Started stream cleanup');
-
     const IWorkers: IWorker<any>[] = [
         new SendMessageProcessor({ connection: { url: env('redisURL')! } }, io),
         new UpdateChat({ connection: { url: env('redisURL')! } }, io),
@@ -186,7 +177,13 @@ async function createApp() {
     process.on('SIGTERM', shutdown);
     process.on('SIGINT', shutdown);
 
-    if (cluster.isPrimary) cronJobs.start();
+    if (cluster.isPrimary) {
+        // Start consuming streams
+        const consumerName = `ecommerce-worker-${Math.random().toString(36).substring(7)}`;
+        await streamRouter.listen(consumerName, io);
+        console.log('Chat API StreamRouter is listening...');
+        cronJobs.start();
+    }
 
     return server;
 }
