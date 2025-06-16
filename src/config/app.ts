@@ -11,11 +11,10 @@ import { ISocket } from "../types";
 import { user, chat as chatRoute, general } from "../routes";
 import { Namespaces, IWorker } from "../types/enums";
 import { createClient } from "redis";
-
 import cluster from "cluster";
 import compression from 'compression';
 import prisma from "../repos";
-
+import { v4 } from "uuid";
 import * as path from 'path';
 import { Queue, Worker, Job } from 'bullmq';
 import { parse } from 'url';
@@ -44,15 +43,14 @@ async function createApp() {
     app.set('view engine', 'ejs');
     app.set('views', path.join(__dirname, '../views'));
 
-    // streamRouter.initializeStreamer(userStreamer);
-    // streamRouter.initializeStreamer(storeStreamer);
+    streamRouter.initializeStreamer(userStreamer);
+    streamRouter.initializeStreamer(storeStreamer);
     // streamRouter.initializeStreamer(productStreamer);
-    // streamRouter.initializeStreamer(notificationStreamer);
+    streamRouter.initializeStreamer(notificationStreamer);
 
-    // // Start consuming streams
-    // const consumerName = `ecommerce-worker-${Math.random().toString(36).substring(7)}`;
-    // await streamRouter.listen(consumerName, io);
-    // console.log('Chat API StreamRouter is listening...');
+    //* Start consuming streams
+    const consumerName = `ecommerce-worker-${v4()}`;
+    await streamRouter.listen(consumerName, io);
 
     const IWorkers: IWorker<any>[] = [
         new SendMessageProcessor({ connection: { url: env('redisURL')! } }, io),

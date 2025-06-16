@@ -77,6 +77,7 @@ export default class StreamRouter {
 
     // Initialize consumer groups and start consuming
     public async listen(consumerName: string, io?: Server) {
+        logger.info('Chat API StreamRouter is listening...');
         for (const [stream, group] of this.groups) {
             try {
                 await this.redis.xgroup('CREATE', stream, group.consumerGroup, '0', 'MKSTREAM');
@@ -92,7 +93,7 @@ export default class StreamRouter {
     private async consumeStream(stream: string, group: StreamGroup, consumerName: string, io?: Server) {
         const retryCounts = new Map<string, number>();
 
-        const concurrency = 5;
+        const concurrency = 1;
         const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
         while (true) {
