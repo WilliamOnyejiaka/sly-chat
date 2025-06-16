@@ -44,10 +44,15 @@ async function createApp() {
     app.set('view engine', 'ejs');
     app.set('views', path.join(__dirname, '../views'));
 
-    streamRouter.initializeStreamer(userStreamer);
-    streamRouter.initializeStreamer(storeStreamer);
-    streamRouter.initializeStreamer(productStreamer);
-    streamRouter.initializeStreamer(notificationStreamer);
+    // streamRouter.initializeStreamer(userStreamer);
+    // streamRouter.initializeStreamer(storeStreamer);
+    // streamRouter.initializeStreamer(productStreamer);
+    // streamRouter.initializeStreamer(notificationStreamer);
+
+    // // Start consuming streams
+    // const consumerName = `ecommerce-worker-${Math.random().toString(36).substring(7)}`;
+    // await streamRouter.listen(consumerName, io);
+    // console.log('Chat API StreamRouter is listening...');
 
     const IWorkers: IWorker<any>[] = [
         new SendMessageProcessor({ connection: { url: env('redisURL')! } }, io),
@@ -177,13 +182,7 @@ async function createApp() {
     process.on('SIGTERM', shutdown);
     process.on('SIGINT', shutdown);
 
-    if (cluster.isPrimary) {
-        // Start consuming streams
-        const consumerName = `ecommerce-worker-${Math.random().toString(36).substring(7)}`;
-        await streamRouter.listen(consumerName, io);
-        console.log('Chat API StreamRouter is listening...');
-        cronJobs.start();
-    }
+    if (cluster.isPrimary) cronJobs.start();
 
     return server;
 }
