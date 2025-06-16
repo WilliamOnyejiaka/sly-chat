@@ -132,16 +132,17 @@ enum NotificationChannel {
 enum NotificationStatus {
   PENDING
   SENT
-  FAILED
+  VIEWED
 }
 
 model Notification {
   id         String              @id @default(auto()) @map("_id") @db.ObjectId
   vendorId   Int?
   customerId Int?
+  type       String
   channel    NotificationChannel @default(PUSH)
   content    Json
-  status     String
+  status     NotificationStatus  @default(PENDING)
   priority   Int                 @default(1)
   createdAt  DateTime            @default(now())
   updatedAt  DateTime            @updatedAt

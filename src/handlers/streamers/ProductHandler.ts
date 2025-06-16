@@ -9,6 +9,6 @@ export default class ProductHandler {
 
     public static async create(event: any, stream: string, id: string, io?: Server) {
         const data = event.data.data;
-        const result = await ProductHandler.notificationService.notify(data.userType as UserType, data.clientId, event.data, io!);
+        const result = await ProductHandler.notificationService.notify("HEllo",data.userType as UserType, data.clientId, event.data, io!);
     }
 }

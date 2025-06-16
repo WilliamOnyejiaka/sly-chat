@@ -96,7 +96,8 @@ export enum StreamEvents {
 
 export enum NotificationStatus {
     SENT = "SENT",
-    PENDING = "PENDING"
+    PENDING = "PENDING",
+    VIEWED = "VIEWED"
 }
 
 

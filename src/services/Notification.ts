@@ -13,7 +13,7 @@ export default class Notification extends BaseService<NotificationRepo> {
 
     private readonly userSocketCache = new UserSocket();
 
-    public async notify(userType: UserType, userId: number, data: any, io: Server) {
+    public async notify(type: string, userType: UserType, userId: number, data: any, io: Server) {
         const cache = await this.userSocketCache.get(userType, userId);
         if (cache.error) return false;
 
@@ -23,15 +23,15 @@ export default class Notification extends BaseService<NotificationRepo> {
         let userData = {};
         if (userType == UserType.Vendor) userData = { vendorId: userId };
         if (userType == UserType.Customer) userData = { customerId: userId };
-        if (userType == UserType.Admin) throw new Error("Admin user type for this method is not allowed");
+        if (userType == UserType.Admin) throw new Error("🛑 Admin user type for this method is not allowed");
 
         const notificationData: any = {
             ...userData,
             channel: 'PUSH',
-            // type: '', like,comment,post
+            type: type,
             status: isOnline ? NotificationStatus.SENT : NotificationStatus.PENDING,
             priority: 1,
-            content: JSON.stringify(data)
+            content: data
         };
 
         const repoResult = await this.repo?.insert(notificationData) as any;
@@ -44,7 +44,7 @@ export default class Notification extends BaseService<NotificationRepo> {
         if (isOnline) {
             const notificationNamespace = io.of(Namespaces.NOTIFICATION);
             notificationNamespace?.to(socketId)?.emit(NotificationEvents.NOTIFICATION, { data: repoResult.data });
-            logger.info(`notification for ${userType}:${userId} has been emitted`);
+            logger.info(`✅ notification for ${userType}:${userId} has been emitted`);
         }
 
         return true;
