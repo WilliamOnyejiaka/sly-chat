@@ -93,7 +93,7 @@ export default class StreamRouter {
     private async consumeStream(stream: string, group: StreamGroup, consumerName: string, io?: Server) {
         const retryCounts = new Map<string, number>();
 
-        const concurrency = 1;
+        const concurrency = 5;
         const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
         while (true) {
