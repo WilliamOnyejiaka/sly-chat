@@ -3,14 +3,13 @@ import cluster from "cluster";
 import * as os from "os";
 import createApp from "./config/app";
 import { env } from "./config";
-import prisma from "./repos";
 
 let environmentType = env('envType');
 const PORT = env('port');
 
 async function startServer() {
     const app = await createApp();
-    const numCpu = (os.cpus().length) - 3; // TODO: note this
+    const numCpu = (os.cpus().length) - 2; // TODO: note this
 
     if (cluster.isPrimary) {
         for (let i = 0; i < numCpu; i++) cluster.fork();

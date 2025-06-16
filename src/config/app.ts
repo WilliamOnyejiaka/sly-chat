@@ -83,6 +83,10 @@ async function createApp() {
 
     // app.use(secureApi);
 
+    app.get('/greet', async (req: Request, res: Response) => {
+        res.status(200).json({ message: "Hello World", error: false });
+    });
+
     // Health check endpoint
     app.get("/health", async (req: Request, res: Response) => {
         try {
