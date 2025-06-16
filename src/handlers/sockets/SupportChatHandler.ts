@@ -2,15 +2,8 @@ import { Server } from "socket.io";
 import { ISocket } from "../../types";
 import { Events, Namespaces, UserType } from "../../types/enums";
 import Handler from "./Handler";
-import { PresenceFacade } from "../../facade";
-import { OnlineCustomer, OnlineSupport, OnlineVendor } from "../../cache";
-
 
 export default class SupportChatHandler {
-    private static readonly facade: PresenceFacade = new PresenceFacade();
-    private static readonly onlineSupport = new OnlineSupport();
-    private static readonly onlineCustomer = new OnlineCustomer();
-    private static readonly onlineVendor = new OnlineVendor();
 
     public static async onConnection(io: Server, socket: ISocket) {
         const supportChatSocketId = socket.id;
@@ -80,29 +73,6 @@ export default class SupportChatHandler {
         try {
             const userId = Number(socket.locals.data.id);
             const userType = socket.locals.userType;
-            const facadeResult = await SupportChatHandler.facade.deleteOnlineUser(String(userId), userType);
-
-            if (facadeResult.error) {
-                socket.emit('appError', {
-                    error: true,
-                    message: facadeResult.message,
-                    statusCode: 500
-                });
-                return;
-            }
-
-            const chatRoomsResult = await SupportChatHandler.facade.getUserTransactionChatRooms(userId, userType);
-            if (chatRoomsResult.error) {
-                socket.emit('appError', chatRoomsResult);
-                return;
-            }
-
-            const chatRooms = chatRoomsResult.data;
-            const rooms = chatRooms ? (chatRooms as Array<any>).map(item => `chat_${item.productId}_${item.vendorId}_${item.customerId}`) : [];
-
-            console.log('User chat rooms', rooms);
-
-            if (rooms.length > 0) io.of(Namespaces.CHAT).to(rooms).emit('userIsOffline', Handler.responseData(200, false, "User has gone offline"));
             console.log(`User disconnected: userId - ${userId} , userType - ${userType} , socketId - ${socket.id}`);
         } catch (error) {
             console.error("❌ Error in disconnect:", error);
