@@ -2,8 +2,9 @@ import { Notification as NotificationRepo } from "../repos";
 import { UserSocket } from "../cache";
 import BaseService from "./bases/BaseService";
 import { Server } from "socket.io";
-import { Namespaces, UserType, NotificationStatus, NotificationEvents } from "../types/enums";
+import { Namespaces, UserType, NotificationStatus, NotificationEvents, ServiceResultDataType } from "../types/enums";
 import { logger } from "../config";
+import { getPagination } from "../utils";
 
 export default class Notification extends BaseService<NotificationRepo> {
 
@@ -48,5 +49,21 @@ export default class Notification extends BaseService<NotificationRepo> {
         }
 
         return true;
+    }
+
+    public async offlineNotifications(userId: number, userType: UserType, page: number, limit: number) {
+        const idField = userType === UserType.Vendor ? "vendorId" : "customerId";
+        const user = { [idField]: userId };
+        const { skip, take } = super.skipAndTake(page, limit);
+
+        const repoResult = await this.repo!.offlineNotifications(user, skip, take);
+        const repoResultError = this.handleRepoError(ServiceResultDataType.SOCKET, repoResult);
+        if (repoResultError) return repoResultError;
+
+        const data = repoResult.data as any;
+        const totalRecords = data.totalItems;
+        const items = data.items;
+        const paginationData = getPagination(page, limit, totalRecords);
+        return super.responseData(ServiceResultDataType.SOCKET, 200, false, null, { items, pagination: paginationData });
     }
 }
