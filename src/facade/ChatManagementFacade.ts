@@ -11,7 +11,7 @@ import { Cloudinary } from "../services";
 
 export default class ChatManagementFacade extends BaseFacade {
 
-    private readonly chatService = new Chat();
+    public readonly chatService = new Chat();
     private readonly messageService = new Message();
     // private readonly onlineCustomer: OnlineCustomer = new OnlineCustomer();
     // private readonly onlineVendor: OnlineVendor = new OnlineVendor();
@@ -62,7 +62,7 @@ export default class ChatManagementFacade extends BaseFacade {
         if (serviceResultError) return serviceResultError;
 
         const chat = serviceResult.data.items;
-        // console.log(chat);
+        console.log(serviceResult);
 
         let offlineMessages = chat.flatMap((item: any) => item.messages.filter((message: any) => message.recipientOnline === false));
 
@@ -77,48 +77,8 @@ export default class ChatManagementFacade extends BaseFacade {
         });
 
         const rooms = chat.length > 0 ? chat.map((item: any) => `chat_${item.productId}_${item.vendorId}_${item.customerId}`) : null;
-        return this.service.socketResponseData(200, false, null, { chat, offlineMessages, rooms });
+        return this.service.socketResponseData(200, false, null, { chat, offlineMessages, rooms, });
     }
-
-
-    // public async updateOnlineCache(userId: string, userType: UserType, socket: ISocket): Promise<ServiceData> {
-    //     const cache = userType === UserType.Customer ? this.onlineCustomer : this.onlineVendor;
-    //     const onlineCache = await cache.get(userId);
-    //     if (onlineCache.error) return this.service.socketResponseData(500, true, "Something went wrong")
-
-    //     const onlineData = onlineCache.data;
-    //     if (!onlineData) return this.service.socketResponseData(400, true, "Connect to presence namespace first");
-
-    //     const socketId = JSON.parse(onlineData).socketId;
-    //     const successful = await cache.set(userId, {
-    //         chatSocketId: socket.id,
-    //         socketId,
-    //     });
-
-    //     if (!successful) this.service.socketResponseData(500, true, "Something went wrong")
-
-    //     return this.service.socketResponseData(200, false);
-    // }
-
-    // public async getRecipientOnlineStatus(userType: UserType, recipientId: string) {
-    //     const recipientOnlineCache = await (userType === UserType.Customer
-    //         ? this.onlineVendor
-    //         : this.onlineCustomer).get(recipientId);
-    //     if (recipientOnlineCache.error) return this.service.socketResponseData(500, true, "Something went wrong");
-
-    //     const data = recipientOnlineCache?.data ? JSON.parse(recipientOnlineCache.data) : null;
-    //     return this.service.socketResponseData(200, false, null, data);
-    // }
-
-    // public async getUserOnlineStatus(userType: UserType, userId: string) {
-    //     const recipientOnlineCache = await (userType === UserType.Vendor
-    //         ? this.onlineVendor
-    //         : this.onlineCustomer).get(userId);
-    //     if (recipientOnlineCache.error) return this.service.socketResponseData(500, true, "Something went wrong");
-
-    //     const data = recipientOnlineCache?.data ? JSON.parse(recipientOnlineCache.data) : null;
-    //     return this.service.socketResponseData(200, false, null, data);
-    // }
 
     public async updateChatSocketCache(userId: number, userType: UserType, socket: ISocket): Promise<ServiceData> {
         const onlineCache = await this.userSocket.get(userType, userId);

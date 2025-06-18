@@ -34,8 +34,8 @@ export default class Message extends Repo<MessageDto> {
 
     public async insert(newMessage: any) {
         try {
-            const [message] = await prisma.$transaction([
-                prisma.message.create({
+            const data = await this.prisma.$transaction(async (tx): Promise<any> => {
+                const message = await tx.message.create({
                     data: {
                         text: newMessage.text,
                         senderId: newMessage.senderId,
@@ -43,18 +43,64 @@ export default class Message extends Repo<MessageDto> {
                         senderType: newMessage.senderType,
                         chatId: newMessage.chatId,
                     }
-                }),
-                prisma.chat.update({
+                });
+
+                await tx.chat.update({
                     where: { id: newMessage.chatId! },
                     data: { lastMessageAt: new Date() },
-                }),
-            ]);
+                });
 
-            return this.repoResponse(false, 201, null, message);
+                return message;
+            });
+
+            return this.repoResponse(false, 201, null, data);
+
+            // const [message] = await prisma.$transaction([
+            //     prisma.message.create({
+            //         data: {
+            //             text: newMessage.text,
+            //             senderId: newMessage.senderId,
+            //             recipientOnline: newMessage.recipientOnline,
+            //             senderType: newMessage.senderType,
+            //             chatId: newMessage.chatId,
+            //         }
+            //     }),
+            //     prisma.chat.update({
+            //         where: { id: newMessage.chatId! },
+            //         data: { lastMessageAt: new Date() },
+            //     }),
+            // ]);
+
+            // return this.repoResponse(false, 201, null, message);
         } catch (error) {
             return this.handleDatabaseError(error);
         }
     }
+
+
+    // public async insert(newMessage: any) {
+    //     try {
+    //         const [message] = await prisma.$transaction([
+    //             prisma.message.create({
+    //                 data: {
+    //                     text: newMessage.text,
+    //                     senderId: newMessage.senderId,
+    //                     recipientOnline: newMessage.recipientOnline,
+    //                     senderType: newMessage.senderType,
+    //                     chatId: newMessage.chatId,
+    //                 }
+    //             }),
+    //             prisma.chat.update({
+    //                 where: { id: newMessage.chatId! },
+    //                 data: { lastMessageAt: new Date() },
+    //             }),
+    //         ]);
+
+    //         return this.repoResponse(false, 201, null, message);
+    //     } catch (error) {
+    //         return this.handleDatabaseError(error);
+    //     }
+    // }
 
     public async insertWithMedia(newMessage: TransactionMessage, medias: any) {
         try {

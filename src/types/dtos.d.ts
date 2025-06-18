@@ -4,7 +4,6 @@ export interface TransactionChat {
     productId: number,
     vendorId: number,
     customerId: number,
-    storeId: number,
     lastMessageAt?: DateTime,
     createdAt?: DateTime,
 };

@@ -80,6 +80,15 @@ export default class Chat extends BaseService<ChatRepo> {
         return super.responseData(dataType, 200, false, "Chats and messages has been retrieved successfully", { items, pagination: paginationData });
     }
 
+    public async getChatId(productId: number, customerId: number, vendorId: number) {
+        const repoResult = await this.repo!.getChatId(productId, customerId, vendorId);
+        const repoResultError = super.httpHandleRepoError(repoResult);
+        if (repoResultError) return repoResultError;
+        const data = repoResult.data;
+
+        return super.responseData(ServiceResultDataType.SOCKET, 200, false, null, { id: data ? (data as any).id : null });
+    }
+
     public async getChatIds(userId: number, userType: UserType, dataType: ServiceResultDataType) {
         const repoResult = await this.repo!.getChatIds(userId, userType);
         const repoResultError = super.handleRepoError(dataType, repoResult);

@@ -84,13 +84,15 @@ model Chat {
   productId     Int
   vendorId      Int
   customerId    Int
-  storeId       Int
+  // storeId       Int
   lastMessageAt DateTime  @default(now())
   messages      Message[]
   createdAt     DateTime  @default(now())
-  store         Store     @relation(fields: [storeId], references: [storeId])
+  // store         Store     @relation(fields: [storeId], references: [storeId])
   vendor        Vendor    @relation(fields: [vendorId], references: [userId], onDelete: Cascade)
   customer      Customer  @relation(fields: [customerId], references: [userId], onDelete: Cascade)
+  Store         Store?    @relation(fields: [storeId], references: [id])
+  storeId       String?   @db.ObjectId
 }
 
 model Message {

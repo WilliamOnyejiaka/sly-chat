@@ -20,8 +20,7 @@ const task2 = cron.schedule('*/5 * * * *', async () => {
     timezone: 'UTC'
 });
 
-const task3 = cron.schedule('*/1 * * * *', async () => {
-    logger.info("Hello");
+const task3 = cron.schedule('*/14 * * * *', async () => {
     https.get("https://sly-chat.onrender.com/greet", res => {
         if (res.statusCode === 200) {
             logger.http("Keeping server running");

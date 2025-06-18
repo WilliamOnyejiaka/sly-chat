@@ -59,7 +59,6 @@ export default class Chat {
             };
 
             const newChat: TransactionChat = {
-                storeId: Number(storeId),
                 customerId,
                 vendorId,
                 productId: Number(productId),

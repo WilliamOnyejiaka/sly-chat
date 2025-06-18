@@ -50,7 +50,6 @@ export default class Chat extends Repo {
                     vendorId: newChat.vendorId,
                     productId: newChat.productId,
                     customerId: newChat.customerId,
-                    storeId: newChat.storeId,
                     messages: {
                         create: {
                             text: newMessage.text,
@@ -97,7 +96,6 @@ export default class Chat extends Repo {
                     vendorId: newChat.vendorId,
                     productId: newChat.productId,
                     customerId: newChat.customerId,
-                    storeId: newChat.storeId,
                     messages: {
                         create: {
                             text: newMessage.text,
@@ -144,46 +142,46 @@ export default class Chat extends Repo {
 
     public async getVendorChatsWithMessages(userId: number, pagination: ChatLimit) {
         try {
-            const data = await this.prisma.$transaction(async (tx): Promise<{ items: any, totalItems: number }> => {
-                const where = {
-                    vendorId: userId
-                };
-                const items = await tx.chat.findMany({
-                    skip: pagination.skip,
-                    take: pagination.take,
-                    where: where,
-                    include: {
-                        messages: {
-                            ...pagination.message,
-                            select: {
-                                id: true,
-                                senderId: true,
-                                text: true,
-                                timestamp: true,
-                                read: true,
-                                recipientOnline: true,
-                                chatId: true,
-                                senderType: true,
-                                messageMedias: {
-                                    select: {
-                                        id: true,
-                                        url: true,
-                                        size: true,
-                                        mimeType: true,
-                                        thumbnail: true,
-                                        duration: true
-                                    }
+            // const data = await this.prisma.$transaction(async (tx): Promise<{ items: any, totalItems: number }> => {
+            const where = {
+                vendorId: userId
+            };
+            const items = await this.prisma.chat.findMany({
+                skip: pagination.skip,
+                take: pagination.take,
+                where: where,
+                include: {
+                    messages: {
+                        ...pagination.message,
+                        select: {
+                            id: true,
+                            senderId: true,
+                            text: true,
+                            timestamp: true,
+                            read: true,
+                            recipientOnline: true,
+                            chatId: true,
+                            senderType: true,
+                            messageMedias: {
+                                select: {
+                                    id: true,
+                                    url: true,
+                                    size: true,
+                                    mimeType: true,
+                                    thumbnail: true,
+                                    duration: true
                                 }
-                            },
-                            orderBy: { updatedAt: 'desc' }
+                            }
                         },
-                        customer: true
-                    }
-                });
-
-                const totalItems = await tx.chat.count({ where: where })
-                return { items, totalItems };
+                        orderBy: { updatedAt: 'desc' }
+                    },
+                    customer: true
+                }
             });
+
+            const totalItems = await this.prisma.chat.count({ where: where })
+            const data = { items, totalItems };
+            // });
 
             return this.repoResponse(false, 200, null, data);
         } catch (error) {
@@ -247,61 +245,61 @@ export default class Chat extends Repo {
     // }
     public async getCustomerChatsWithMessages(userId: number, pagination: ChatLimit) {
         try {
-            const data = await this.prisma.$transaction(async (tx): Promise<{ items: any, totalItems: number }> => {
-                const where = {
-                    customerId: userId
-                };
-                const items = await tx.chat.findMany({
-                    where: where,
-                    skip: pagination.skip,
-                    take: pagination.take,
-                    orderBy: { lastMessageAt: 'desc' },
-                    include: {
-                        messages: {
-                            ...pagination.message,
-                            select: {
-                                id: true,
-                                senderId: true,
-                                text: true,
-                                timestamp: true,
-                                read: true,
-                                recipientOnline: true,
-                                chatId: true,
-                                senderType: true,
-                                messageMedias: {
-                                    select: {
-                                        id: true,
-                                        url: true,
-                                        size: true,
-                                        mimeType: true,
-                                        thumbnail: true,
-                                        duration: true
-                                    }
+            // const data = await this.prisma.$transaction(async (tx): Promise<{ items: any, totalItems: number }> => {
+            const where = {
+                customerId: userId
+            };
+            const items = await this.prisma.chat.findMany({
+                where: where,
+                skip: pagination.skip,
+                take: pagination.take,
+                orderBy: { lastMessageAt: 'desc' },
+                include: {
+                    messages: {
+                        ...pagination.message,
+                        select: {
+                            id: true,
+                            senderId: true,
+                            text: true,
+                            timestamp: true,
+                            read: true,
+                            recipientOnline: true,
+                            chatId: true,
+                            senderType: true,
+                            messageMedias: {
+                                select: {
+                                    id: true,
+                                    url: true,
+                                    size: true,
+                                    mimeType: true,
+                                    thumbnail: true,
+                                    duration: true
                                 }
-                            },
-                            orderBy: { updatedAt: 'desc' }
-                        },
-                        vendor: {
-                            select: {
-                                id: true,
-                                userId: true,
-                                firstName: true,
-                                lastName: true,
-                                profilePictureUrl: true,
-                                email: true,
-                                verified: true,
-                                phoneNumber: true,
-                                active: true,
-                                createdAt: true,
-                                updatedAt: true,
-                                store: true
                             }
-                        }
+                        },
+                        orderBy: { updatedAt: 'desc' }
                     },
-                });
-                const totalItems = await tx.chat.count({ where: where })
-                return { items, totalItems };
+                    vendor: {
+                        select: {
+                            id: true,
+                            userId: true,
+                            firstName: true,
+                            lastName: true,
+                            profilePictureUrl: true,
+                            email: true,
+                            verified: true,
+                            phoneNumber: true,
+                            active: true,
+                            createdAt: true,
+                            updatedAt: true,
+                            store: true
+                        }
+                    }
+                },
             });
+            const totalItems = await this.prisma.chat.count({ where: where })
+            const data = { items, totalItems };
+            // });
 
             return this.repoResponse(false, 200, null, data);
         } catch (error) {
@@ -351,5 +349,21 @@ export default class Chat extends Repo {
             id: id,
             ...where
         });
+    }
+
+    public async getChatId(productId: number, customerId: number, vendorId: number) {
+        try {
+            const where = { productId, customerId, vendorId };
+            const item = await this.prisma.chat.findFirst({
+                where,
+                select: {
+                    id: true
+                }
+            });
+            return this.repoResponse(false, 200, null, item);
+        } catch (error) {
+            return this.handleDatabaseError(error);
+        }
+
     }
 }

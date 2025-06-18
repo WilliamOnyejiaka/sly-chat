@@ -133,11 +133,10 @@ export default class ChatHandler {
         let {
             recipientId,
             productId,
-            text,
-            storeId
+            text
         } = data;
 
-        if (!recipientId || !text || !productId || !storeId) {
+        if (!recipientId || !text || !productId) {
             socket.emit('appError', Handler.responseData(400, true, "Invalid data provided"));
             return;
         }
@@ -151,33 +150,18 @@ export default class ChatHandler {
         }
 
         const recipientOnlineData = statusResult.data;
-        const recipientOnline = !!recipientOnlineData;
+        const recipientOnline = recipientOnlineData.data && recipientOnlineData.data.chat ? true : false;
         const room = `chat_${productId}_${vendorId}_${customerId}`;
-        const pagination: ChatPagination = {
-            page: 1,
-            limit: 10,
-            message: {
-                page: 1,
-                limit: 10
-            }
-        };
-        const facadeResult = await ChatHandler.facade.socketGetChatWithRoomId(productId, customerId, vendorId, pagination);
-        if (facadeResult.error) {
-            socket.emit('appError', facadeResult);
-            return;
-        }
 
-        console.log(facadeResult);
+        const chatId: string | null = ((await ChatHandler.facade.chatService.getChatId(productId, customerId, vendorId)) as { statusCode: number; error: boolean; message: string | null; data: any }).data?.id;
 
-        let chat = facadeResult.data.items;
-        if (!chat) {
+        if (!chatId) {
             console.log(`💬 Creating new chat for room `);
 
             const newChat: TransactionChat = {
                 productId,
                 vendorId,
                 customerId,
-                storeId
             };
             const newMessage: TransactionMessage = { senderId: userId, text, recipientOnline, senderType };
 
@@ -188,9 +172,8 @@ export default class ChatHandler {
                 return;
             }
 
-            chat = newChatResult.data; // Get the newly created chat
-            console.log(room);
-
+            const chat = newChatResult.data; // Get the newly created chat
+            
             socket.join(room);
             console.log(`✅ New chat has been created`);
             const vendorProfile = chat.vendor;
@@ -234,14 +217,14 @@ export default class ChatHandler {
             console.log(`📩 User ${userId} sending message to room ${room}: "${text}"`);
 
             console.log(`🟡 Adding message to existing chat for room ${room}`);
-            const newMessageResult = await ChatHandler.facade.socketCreateMessage(userId, text, chat.id, recipientOnline, senderType);
+            const newMessageResult = await ChatHandler.facade.socketCreateMessage(userId, text, chatId, recipientOnline, senderType);
             if (newMessageResult.error) {
                 socket.emit('appError', newMessageResult);
                 return;
             }
 
             // Mark all existing messages as read except for the sender's own messages
-            const markMessagesAsReadResult = await ChatHandler.facade.socketMarkMessagesAsRead(chat.id, senderType);
+            const markMessagesAsReadResult = await ChatHandler.facade.socketMarkMessagesAsRead(chatId, senderType);
             if (markMessagesAsReadResult.error) {
                 socket.emit('appError', markMessagesAsReadResult);
                 return;
@@ -383,25 +366,25 @@ export default class ChatHandler {
         try {
             const userId = Number(socket.locals.data.id);
             const userType = socket.locals.userType;
-            const pagination: ChatPagination = {
-                page: 1,
-                limit: 10,
-                message: {
-                    page: 1,
-                    limit: 10
-                }
-            }; const facadeResult = await ChatHandler.facade.socketGetUserChats(userId, userType, pagination); // TODO: handle this bro, this ain't right
-            if (facadeResult.error) {
-                socket.emit('appError', facadeResult);
-                return;
-            }
-            const chat = facadeResult.data;
-            const rooms = chat.map((item: any) => `chat_${item.productId}_${item.vendorId}_${item.customerId}`);
+            // const pagination: ChatPagination = {
+            //     page: 1,
+            //     limit: 10,
+            //     message: {
+            //         page: 1,
+            //         limit: 10
+            //     }
+            // }; const facadeResult = await ChatHandler.facade.socketGetUserChats(userId, userType, pagination); // TODO: handle this bro, this ain't right
+            // if (facadeResult.error) {
+            //     socket.emit('appError', facadeResult);
+            //     return;
+            // }
+            // const chat = facadeResult.data;
+            // const rooms = chat.map((item: any) => `chat_${item.productId}_${item.vendorId}_${item.customerId}`);
 
-            if (rooms.length > 0) {
-                socket.leave(rooms);
-                // socket.to(rooms).emit('userIsOffline', Handler.responseData(200, false, "User has gone offline"));
-            }
+            // if (rooms.length > 0) {
+            //     socket.leave(rooms);
+            //     // socket.to(rooms).emit('userIsOffline', Handler.responseData(200, false, "User has gone offline"));
+            // }
             console.log(`User disconnected: userId - ${userId} , userType - ${userType} , socketId - ${socket.id}`);
         } catch (error) {
             console.error("❌ Error in disconnect:", error);
