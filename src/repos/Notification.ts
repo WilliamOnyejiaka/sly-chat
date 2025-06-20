@@ -42,4 +42,24 @@ export default class Notification extends Repo {
             return this.handleDatabaseError(error);
         }
     }
+
+    public async userNotifications(user: any, skip: number, take: number) {
+        try {
+            const where = {
+                ...user
+            };
+            
+            const items = await this.prisma.notification.findMany({
+                where,
+                skip,
+                take,
+            });
+
+            const totalItems = await this.prisma.notification.count({ where: where })
+            const data = { items, totalItems };
+            return this.repoResponse(false, 200, null, data);
+        } catch (error) {
+            return this.handleDatabaseError(error);
+        }
+    }
 }

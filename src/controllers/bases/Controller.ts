@@ -1,4 +1,4 @@
-import { Result, ValidationError } from "express-validator";
+import { Result, ValidationError, validationResult } from "express-validator";
 import BaseService from "../../services/bases/BaseService";
 import { Request, Response } from "express";
 import { HttpData } from "../../types";
@@ -17,6 +17,16 @@ export default class Controller {
     public static handleValidationErrors(res: Response, validationErrors: Result<ValidationError>): void {
         const error = JSON.parse(validationErrors.array()[0].msg);
         res.status(error.statusCode).json({ error: true, message: error.message });
+    }
+
+    public static handleValidationError(req: Request, res: Response): void {
+        const validationErrors = validationResult(req);
+
+        if (!validationErrors.isEmpty()) {
+            const error = JSON.parse(validationErrors.array()[0].msg);
+            res.status(error.statusCode).json({ error: true, message: error.message });
+            return;
+        }
     }
 
     public static response(res: Response, responseData: HttpData) {

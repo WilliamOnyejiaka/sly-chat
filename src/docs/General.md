@@ -13,7 +13,6 @@ This key should be put in the `'x-api-key'` header and this key is for the route
 ### **The Following are the docs**
 
 - [TransactionChat](/docs?doc=chat)
-- [Presence](/docs?doc=presence)
+- [Notification](/docs?doc=notification)
 - [SendFile](/docs?doc=sendFile)
 - [ChatRoutes](/docs?doc=chatRoutes)
-

@@ -41,10 +41,10 @@ export default class Message extends BaseService<MessageRepo> {
         return super.responseData(dataType, 200, false, "Messages has been updated successfully", updateOfflineMessagesRepoResult.data);
     }
 
-    public async markMessagesAsRead(chatId: string, senderType: any, dataType: ServiceResultDataType) {
-        const repoResult = await this.repo!.markMessagesAsRead(chatId, senderType);
-        const repoResultError = super.handleRepoError(dataType, repoResult);
-        if (repoResultError) return repoResultError;
-        return super.responseData(dataType, 200, false, "Messages has been marked as read", repoResult.data);
-    }
+    // public async markMessagesAsRead(chatId: string, senderType: any, dataType: ServiceResultDataType) {
+    //     const repoResult = await this.repo!.markMessagesAsRead(chatId, senderType);
+    //     const repoResultError = super.handleRepoError(dataType, repoResult);
+    //     if (repoResultError) return repoResultError;
+    //     return super.responseData(dataType, 200, false, "Messages has been marked as read", repoResult.data);
+    // }
 }

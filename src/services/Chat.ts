@@ -4,7 +4,7 @@ import { CustomerCache } from "../cache";
 import BaseService from "./bases/BaseService";
 import { ServiceResultDataType, UserType } from "../types/enums";
 import { TransactionChat, TransactionMessage } from "../types/dtos";
-import { ChatLimit, ChatPagination, MessageLimit, MessagePagination, UploadedFiles } from "../types";
+import { ChatLimit, ChatPagination, MessageLimit, MessagePagination, SocketData, UploadedFiles } from "../types";
 import { getPagination } from "../utils";
 
 export default class Chat extends BaseService<ChatRepo> {
@@ -44,6 +44,29 @@ export default class Chat extends BaseService<ChatRepo> {
             data = { ...data, pagination: messagePagination }
         }
         return super.responseData(dataType, 201, false, "Chat has been retrieved successfully", data);
+    }
+
+    public async offlineMessages(userId: number, userType: UserType) {
+        
+    }
+
+    public async joinChat(
+        productId: number,
+        customerId: number,
+        vendorId: number,
+        pagination: MessagePagination,
+        userType: UserType
+    ) {
+        const messageLimit: MessageLimit = this.messageLimit(pagination);
+        const repoResult = await this.repo!.roomChat(productId, customerId, vendorId, messageLimit, userType);
+        const repoResultError = super.handleRepoError(ServiceResultDataType.SOCKET, repoResult) as SocketData;
+        if (repoResultError) return repoResultError;
+        let { item, totalMessages } = repoResult.data as any;
+        if (item && item.messages) {
+            const messagePagination = getPagination(pagination.page, pagination.limit, totalMessages);
+            item = { ...item, pagination: messagePagination }
+        }
+        return super.responseData(ServiceResultDataType.SOCKET, 200, false, "Chat has been retrieved successfully", item) as SocketData;
     }
 
     // public async getUserChats(userId: number, userType: UserType, dataType: ServiceResultDataType) {

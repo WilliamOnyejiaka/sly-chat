@@ -12,7 +12,6 @@ export default class Chat extends Repo {
         senderId: true,
         text: true,
         timestamp: true,
-        read: true,
         recipientOnline: true,
         chatId: true,
         senderType: true,
@@ -50,6 +49,8 @@ export default class Chat extends Repo {
                     vendorId: newChat.vendorId,
                     productId: newChat.productId,
                     customerId: newChat.customerId,
+                    unReadCustomerMessages: newChat.unReadCustomerMessages,
+                    unReadVendorMessages: newChat.unReadVendorMessages,
                     messages: {
                         create: {
                             text: newMessage.text,
@@ -158,7 +159,6 @@ export default class Chat extends Repo {
                             senderId: true,
                             text: true,
                             timestamp: true,
-                            read: true,
                             recipientOnline: true,
                             chatId: true,
                             senderType: true,
@@ -188,6 +188,94 @@ export default class Chat extends Repo {
             return this.handleDatabaseError(error);
         }
     }
+
+
+    public async offlineMessages(userId: number, userType: UserType, skip: number, take: number) {
+        try {
+            const data = await this.prisma.$transaction(async (tx) => {
+                const where = { senderId: userId, senderType: userType.toUpperCase() as any, recipientOnline: false };
+                const items = await tx.message.findMany({
+                    skip,
+                    take,
+                    where,
+                    include: { chat: true }
+                });
+
+                const messageIds = items.map(item => item.id);
+
+                if (items.length > 0) {
+                    await tx.message.updateMany({
+                        where: {
+                            id: { in: messageIds }
+                        },
+                        data: {
+                            recipientOnline: true
+                        }
+                    });
+                }
+
+                const totalRecords = tx.message.count({ where });
+                return { items, totalRecords };
+            });
+        } catch (error) {
+            return this.handleDatabaseError(error);
+        }
+    }
+
+    public async roomChat(productId: number, customerId: number, vendorId: number, pagination: MessageLimit, userType: UserType) {
+        try {
+            const data = await this.prisma.$transaction(async (tx) => {
+                const where = { productId, customerId, vendorId };
+                const item = await tx.chat.findFirst({
+                    where: where,
+                    include: {
+                        messages: {
+                            ...pagination,
+                            select: {
+                                id: true,
+                                senderId: true,
+                                text: true,
+                                timestamp: true,
+                                recipientOnline: true,
+                                chatId: true,
+                                senderType: true,
+                                messageMedias: {
+                                    select: {
+                                        id: true,
+                                        url: true,
+                                        size: true,
+                                        mimeType: true,
+                                        thumbnail: true,
+                                        duration: true
+                                    }
+                                }
+                            },
+                            orderBy: { updatedAt: 'desc' }
+                        }
+                    }
+                });
+
+                let totalMessages = 0;
+                if (item) {
+                    totalMessages = await tx.message.count({ where: { chatId: item?.id } });
+                    const updateData = userType === UserType.Customer ? { unReadCustomerMessages: false } : { unReadVendorMessages: false };
+                    await tx.chat.update({
+                        where: {
+                            id: item.id
+                        },
+                        data: updateData
+                    });
+                }
+
+                return { item, totalMessages };
+            });
+
+            return this.repoResponse(false, 200, null, data);
+        } catch (error) {
+            return this.handleDatabaseError(error);
+        }
+    }
+
     public async getChatWithRoomId(productId: number, customerId: number, vendorId: number, pagination: MessageLimit) {
         try {
             const where = { productId, customerId, vendorId };
@@ -202,7 +290,6 @@ export default class Chat extends Repo {
                             senderId: true,
                             text: true,
                             timestamp: true,
-                            read: true,
                             recipientOnline: true,
                             chatId: true,
                             senderType: true,
@@ -262,7 +349,6 @@ export default class Chat extends Repo {
                             senderId: true,
                             text: true,
                             timestamp: true,
-                            read: true,
                             recipientOnline: true,
                             chatId: true,
                             senderType: true,

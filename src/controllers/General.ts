@@ -10,7 +10,7 @@ export default class General {
             const query = req.query.doc as string;
             const files: Record<string, string> = {
                 'chat': "TransactionChat.md",
-                'presence': "Presence.md",
+                'notification': "Notification.md",
                 'general': "General.md",
                 'sendFile': "SendFile.md",
                 'chatRoutes': "ChatRoutes.md"

@@ -6,20 +6,21 @@ import { ChatManagementFacade } from "../../facade";
 import { TransactionChat, TransactionMessage } from "../../types/dtos";
 import { Events } from "../../types/enums";
 import { updateChat } from "../../config/bullMQ";
+import { logger, redisClient } from "../../config";
 
 export default class ChatHandler {
 
     private static readonly facade: ChatManagementFacade = new ChatManagementFacade();
 
     public static async onConnection(io: Server, socket: ISocket) {
-        console.log("User connected: ", socket.id);
         const userId = Number(socket.locals.data.id);
         const userType = socket.locals.userType as UserType;
-        console.log(`User id ${userId} , user type ${userType}`);
+
+        logger.info(`${userType}:${userId} with the socket id - ${socket.id} has connected to chat namespace`);
 
         const onlineCacheUpdated = await ChatHandler.facade.updateChatSocketCache(userId, userType, socket);
         if (onlineCacheUpdated.error) {
-            socket.emit('appError', onlineCacheUpdated);
+            socket.emit(Events.APP_ERROR, onlineCacheUpdated);
             socket.disconnect(true);
             return;
         }
@@ -34,7 +35,7 @@ export default class ChatHandler {
 
         const getUserChatsAndOfflineMessages = await ChatHandler.facade.getUserChatsAndOfflineMessages(userId, userType, pagination);
         if (getUserChatsAndOfflineMessages.error) {
-            socket.emit('appError', getUserChatsAndOfflineMessages);
+            socket.emit(Events.APP_ERROR, getUserChatsAndOfflineMessages);
             return;
         }
         console.log("✅ User offline messages has been retrieved");
@@ -48,7 +49,6 @@ export default class ChatHandler {
 
         if (rooms) socket.join(rooms);
         console.log("✅ Rooms has been joint");
-
 
         io.of(Namespaces.CHAT).to(rooms).emit("userIsOnline", Handler.responseData(200, false, "User is online"));
         socket.emit('offlineMessages', Handler.responseData(200, false, "Offline messages has been sent successfully", offlineMessages));
@@ -82,46 +82,35 @@ export default class ChatHandler {
     public static async joinChat(io: Server, socket: ISocket, data: any) {
         const userId = socket.locals.data.id;
         const userType = socket.locals.userType;
-        const senderType = (userType as string).toUpperCase();
-        let { productId, recipientId, page, limit } = data;
+        let { productId, recipientId } = data;
         const pagination: MessagePagination = {
-            page: page,
-            limit: limit
+            page: 1,
+            limit: 10
         };
 
         const [customerId, vendorId] = userType === UserType.Customer ? [userId, recipientId] : [recipientId, userId];
         const room = `chat_${productId}_${vendorId}_${customerId}`;
 
-        const facadeResult = await ChatHandler.facade.socketGetChatWithRoomId(productId, customerId, vendorId, pagination);
+        const facadeResult = await ChatHandler.facade.chatService.joinChat(productId, customerId, vendorId, pagination, userType);
         if (facadeResult.error) {
             socket.emit(Events.APP_ERROR, facadeResult);
             return;
         }
 
-        console.log(`🟢 User ${userId} joining room: ${room}`)
+        logger.info(`🏃 ${userType}:${userId} joining room: ${room}`)
 
         const chat = facadeResult.data;
         if (chat) {
-            socket.join(room);
-            const messages = chat.messages;
-            if (messages.length > 0) {
+            const rooms = await redisClient.lrange(`user:rooms:${socket.id}`, 0, -1);
+            if (!rooms.includes(room)) {
+                const pushResult = await redisClient.lpush(`user:rooms:${socket.id}`, room);
+                // console.log(pushResult);
+                socket.join(room);
+                logger.info(`🟢 ${userType}:${userId} has joint room: ${room}`)
+            } else logger.warn(`⚠️  ${userType}:${userId} is already in room: ${room}`)
 
-                // Mark messages as read if the user is the recipient
-                const markMessagesAsReadResult = await ChatHandler.facade.socketMarkMessagesAsRead(chat.id, senderType);
-                if (markMessagesAsReadResult.error) {
-                    socket.emit('appError', markMessagesAsReadResult);
-                    return;
-                }
-                chat.messages = messages.map((item: any) => {
-                    if (item.senderType !== senderType) item.read = true;
-                    return item;
-                });
-
-                //Include the additional fields when sending the chat history
-                socket.emit('loadMessages', Handler.responseData(200, false, "Chats has been loaded", chat));
-                return;
-            }
-        }
+            socket.emit('loadChat', Handler.responseData(200, false, "Chat has been loaded", chat));
+        } else logger.warn(`⚠️ No chat found for room ${room}`);
     }
 
     public static async sendMessage(io: Server, socket: ISocket, data: any) {
@@ -137,7 +126,7 @@ export default class ChatHandler {
         } = data;
 
         if (!recipientId || !text || !productId) {
-            socket.emit('appError', Handler.responseData(400, true, "Invalid data provided"));
+            socket.emit(Events.APP_ERROR, Handler.responseData(400, true, "Invalid data provided"));
             return;
         }
 
@@ -145,7 +134,7 @@ export default class ChatHandler {
 
         const statusResult = await ChatHandler.facade.getRecipientOnlineStatus(userType, recipientId);
         if (statusResult.error) {
-            socket.emit('appError', statusResult);
+            socket.emit(Events.APP_ERROR, statusResult);
             return;
         }
 
@@ -157,11 +146,13 @@ export default class ChatHandler {
 
         if (!chatId) {
             console.log(`💬 Creating new chat for room `);
+            const unReadData = userType === UserType.Customer ? { unReadVendorMessages: true } : { unReadCustomerMessages: true };
 
             const newChat: TransactionChat = {
                 productId,
                 vendorId,
                 customerId,
+                ...unReadData
             };
             const newMessage: TransactionMessage = { senderId: userId, text, recipientOnline, senderType };
 
@@ -173,8 +164,10 @@ export default class ChatHandler {
             }
 
             const chat = newChatResult.data; // Get the newly created chat
-            
+
+            const pushResult = await redisClient.lpush(`user:rooms:${socket.id}`, room);
             socket.join(room);
+
             console.log(`✅ New chat has been created`);
             const vendorProfile = chat.vendor;
             const customerProfile = chat.customer;
@@ -204,8 +197,15 @@ export default class ChatHandler {
             }
             socket.emit('newSentChat', Handler.responseData(200, false, null, senderChat));
             chatNamespace.to(room).emit('receiveMessage', Handler.responseData(200, false, null, chat.messages));
+
+            const cacheKey = `chat:messages:${room}`;
+            const cacheMessage = JSON.stringify(chat.messages);
+            await redisClient.lpush(cacheKey, cacheMessage);
+            await redisClient.expire(cacheKey, 3600); // Set TTL to 1 hour
+
             if (recipientOnlineData) {
                 const recipientSocketId = recipientOnlineData.chat;
+                const pushResult = await redisClient.lpush(`user:rooms:${recipientSocketId}`, room);
                 chatNamespace.sockets.get(recipientSocketId)?.join(room); //💬 Forcing the the recipient to join the room 
                 socket.to(recipientSocketId).emit('newChat', Handler.responseData(200, false, null, recipientChat));
                 const recipientType = userType === UserType.Customer ? UserType.Vendor : UserType.Customer;
@@ -219,20 +219,21 @@ export default class ChatHandler {
             console.log(`🟡 Adding message to existing chat for room ${room}`);
             const newMessageResult = await ChatHandler.facade.socketCreateMessage(userId, text, chatId, recipientOnline, senderType);
             if (newMessageResult.error) {
-                socket.emit('appError', newMessageResult);
-                return;
-            }
-
-            // Mark all existing messages as read except for the sender's own messages
-            const markMessagesAsReadResult = await ChatHandler.facade.socketMarkMessagesAsRead(chatId, senderType);
-            if (markMessagesAsReadResult.error) {
-                socket.emit('appError', markMessagesAsReadResult);
+                socket.emit(Events.APP_ERROR, newMessageResult);
                 return;
             }
 
             // Emit new message event to the room
             const newMessage = newMessageResult.data;
             chatNamespace.to(room).emit('receiveMessage', Handler.responseData(200, false, null, newMessage));
+
+            const cacheKey = `chat:messages:${room}`;
+            const cacheMessage = JSON.stringify(newMessage);
+
+            // Add to Redis list (limit to 20 messages)
+            await redisClient.lpush(cacheKey, cacheMessage);
+            await redisClient.ltrim(cacheKey, 0, 19); // Keep only the latest 20 messages
+            await redisClient.expire(cacheKey, 3600); // Set TTL to 1 hour
 
             console.log(`✅ Message sent successfully to room ${room}`);
             return;
@@ -269,11 +270,11 @@ export default class ChatHandler {
         if (chat) {
             const messages = chat.messages;
             if (messages.length != 0) {
-                const markMessagesAsReadResult = await ChatHandler.facade.socketMarkMessagesAsRead(chat.id, userType);
-                if (markMessagesAsReadResult.error) {
-                    socket.emit('appError', markMessagesAsReadResult);
-                    return;
-                }
+                // const markMessagesAsReadResult = await ChatHandler.facade.socketMarkMessagesAsRead(chat.id, userType);
+                // if (markMessagesAsReadResult.error) {
+                //     socket.emit('appError', markMessagesAsReadResult);
+                //     return;
+                // }
                 socket.to(room).emit('updateReadReceipts', chat.messages);
                 console.log(`✅ Messages marked as read in room ${room}`);
             }
@@ -366,26 +367,16 @@ export default class ChatHandler {
         try {
             const userId = Number(socket.locals.data.id);
             const userType = socket.locals.userType;
-            // const pagination: ChatPagination = {
-            //     page: 1,
-            //     limit: 10,
-            //     message: {
-            //         page: 1,
-            //         limit: 10
-            //     }
-            // }; const facadeResult = await ChatHandler.facade.socketGetUserChats(userId, userType, pagination); // TODO: handle this bro, this ain't right
-            // if (facadeResult.error) {
-            //     socket.emit('appError', facadeResult);
-            //     return;
-            // }
-            // const chat = facadeResult.data;
-            // const rooms = chat.map((item: any) => `chat_${item.productId}_${item.vendorId}_${item.customerId}`);
+            const rooms = await redisClient.lrange(`user:rooms:${socket.id}`, 0, -1);
 
-            // if (rooms.length > 0) {
-            //     socket.leave(rooms);
-            //     // socket.to(rooms).emit('userIsOffline', Handler.responseData(200, false, "User has gone offline"));
-            // }
-            console.log(`User disconnected: userId - ${userId} , userType - ${userType} , socketId - ${socket.id}`);
+            if (rooms.length > 0) {
+                rooms.forEach(async (room) => socket.leave(room));
+                const deleted = await redisClient.del(`user:rooms:${socket.id}`);
+                console.log(deleted);
+
+            }
+
+            logger.info(`${userType}:${userId} with the socket id - ${socket.id} has disconnected from chat namespace`);
         } catch (error) {
             console.error("❌ Error in disconnect:", error);
             socket.emit("appError", Handler.responseData(500, true, "An internal error occurred"));

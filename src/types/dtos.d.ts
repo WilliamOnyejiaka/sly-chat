@@ -6,6 +6,8 @@ export interface TransactionChat {
     customerId: number,
     lastMessageAt?: DateTime,
     createdAt?: DateTime,
+    unReadVendorMessages?: boolean,
+    unReadCustomerMessages?: boolean
 };
 
 export interface TransactionMessage {

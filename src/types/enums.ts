@@ -26,6 +26,13 @@ export enum ServiceResultDataType {
     SOCKET = 'socket'
 }
 
+export interface SocketData {
+    statusCode: number,
+    error: boolean,
+    message: string | null,
+    data?: any
+};
+
 export enum ResourceType {
     IMAGE = "image",
     VIDEO = "video",

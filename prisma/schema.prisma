@@ -80,19 +80,19 @@ model SupportChat {
 }
 
 model Chat {
-  id            String    @id @default(auto()) @map("_id") @db.ObjectId
-  productId     Int
-  vendorId      Int
-  customerId    Int
-  // storeId       Int
-  lastMessageAt DateTime  @default(now())
-  messages      Message[]
-  createdAt     DateTime  @default(now())
-  // store         Store     @relation(fields: [storeId], references: [storeId])
-  vendor        Vendor    @relation(fields: [vendorId], references: [userId], onDelete: Cascade)
-  customer      Customer  @relation(fields: [customerId], references: [userId], onDelete: Cascade)
-  Store         Store?    @relation(fields: [storeId], references: [id])
-  storeId       String?   @db.ObjectId
+  id                     String    @id @default(auto()) @map("_id") @db.ObjectId
+  productId              Int
+  vendorId               Int
+  customerId             Int
+  lastMessageAt          DateTime  @default(now())
+  messages               Message[]
+  createdAt              DateTime  @default(now())
+  unReadCustomerMessages Boolean   @default(false)
+  unReadVendorMessages   Boolean   @default(false)
+  vendor                 Vendor    @relation(fields: [vendorId], references: [userId], onDelete: Cascade)
+  customer               Customer  @relation(fields: [customerId], references: [userId], onDelete: Cascade)
+  Store                  Store?    @relation(fields: [storeId], references: [id])
+  storeId                String?   @db.ObjectId
 }
 
 model Message {
@@ -101,7 +101,6 @@ model Message {
   senderType      SenderType
   text            String?
   timestamp       DateTime       @default(now())
-  read            Boolean        @default(false)
   recipientOnline Boolean        @default(false)
   chatId          String?        @db.ObjectId
   chat            Chat?          @relation(fields: [chatId], references: [id], onDelete: Cascade)

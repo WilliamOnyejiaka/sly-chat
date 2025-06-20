@@ -28,6 +28,13 @@ export type HttpData = {
     statusCode: number
 };
 
+export interface SocketData {
+    statusCode: number,
+    error: boolean,
+    message: string | null,
+    data?: any
+};
+
 export type UploadedFiles = {
     publicId: string,
     size: string,

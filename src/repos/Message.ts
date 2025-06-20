@@ -143,23 +143,22 @@ export default class Message extends Repo<MessageDto> {
         }
     }
 
-    public async markMessagesAsRead(chatId: string, userType: string) {
-        try {
-            const updatedMessages = await prisma.message.updateMany({
-                where: {
-                    chatId: chatId,
-                    senderType: { not: userType as any },
-                    read: false,
-                },
-                data: {
-                    read: true,
-                },
-            });
-            return this.repoResponse(false, 201, null, updatedMessages);
-        } catch (error) {
-            return this.handleDatabaseError(error);
-        }
-    }
+    // public async markMessagesAsRead(chatId: string, userType: string) {
+    //     try {
+    //         const updatedMessages = await prisma.message.updateMany({
+    //             where: {
+    //                 chatId: chatId,
+    //                 senderType: { not: userType as any },
+    //             },
+    //             data: {
+    //                 read: true,
+    //             },
+    //         });
+    //         return this.repoResponse(false, 201, null, updatedMessages);
+    //     } catch (error) {
+    //         return this.handleDatabaseError(error);
+    //     }
+    // }
 
     public async updateOfflineMessages(chatIds: string[], userType: string) {
         try {
