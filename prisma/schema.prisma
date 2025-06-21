@@ -24,6 +24,7 @@ model Customer {
   phoneNumber       String
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
+  lastSeen          DateTime       @default(now())
   profilePictureUrl String?
   chat              Chat[]
   Notification      Notification[]
@@ -40,6 +41,7 @@ model Vendor {
   phoneNumber       String
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
+  lastSeen          DateTime       @default(now())
   profilePictureUrl String?
   store             Store[]
   chat              Chat[]

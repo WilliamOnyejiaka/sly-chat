@@ -7,6 +7,8 @@ import { TransactionChat, TransactionMessage } from "../../types/dtos";
 import { Events } from "../../types/enums";
 import { updateChat } from "../../config/bullMQ";
 import { logger, redisClient } from "../../config";
+import { UserSocket } from "../../cache";
+import { Customer, Vendor } from "../../services";
 
 export default class ChatHandler {
 
@@ -52,6 +54,39 @@ export default class ChatHandler {
         } else logger.info(`🤷 No rooms found for ${user}`);
 
         socket.emit('userChats', Handler.responseData(200, false, "Chats have been sent successfully", serviceResult.data));
+    }
+
+    public static async checkOnlinePresence(io: Server, socket: ISocket, data: any) {
+        const { userId, userType } = data;
+
+        if (!userId || !userType) {
+            socket.emit(Events.APP_ERROR, Handler.responseData(400, true, "Invalid data provided"));
+            return;
+        }
+
+        const socketCache = new UserSocket();
+
+        const cache = await socketCache.get(userType, Number(userId));
+        if (cache.error) {
+            socket.emit(Events.APP_ERROR, Handler.responseData(500, true, "An internal error occurred"));
+            return;
+        }
+
+        const socketData = cache.data;
+
+        if (socketData && socketData.chat) {
+            socket.emit(Events.ONLINE_PRESENCE, Handler.responseData(200, false, "User is online", { status: true, lastSeen: null }));
+        } else {
+            const customerService = new Customer();
+            const vendorService = new Vendor();
+            const serviceResult = (userType === UserType.Customer ? await customerService.getLastSeen(userId) : await vendorService.getLastSeen(userId)) as SocketData;
+            if (serviceResult.error) {
+                socket.emit(Events.APP_ERROR, serviceResult);
+                return;
+            }
+
+            socket.emit(Events.ONLINE_PRESENCE, Handler.responseData(200, false, "User is offline", { status: false, lastSeen: serviceResult.data.lastSeen }));
+        }
     }
 
     public static async joinRooms(io: Server, socket: ISocket, data: any) {
@@ -367,6 +402,18 @@ export default class ChatHandler {
         try {
             const userId = Number(socket.locals.data.id);
             const userType = socket.locals.userType;
+            const customerService = new Customer();
+            const vendorService = new Vendor();
+
+            const cacheResult = await ChatHandler.facade.deleteUserChatSocketId(userId, userType);
+            if (cacheResult.error) {
+                logger.error(`🛑 Failed to remove ${userType}:${userId} socket id from chat cache.`);
+                socket.emit(Events.APP_ERROR, cacheResult);
+                return;
+            }
+
+            const serviceResult = userType === UserType.Customer ? await customerService.updateLastSeen(userId) : await vendorService.updateLastSeen(userId);
+
             const rooms = await redisClient.lrange(`user:rooms:${socket.id}`, 0, -1);
 
             if (rooms.length > 0) {

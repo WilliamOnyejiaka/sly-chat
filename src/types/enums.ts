@@ -8,7 +8,7 @@ export enum UserType {
 
 export enum Events {
     APP_ERROR = "appError",
-
+    ONLINE_PRESENCE = "onlinePresence"
 }
 export enum Namespaces {
     CHAT = '/chat',

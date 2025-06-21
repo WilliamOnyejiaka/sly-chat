@@ -52,6 +52,10 @@ export default class UserRepo extends Repo {
         return await this.update(where, data);
     }
 
+    public async updateLastSeen(userId: number) {
+        return await this.update({ userId }, { lastSeen: new Date() });
+    }
+
     public async updateActiveStatus(userId: number, activate: boolean = true) {
         return await this.updateWithIdOrEmail(userId, { active: activate });
     }
@@ -64,4 +68,16 @@ export default class UserRepo extends Repo {
         return await super.update({ email: email }, { verified: true });
     }
 
+    public async findLastSeen(userId: number) {
+        try {
+            const data = await (this.prisma[this.tblName] as any).findFirst({
+                where: { userId },
+                select: { lastSeen: true }
+            });
+
+            return super.repoResponse(false, 200, null, data);
+        } catch (error) {
+            return super.handleDatabaseError(error);
+        }
+    }
 }

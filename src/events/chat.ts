@@ -12,6 +12,7 @@ chat.register("typing", ChatHandler.typing.bind(ChatHandler));
 chat.register("stoppedTyping", ChatHandler.stoppedTyping.bind(ChatHandler));
 chat.register("getUserChats", ChatHandler.getUserChats.bind(ChatHandler));
 chat.register("joinRooms", ChatHandler.joinRooms.bind(ChatHandler));
+chat.register("checkOnlinePresence", ChatHandler.checkOnlinePresence.bind(ChatHandler));
 chat.register("disconnect", ChatHandler.disconnect.bind(ChatHandler));
 
 export default chat;

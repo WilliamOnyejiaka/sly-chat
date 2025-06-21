@@ -2,7 +2,7 @@ import { Socket } from "socket.io";
 // import { OnlineCustomer, OnlineVendor } from "../cache";
 import { UserSocket } from "../cache";
 import { Chat, Message } from "../services";
-import { ISocket, ServiceData, HttpData, UploadedFiles, ChatPagination, MessagePagination } from "../types";
+import { ISocket, ServiceData, HttpData, UploadedFiles, ChatPagination, MessagePagination, SocketData } from "../types";
 import { TransactionChat, TransactionMessage } from "../types/dtos";
 import { CdnFolders, ResourceType, ServiceResultDataType, UserType } from "../types/enums";
 import BaseFacade from "./bases/BaseFacade";
@@ -13,7 +13,7 @@ export default class ChatManagementFacade extends BaseFacade {
 
     public readonly chatService = new Chat();
     public readonly messageService = new Message();
-    private readonly userSocket: UserSocket = new UserSocket();
+    private readonly socketCache: UserSocket = new UserSocket();
     private readonly cloudinary = new Cloudinary();
 
     public constructor() {
@@ -24,6 +24,20 @@ export default class ChatManagementFacade extends BaseFacade {
         return await this.chatService.getUserChatsWithMessages(userId, userType, pagination, dataType);
     }
 
+    public async deleteUserChatSocketId(userId: number, userType: UserType) {
+        const cache = await this.socketCache.get(userType, userId);
+        if (cache.error) return this.service.responseData(ServiceResultDataType.SOCKET, 500, true, "An internal error occurred") as SocketData;
+
+        const socketData = cache.data;
+        if (socketData) {
+            socketData.chat = null;
+            if (await this.socketCache.set(userType, userId, { ...socketData })) {
+                return this.service.responseData(ServiceResultDataType.SOCKET, 200, false, null) as SocketData;
+            }
+            return this.service.responseData(ServiceResultDataType.SOCKET, 500, true, "An internal error occurred") as SocketData;
+        }
+        return this.service.responseData(ServiceResultDataType.SOCKET, 200, false, null) as SocketData;
+    }
 
     public async httpGetUserChats(userId: number, userType: UserType, pagination: ChatPagination): Promise<HttpData> {
         return await this.getUserChats(userId, userType, pagination, ServiceResultDataType.HTTP) as HttpData;
@@ -79,12 +93,12 @@ export default class ChatManagementFacade extends BaseFacade {
     }
 
     public async updateChatSocketCache(userId: number, userType: UserType, socket: ISocket): Promise<ServiceData> {
-        const onlineCache = await this.userSocket.get(userType, userId);
+        const onlineCache = await this.socketCache.get(userType, userId);
         if (onlineCache.error) return this.service.socketResponseData(500, true, "Something went wrong")
 
         const onlineData = onlineCache.data;
 
-        const successful = await this.userSocket.set(userType, userId, {
+        const successful = await this.socketCache.set(userType, userId, {
             ...onlineData,
             chat: socket.id,
         });
@@ -96,13 +110,13 @@ export default class ChatManagementFacade extends BaseFacade {
 
     public async getRecipientOnlineStatus(userType: UserType, recipientId: number) {
         const recipientType = userType === UserType.Customer ? UserType.Vendor : UserType.Customer;
-        const recipientOnlineCache = await this.userSocket.get(recipientType, recipientId);
+        const recipientOnlineCache = await this.socketCache.get(recipientType, recipientId);
         if (recipientOnlineCache.error) return this.service.socketResponseData(500, true, "Something went wrong");
         return this.service.socketResponseData(200, false, null, recipientOnlineCache.data);
     }
 
     public async getUserOnlineStatus(userType: UserType, userId: number) {
-        const recipientOnlineCache = await this.userSocket.get(userType, userId);
+        const recipientOnlineCache = await this.socketCache.get(userType, userId);
         if (recipientOnlineCache.error) return this.service.socketResponseData(500, true, "Something went wrong");
 
         return this.service.socketResponseData(200, false, null, recipientOnlineCache.data);
