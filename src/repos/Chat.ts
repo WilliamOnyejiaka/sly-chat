@@ -10,11 +10,13 @@ export default class Chat extends Repo {
     private messageSelect = {
         id: true,
         senderId: true,
+        recipientId: true,
         text: true,
         timestamp: true,
         recipientOnline: true,
         chatId: true,
         senderType: true,
+        recipientType: true,
         messageMedias: {
             select: {
                 id: true,
@@ -56,7 +58,9 @@ export default class Chat extends Repo {
                             text: newMessage.text,
                             senderId: newMessage.senderId,
                             recipientOnline: newMessage.recipientOnline,
-                            senderType: newMessage.senderType
+                            senderType: newMessage.senderType,
+                            recipientType: newMessage.recipientType,
+                            recipientId: newMessage.recipientId
                         },
                     },
                 },
@@ -103,6 +107,8 @@ export default class Chat extends Repo {
                             senderId: newMessage.senderId,
                             recipientOnline: newMessage.recipientOnline,
                             senderType: newMessage.senderType,
+                            recipientType: newMessage.recipientType,
+                            recipientId: newMessage.recipientId,
                             messageMedias: {
                                 createMany: {
                                     data: medias
@@ -136,6 +142,26 @@ export default class Chat extends Repo {
                 }
             });
             return this.repoResponse(false, 201, null, newItem);
+        } catch (error) {
+            return this.handleDatabaseError(error);
+        }
+    }
+
+    public async getChats(user: any, skip: number, take: number) {
+        try {
+            const data = await this.prisma.$transaction(async (tx): Promise<{ items: any, totalRecords: number }> => {
+                const items = await tx.chat.findMany({
+                    where: user,
+                    skip,
+                    take,
+                    orderBy: { lastMessageAt: 'desc' } // Sort by creation date, newest first
+                });
+
+                const totalRecords = await tx.chat.count({ where: user });
+                return { items, totalRecords };
+            });
+            
+            return this.repoResponse(false, 201, null, data);
         } catch (error) {
             return this.handleDatabaseError(error);
         }
@@ -184,39 +210,6 @@ export default class Chat extends Repo {
             // });
 
             return this.repoResponse(false, 200, null, data);
-        } catch (error) {
-            return this.handleDatabaseError(error);
-        }
-    }
-
-
-    public async offlineMessages(userId: number, userType: UserType, skip: number, take: number) {
-        try {
-            const data = await this.prisma.$transaction(async (tx) => {
-                const where = { senderId: userId, senderType: userType.toUpperCase() as any, recipientOnline: false };
-                const items = await tx.message.findMany({
-                    skip,
-                    take,
-                    where,
-                    include: { chat: true }
-                });
-
-                const messageIds = items.map(item => item.id);
-
-                if (items.length > 0) {
-                    await tx.message.updateMany({
-                        where: {
-                            id: { in: messageIds }
-                        },
-                        data: {
-                            recipientOnline: true
-                        }
-                    });
-                }
-
-                const totalRecords = tx.message.count({ where });
-                return { items, totalRecords };
-            });
         } catch (error) {
             return this.handleDatabaseError(error);
         }

@@ -37,6 +37,8 @@ export default class Chat {
 
             recipientId = Number(recipientId);
             const { customerId, vendorId } = userIds(userId, recipientId, userType);
+            const recipientType = (userType === UserType.Customer ? UserType.Vendor : UserType.Customer).toUpperCase();
+
             const room = getRoom(productId, customerId, vendorId);
             const usersOnlineStatusResult = await Chat.facade.getUsersOnlineStatus(Number(userId), Number(recipientId), userType);
             if (usersOnlineStatusResult.error) {
@@ -55,7 +57,10 @@ export default class Chat {
                 senderId: userId,
                 text: text,
                 senderType: userType.toUpperCase(),
-                recipientOnline: recipientIsOnline
+                recipientOnline: recipientIsOnline,
+                recipientId,
+                recipientType
+
             };
 
             const newChat: TransactionChat = {
@@ -185,6 +190,11 @@ export default class Chat {
         const facadeResult = await Chat.facade.httpGetUserChats(userId, userType, pagination);
         Controller.response(res, facadeResult);
     }
+
+    public static async recentMessages(req: Request, res: Response) {
+    }
+
+    
 
     public static async getChat(req: Request, res: Response) {
         const validationErrors = validationResult(req);

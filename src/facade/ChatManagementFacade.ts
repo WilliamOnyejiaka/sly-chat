@@ -12,9 +12,7 @@ import { Cloudinary } from "../services";
 export default class ChatManagementFacade extends BaseFacade {
 
     public readonly chatService = new Chat();
-    private readonly messageService = new Message();
-    // private readonly onlineCustomer: OnlineCustomer = new OnlineCustomer();
-    // private readonly onlineVendor: OnlineVendor = new OnlineVendor();
+    public readonly messageService = new Message();
     private readonly userSocket: UserSocket = new UserSocket();
     private readonly cloudinary = new Cloudinary();
 
@@ -133,12 +131,12 @@ export default class ChatManagementFacade extends BaseFacade {
         return (await this.chatService.createChatWithMessage(newChat, newMessage, ServiceResultDataType.SOCKET)) as ServiceData;
     }
 
-    private async createMessage(userId: number, text: string, chatId: string, recipientOnline: boolean, senderType: any, dataType: ServiceResultDataType): Promise<ServiceData | HttpData> {
-        return (await this.messageService.createMessage(userId, text, chatId, recipientOnline, senderType, dataType))
+    private async createMessage(userId: number, recipientId: number, text: string, chatId: string, recipientOnline: boolean, senderType: any, dataType: ServiceResultDataType): Promise<ServiceData | HttpData> {
+        return (await this.messageService.createMessage(userId, recipientId, text, chatId, recipientOnline, senderType, dataType))
     }
 
-    public async socketCreateMessage(userId: number, text: string, chatId: string, recipientOnline: boolean, senderType: any): Promise<ServiceData> {
-        return (await this.createMessage(userId, text, chatId, recipientOnline, senderType, ServiceResultDataType.SOCKET)) as ServiceData
+    public async socketCreateMessage(userId: number, recipientId: number, text: string, chatId: string, recipientOnline: boolean, senderType: any): Promise<ServiceData> {
+        return (await this.createMessage(userId, recipientId, text, chatId, recipientOnline, senderType, ServiceResultDataType.SOCKET)) as ServiceData
     }
 
     // private async markMessagesAsRead(chatId: string, senderType: any, dataType: ServiceResultDataType): Promise<ServiceData | HttpData> {

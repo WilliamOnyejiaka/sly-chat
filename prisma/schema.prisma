@@ -99,6 +99,8 @@ model Message {
   id              String         @id @default(auto()) @map("_id") @db.ObjectId
   senderId        Int
   senderType      SenderType
+  recipientId     Int
+  recipientType   SenderType
   text            String?
   timestamp       DateTime       @default(now())
   recipientOnline Boolean        @default(false)

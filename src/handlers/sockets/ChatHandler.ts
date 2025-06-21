@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
-import { ChatPagination, ISocket, MessagePagination } from "../../types";
-import { Namespaces, UserType } from "../../types/enums";
+import { ChatPagination, ISocket, MessagePagination, SocketData } from "../../types";
+import { Namespaces, ServiceResultDataType, UserType } from "../../types/enums";
 import Handler from "./Handler";
 import { ChatManagementFacade } from "../../facade";
 import { TransactionChat, TransactionMessage } from "../../types/dtos";
@@ -15,8 +15,9 @@ export default class ChatHandler {
     public static async onConnection(io: Server, socket: ISocket) {
         const userId = Number(socket.locals.data.id);
         const userType = socket.locals.userType as UserType;
+        const user = `${userType}:${userId}`;
 
-        logger.info(`${userType}:${userId} with the socket id - ${socket.id} has connected to chat namespace`);
+        logger.info(`${user} with the socket id - ${socket.id} has connected to chat namespace`);
 
         const onlineCacheUpdated = await ChatHandler.facade.updateChatSocketCache(userId, userType, socket);
         if (onlineCacheUpdated.error) {
@@ -24,35 +25,33 @@ export default class ChatHandler {
             socket.disconnect(true);
             return;
         }
-        const pagination: ChatPagination = {
-            page: 1,
-            limit: 10,
-            message: {
-                page: 1,
-                limit: 10
-            }
-        };
 
-        const getUserChatsAndOfflineMessages = await ChatHandler.facade.getUserChatsAndOfflineMessages(userId, userType, pagination);
-        if (getUserChatsAndOfflineMessages.error) {
-            socket.emit(Events.APP_ERROR, getUserChatsAndOfflineMessages);
+        const offlineMessages = await ChatHandler.facade.messageService.offlineMessages(userId, userType, 1, 10, ServiceResultDataType.SOCKET) as SocketData;
+        if (offlineMessages.error) {
+            socket.emit(Events.APP_ERROR, offlineMessages);
             return;
         }
-        console.log("✅ User offline messages has been retrieved");
 
-        const rooms = getUserChatsAndOfflineMessages.data.rooms;
-        const offlineMessages = getUserChatsAndOfflineMessages.data.offlineMessages;
-        const chat = getUserChatsAndOfflineMessages.data.chat;
+        logger.info(`✅ ${user} offline messages has been retrieved`);
+        socket.emit('offlineMessages', Handler.responseData(200, false, "Offline messages has been sent successfully", offlineMessages.data));
 
-        console.log("🚧 Joining rooms...");
-        console.log(rooms);
+        logger.info(`🚧 Loading ${user} chats`);
+        const serviceResult = await ChatHandler.facade.chatService.loadChatsWithRooms(userId, userType, 1, 10, ServiceResultDataType.SOCKET) as SocketData;
+        if (serviceResult.error) {
+            socket.emit(Events.APP_ERROR, serviceResult);
+            return;
+        }
+        const { rooms } = serviceResult.data;
+        delete serviceResult.data.rooms;
 
-        if (rooms) socket.join(rooms);
-        console.log("✅ Rooms has been joint");
+        if (rooms.length > 0) {
+            const pushResult = await redisClient.lpush(`user:rooms:${socket.id}`, rooms);
+            socket.join(rooms);
 
-        io.of(Namespaces.CHAT).to(rooms).emit("userIsOnline", Handler.responseData(200, false, "User is online"));
-        socket.emit('offlineMessages', Handler.responseData(200, false, "Offline messages has been sent successfully", offlineMessages));
-        socket.emit('userChats', Handler.responseData(200, false, "Chats have been sent successfully", chat));
+            logger.info(`✅ ${user} has joined ${rooms.length} rooms`);
+        } else logger.info(`🤷 No rooms found for ${user}`);
+
+        socket.emit('userChats', Handler.responseData(200, false, "Chats have been sent successfully", serviceResult.data));
     }
 
     public static async joinRooms(io: Server, socket: ISocket, data: any) {
@@ -131,6 +130,7 @@ export default class ChatHandler {
         }
 
         const [customerId, vendorId] = userType === UserType.Customer ? [userId, recipientId] : [recipientId, userId];
+        const recipientType = (userType === UserType.Customer ? UserType.Vendor : UserType.Customer).toUpperCase();
 
         const statusResult = await ChatHandler.facade.getRecipientOnlineStatus(userType, recipientId);
         if (statusResult.error) {
@@ -154,7 +154,7 @@ export default class ChatHandler {
                 customerId,
                 ...unReadData
             };
-            const newMessage: TransactionMessage = { senderId: userId, text, recipientOnline, senderType };
+            const newMessage: TransactionMessage = { senderId: userId, text, recipientOnline, senderType, recipientType, recipientId };
 
             // Create new chat with first message
             const newChatResult = await ChatHandler.facade.createChatWithMessage(newChat, newMessage);
@@ -217,7 +217,7 @@ export default class ChatHandler {
             console.log(`📩 User ${userId} sending message to room ${room}: "${text}"`);
 
             console.log(`🟡 Adding message to existing chat for room ${room}`);
-            const newMessageResult = await ChatHandler.facade.socketCreateMessage(userId, text, chatId, recipientOnline, senderType);
+            const newMessageResult = await ChatHandler.facade.socketCreateMessage(userId, recipientId, text, chatId, recipientOnline, senderType);
             if (newMessageResult.error) {
                 socket.emit(Events.APP_ERROR, newMessageResult);
                 return;
@@ -372,8 +372,6 @@ export default class ChatHandler {
             if (rooms.length > 0) {
                 rooms.forEach(async (room) => socket.leave(room));
                 const deleted = await redisClient.del(`user:rooms:${socket.id}`);
-                console.log(deleted);
-
             }
 
             logger.info(`${userType}:${userId} with the socket id - ${socket.id} has disconnected from chat namespace`);

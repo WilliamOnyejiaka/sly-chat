@@ -46,8 +46,19 @@ export default class Chat extends BaseService<ChatRepo> {
         return super.responseData(dataType, 201, false, "Chat has been retrieved successfully", data);
     }
 
-    public async offlineMessages(userId: number, userType: UserType) {
-        
+    public async loadChatsWithRooms(userId: number, userType: UserType, page: number, limit: number, dataType: ServiceResultDataType) {
+        const user = userType === UserType.Customer ? { customerId: userId } : { vendorId: userId };
+        const { skip, take } = this.skipAndTake(page, limit);
+
+        const repoResult = await this.repo!.getChats(user, skip, take);
+        const repoResultError = super.handleRepoError(dataType, repoResult);
+        if (repoResultError) return repoResultError;
+
+        let { items, totalRecords } = repoResult.data as any;
+        const pagination = getPagination(page, limit, totalRecords);
+        let rooms: string[] = [];
+        if (items.length > 0) rooms = (items as any[]).map(item => `chat_${item.productId}_${item.vendorId}_${item.customerId}`);
+        return super.responseData(dataType, 201, false, "Chats has been retrieved successfully", { items, pagination, rooms });
     }
 
     public async joinChat(

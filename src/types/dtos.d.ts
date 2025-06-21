@@ -13,11 +13,13 @@ export interface TransactionChat {
 export interface TransactionMessage {
     id?: string;
     senderId: number;
-    senderType?: any; // Enum values TODO: change this
+    senderType: any; // Enum values TODO: change this
     text: string;
     timestamp?: Date;
     read?: boolean;
     recipientOnline: boolean;
+    recipientType: any; 
+    recipientId: number;
     chatId?: string | null;
     createdAt?: Date;
     updatedAt?: Date;

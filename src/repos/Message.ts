@@ -42,6 +42,8 @@ export default class Message extends Repo<MessageDto> {
                         recipientOnline: newMessage.recipientOnline,
                         senderType: newMessage.senderType,
                         chatId: newMessage.chatId,
+                        recipientType: newMessage.recipientType,
+                        recipientId: newMessage.recipientId
                     }
                 });
 
@@ -112,6 +114,8 @@ export default class Message extends Repo<MessageDto> {
                         recipientOnline: newMessage.recipientOnline,
                         senderType: newMessage.senderType,
                         chatId: newMessage.chatId,
+                        recipientType: newMessage.recipientType,
+                        recipientId: newMessage.recipientId,
                         messageMedias: {
                             createMany: {
                                 data: medias
@@ -173,6 +177,38 @@ export default class Message extends Repo<MessageDto> {
                 },
             });
             return this.repoResponse(false, 201, null, updatedMessages);
+        } catch (error) {
+            return this.handleDatabaseError(error);
+        }
+    }
+
+    public async offlineMessages(userId: number, userType: UserType, skip: number, take: number) {
+        try {
+            const where = { recipientId: userId, recipientType: userType.toUpperCase() as any, recipientOnline: false };
+            const data = await this.prisma.$transaction(async (tx) => {
+                const items = await tx.message.findMany({
+                    skip,
+                    take,
+                    where,
+                    include: { chat: true },
+                    orderBy: { createdAt: 'desc' } // Sort by creation date, newest first
+                });
+
+                let totalRecords = 0;
+
+                if (items.length > 0) {
+                    const messageIds = items.map(item => item.id);
+                    totalRecords = await tx.message.count({ where });
+                    await tx.message.updateMany({
+                        where: { id: { in: messageIds } },
+                        data: { recipientOnline: true }
+                    });
+                }
+
+                return { items, totalRecords };
+            });
+
+            return this.repoResponse(false, 200, null, data);
         } catch (error) {
             return this.handleDatabaseError(error);
         }
