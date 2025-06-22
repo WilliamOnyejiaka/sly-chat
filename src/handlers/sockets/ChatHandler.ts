@@ -231,10 +231,10 @@ export default class ChatHandler {
                 };
             }
             socket.emit('newSentChat', Handler.responseData(200, false, null, senderChat));
-            chatNamespace.to(room).emit('receiveMessage', Handler.responseData(200, false, null, chat.messages));
+            chatNamespace.to(room).emit('receiveMessage', Handler.responseData(200, false, null, chat.messages[0]));
 
             const cacheKey = `chat:messages:${room}`;
-            const cacheMessage = JSON.stringify(chat.messages);
+            const cacheMessage = JSON.stringify(chat.messages[0]);
             await redisClient.lpush(cacheKey, cacheMessage);
             await redisClient.expire(cacheKey, 3600); // Set TTL to 1 hour
 
@@ -262,12 +262,13 @@ export default class ChatHandler {
             const newMessage = newMessageResult.data;
             chatNamespace.to(room).emit('receiveMessage', Handler.responseData(200, false, null, newMessage));
 
+            // TODO: convert this to a function
             const cacheKey = `chat:messages:${room}`;
             const cacheMessage = JSON.stringify(newMessage);
 
-            // Add to Redis list (limit to 20 messages)
+            // Add to Redis list (limit to 10 messages)
             await redisClient.lpush(cacheKey, cacheMessage);
-            await redisClient.ltrim(cacheKey, 0, 19); // Keep only the latest 20 messages
+            await redisClient.ltrim(cacheKey, 0, 9); // Keep only the latest 10 messages
             await redisClient.expire(cacheKey, 3600); // Set TTL to 1 hour
 
             console.log(`✅ Message sent successfully to room ${room}`);
@@ -278,41 +279,29 @@ export default class ChatHandler {
     public static async markAsRead(io: Server, socket: ISocket, data: any) {
         const userId = Number(socket.locals.data.id);
         const userType = socket.locals.userType;
-        const { productId, recipientId, page, limit, messagePage, messageLimit } = data;
-        const pagination: ChatPagination = {
-            page: page,
-            limit: limit,
-            message: {
-                page: messagePage,
-                limit: messageLimit
-            }
-        };
+        const { productId, recipientId } = data;
+
+        if (!recipientId || !productId) {
+            socket.emit(Events.APP_ERROR, Handler.responseData(400, true, "Invalid data provided"));
+            return;
+        }
 
         const [customerId, vendorId] = userType === UserType.Customer ? [userId, recipientId] : [recipientId, userId];
-        const room = `chat_${productId}_${vendorId}_${customerId}`;
+        const room = `${productId}_${vendorId}_${customerId}`;
 
-        console.log(
-            `👀 User ${userId} marking messages as read in room ${room}`
-        );
+        logger.info(`👀 ${userType}:${userId} marking messages as read in room ${room}`);
 
-        const facadeResult = await ChatHandler.facade.socketGetChatWithRoomId(productId, customerId, vendorId, pagination);
+        const facadeResult = await ChatHandler.facade.chatService.markAsRead({ productId, customerId, vendorId }, userType) as SocketData;
         if (facadeResult.error) {
-            socket.emit('appError', facadeResult);
+            socket.emit(Events.APP_ERROR, facadeResult);
             return;
         }
 
         const chat = facadeResult.data;
         if (chat) {
-            const messages = chat.messages;
-            if (messages.length != 0) {
-                // const markMessagesAsReadResult = await ChatHandler.facade.socketMarkMessagesAsRead(chat.id, userType);
-                // if (markMessagesAsReadResult.error) {
-                //     socket.emit('appError', markMessagesAsReadResult);
-                //     return;
-                // }
-                socket.to(room).emit('updateReadReceipts', chat.messages);
-                console.log(`✅ Messages marked as read in room ${room}`);
-            }
+            console.log(chat);
+            socket.to(room).emit('updateReadReceipts', chat);
+            console.log(`✅ Messages marked as read in room ${room}`);
         } else {
             console.log(`⚠️ No chat found for room ${room} to mark as read`)
         }

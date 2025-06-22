@@ -8,7 +8,7 @@ import http from 'http';
 import { Server } from 'socket.io';
 import { chat, notification, supportChat } from "../events";
 import { ISocket } from "../types";
-import { user, chat as chatRoute, general,notification as notificationRoute } from "../routes";
+import { user, chat as chatRoute, general, notification as notificationRoute } from "../routes";
 import { Namespaces, IWorker } from "../types/enums";
 import { createClient } from "redis";
 import cluster from "cluster";
@@ -18,7 +18,7 @@ import { v4 } from "uuid";
 import * as path from 'path';
 import { Queue, Worker, Job } from 'bullmq';
 import { parse } from 'url';
-import { SendMessageProcessor } from "../processors";
+import { SendMessageProcessor, UpdateMessages } from "../processors";
 import { UpdateChat } from "../processors/UpdateChat";
 import { loadMD } from "./../utils";
 import initializeIO from "./io";
@@ -55,6 +55,7 @@ async function createApp() {
     const IWorkers: IWorker<any>[] = [
         new SendMessageProcessor({ connection: { url: env('redisURL')! } }, io),
         new UpdateChat({ connection: { url: env('redisURL')! } }, io),
+        new UpdateMessages({ connection: { url: env('redisURL')! } }, io),
     ];
 
     for (const IWorker of IWorkers) {

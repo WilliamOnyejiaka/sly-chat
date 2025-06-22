@@ -95,6 +95,11 @@ model Chat {
   customer               Customer  @relation(fields: [customerId], references: [userId], onDelete: Cascade)
   Store                  Store?    @relation(fields: [storeId], references: [id])
   storeId                String?   @db.ObjectId
+
+  @@unique([productId, vendorId, customerId])
+  @@index([productId])
+  @@index([vendorId])
+  @@index([customerId])
 }
 
 model Message {

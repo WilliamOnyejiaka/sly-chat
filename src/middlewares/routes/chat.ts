@@ -1,6 +1,6 @@
 import { uploads, validateBody, validateFileUpload } from "..";
 import { ResourceType } from "../../types/enums";
-import { bodyNumberIsValid, paramNumberIsValid } from "../validators";
+import { bodyNumberIsValid, paramNumberIsValid, queryIsValidNumber } from "../validators";
 
 const sendMedia = [
     validateFileUpload,
@@ -28,7 +28,25 @@ export const sendVideo = [
     ...sendMedia
 ];
 
-export const getChat =  [
+export const pagination = [
+    queryIsValidNumber('page'),
+    queryIsValidNumber('limit'),
+];
+
+
+export const messages = [
+    paramNumberIsValid('productId'),
+    paramNumberIsValid('participantId'),
+    queryIsValidNumber('page'),
+    queryIsValidNumber('limit'),
+];
+
+export const recentMessages = [
+    paramNumberIsValid('productId'),
+    paramNumberIsValid('participantId')
+];
+
+export const getChat = [
     paramNumberIsValid('vendorId'),
     paramNumberIsValid('customerId')
 ]

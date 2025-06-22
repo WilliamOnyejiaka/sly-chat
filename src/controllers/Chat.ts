@@ -8,7 +8,7 @@ import { Server } from "socket.io";
 import Handler from "../handlers/sockets/Handler";
 import { userIds, getRoom } from "../utils";
 import { updateChat } from "../config/bullMQ";
-import { ChatPagination } from "../types";
+import { ChatPagination, HttpData, ServiceData } from "../types";
 
 export default class Chat {
 
@@ -191,10 +191,48 @@ export default class Chat {
         Controller.response(res, facadeResult);
     }
 
-    public static async recentMessages(req: Request, res: Response) {
+    public static async messages(req: Request, res: Response) {
+        Controller.handleValidationError(req, res);
+
+        const page = Number(req.query.page);
+        const limit = Number(req.query.limit);
+        const userType = res.locals.userType as UserType;
+        const userId = Number(res.locals.data.id);
+        const participantId = Number(req.params.participantId);
+        const productId = Number(req.params.productId);
+
+        const [vendorId, customerId] = userType === UserType.Vendor ? [userId, participantId] : [participantId, userId];
+
+        const facadeResult = await Chat.facade.messageService.messages({ productId, vendorId, customerId }, page, limit) as HttpData;
+        Controller.response(res, facadeResult);
     }
 
-    
+    public static async recentMessages(req: Request, res: Response) {
+        Controller.handleValidationError(req, res);
+
+        const userType = res.locals.userType as UserType;
+        const userId = Number(res.locals.data.id);
+        const participantId = Number(req.params.participantId);
+        const productId = Number(req.params.productId);
+
+        const [vendorId, customerId] = userType === UserType.Vendor ? [userId, participantId] : [participantId, userId];
+        const room = `${productId}_${vendorId}_${customerId}`;
+
+        const facadeResult = await Chat.facade.messageService.recentMessages(room) as HttpData;
+        Controller.response(res, facadeResult);
+    }
+
+    public static async unreadChats(req: Request, res: Response) {
+        Controller.handleValidationError(req, res);
+
+        const page = Number(req.query.page);
+        const limit = Number(req.query.limit);
+        const userType = res.locals.userType as UserType;
+        const userId = Number(res.locals.data.id);
+
+        const facadeResult = await Chat.facade.chatService.unreadChats(userId, userType, page, limit) as HttpData;
+        Controller.response(res, facadeResult);
+    }
 
     public static async getChat(req: Request, res: Response) {
         const validationErrors = validationResult(req);

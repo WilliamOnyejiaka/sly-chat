@@ -160,7 +160,7 @@ export default class Chat extends Repo {
                 const totalRecords = await tx.chat.count({ where: user });
                 return { items, totalRecords };
             });
-            
+
             return this.repoResponse(false, 201, null, data);
         } catch (error) {
             return this.handleDatabaseError(error);
@@ -443,6 +443,39 @@ export default class Chat extends Repo {
         } catch (error) {
             return this.handleDatabaseError(error);
         }
+    }
 
+    public async findUnreadChats(where: any, skip: number, take: number) {
+        try {
+            const data = await this.prisma.$transaction(async (tx): Promise<{ items: any, totalRecords: number }> => {
+                const items = await tx.chat.findMany({
+                    where: where,
+                    skip,
+                    take,
+                    orderBy: { lastMessageAt: 'desc' }
+                });
+
+                let totalRecords = 0;
+                if (items.length > 0) totalRecords = await tx.chat.count({ where: where });
+
+                return { items, totalRecords }
+            });
+            return this.repoResponse(false, 200, null, data);
+        } catch (error) {
+            return this.handleDatabaseError(error);
+        }
+    }
+
+    public async markAsRead(room: { productId: number, vendorId: number, customerId: number }, where: any, updateData: any) {
+        try {
+            const data = await this.prisma.chat.update({
+                where: { productId_vendorId_customerId: room, ...where },
+                data: updateData
+            });
+            return this.repoResponse(false, 200, null, data);
+        } catch (error) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') return this.repoResponse(false, 200, null, null);
+            return this.handleDatabaseError(error);
+        }
     }
 }

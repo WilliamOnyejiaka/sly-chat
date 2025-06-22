@@ -21,15 +21,15 @@ const task2 = cron.schedule('*/5 * * * *', async () => {
 });
 
 const task3 = cron.schedule('*/14 * * * *', async () => {
-    https.get("https://sly-chat.onrender.com/greet", res => {
-        if (res.statusCode === 200) {
-            logger.http("Keeping server running");
-        } else {
-            logger.http("Failed to consume: ", res.statusCode);
-        }
-    }).on('error', e => {
-        console.log("Error: ", e);
-    });
+    // https.get("https://sly-chat.onrender.com/greet", res => {
+    //     if (res.statusCode === 200) {
+    //         logger.http("Keeping server running");
+    //     } else {
+    //         logger.http("Failed to consume: ", res.statusCode);
+    //     }
+    // }).on('error', e => {
+    //     console.log("Error: ", e);
+    // });
 }, {
     scheduled: true,
     timezone: 'UTC'

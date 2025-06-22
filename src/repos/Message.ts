@@ -2,6 +2,7 @@ import prisma from ".";
 import Repo from "./bases/Repo";
 import { TransactionMessage } from "../types/dtos";
 import { UserType } from "../types/enums";
+import { TrustProductsChannelEndpointAssignmentContextImpl } from "twilio/lib/rest/trusthub/v1/trustProducts/trustProductsChannelEndpointAssignment";
 
 interface MessageDto {
     id?: string,
@@ -17,20 +18,31 @@ interface MessageDto {
 
 export default class Message extends Repo<MessageDto> {
 
+    private messageSelect = {
+        id: true,
+        senderId: true,
+        recipientId: true,
+        text: true,
+        timestamp: true,
+        recipientOnline: true,
+        chatId: true,
+        senderType: true,
+        recipientType: true,
+        messageMedias: {
+            select: {
+                id: true,
+                url: true,
+                size: true,
+                mimeType: true,
+                thumbnail: true,
+                duration: true
+            }
+        }
+    };
+
     public constructor() {
         super('message');
     }
-
-    // public override async insert(data: any) {
-    //     try {
-    //         const newItem = await prisma.message.create({
-    //             data: data
-    //         });
-    //         return this.repoResponse(false, 201, null, newItem);
-    //     } catch (error) {
-    //         return this.handleDatabaseError(error);
-    //     }
-    // }
 
     public async insert(newMessage: any) {
         try {
@@ -147,22 +159,6 @@ export default class Message extends Repo<MessageDto> {
         }
     }
 
-    // public async markMessagesAsRead(chatId: string, userType: string) {
-    //     try {
-    //         const updatedMessages = await prisma.message.updateMany({
-    //             where: {
-    //                 chatId: chatId,
-    //                 senderType: { not: userType as any },
-    //             },
-    //             data: {
-    //                 read: true,
-    //             },
-    //         });
-    //         return this.repoResponse(false, 201, null, updatedMessages);
-    //     } catch (error) {
-    //         return this.handleDatabaseError(error);
-    //     }
-    // }
 
     public async updateOfflineMessages(chatIds: string[], userType: string) {
         try {
@@ -211,6 +207,37 @@ export default class Message extends Repo<MessageDto> {
             return this.repoResponse(false, 200, null, data);
         } catch (error) {
             return this.handleDatabaseError(error);
+        }
+    }
+
+    public async findChatMessages(room: { productId: number, vendorId: number, customerId: number }, skip: number, take: number) {
+        try {
+            const data = await this.prisma.$transaction(async (tx) => {
+                const items = await tx.chat.findUnique({
+                    where: {
+                        productId_vendorId_customerId: room,
+                    },
+                    include: {
+                        messages: {
+                            skip,
+                            take,
+                            select: this.messageSelect,
+                            orderBy: { updatedAt: 'desc' }
+                        }
+                    }
+                });
+
+                let totalRecords = 0
+
+                if (items && items.messages.length > 0) {
+                    const chatId = items.messages[0].chatId;
+                    totalRecords = await tx.message.count({ where: { chatId: chatId } })
+                }
+                return { items, totalRecords };
+            });
+            return this.repoResponse(false, 200, null, data);
+        } catch (error) {
+            return super.handleDatabaseError(error);
         }
     }
 

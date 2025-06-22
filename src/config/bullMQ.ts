@@ -12,3 +12,7 @@ export const sendMessage = new Queue('send-message', {
 export const updateChat = new Queue('update-chat', {
     connection: { url: env('redisURL')! },
 });
+
+export const updateMessages = new Queue('update-messages', {
+    connection: { url: env('redisURL')! },
+});

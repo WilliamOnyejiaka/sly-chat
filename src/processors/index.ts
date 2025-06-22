@@ -1,3 +1,4 @@
 import { SendMessageProcessor } from "./SendMessage";
+import { UpdateMessages } from "./UpdateMessages";
 
-export { SendMessageProcessor };
+export { SendMessageProcessor, UpdateMessages };
