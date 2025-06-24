@@ -1,9 +1,9 @@
 import { Server } from "socket.io";
 import { Job } from "bullmq";
-import { Events, Namespaces, WorkerConfig, IWorker, UpdateChatJob } from "../types/enums";
+import { Events, Namespaces, WorkerConfig, IWorker, UpdateChatJob, ServiceResultDataType } from "../types/enums";
 import { ChatManagementFacade } from "../facade";
 import Handler from "../handlers/sockets/Handler";
-import { ChatPagination } from "../types";
+import { ChatPagination, SocketData } from "../types";
 
 export class UpdateChat implements IWorker<UpdateChatJob> {
 
@@ -19,21 +19,15 @@ export class UpdateChat implements IWorker<UpdateChatJob> {
 
     public async process(job: Job<UpdateChatJob>) {
         const { recipientSocketId, recipientId, recipientType } = job.data;
-        const pagination: ChatPagination = {
-            page: 1,
-            limit: 10,
-            message: {
-                page: 1,
-                limit: 10
-            }
-        };
-        const allChats = await this.facade.socketGetUserChats(recipientId, recipientType, pagination); // TODO: handle this
+
+        const result = await this.facade.chatService.getUserChats(recipientId, recipientType, 1, 10, ServiceResultDataType.SOCKET) as SocketData;
         const namespace = this.io.of(Namespaces.CHAT);
-        if (allChats.error) {
-            namespace.to(recipientSocketId).emit('appError', allChats);
+        if (result.error) {
+            namespace.to(recipientSocketId).emit(Events.APP_ERROR, result);
             return;
         }
 
-        namespace.to(recipientSocketId).emit('updateChat', Handler.responseData(200, false, allChats.message, allChats.data));
+        namespace.to(recipientSocketId).emit('updateChat', Handler.responseData(200, false, result.message, result.data));
+        return;
     }
 }

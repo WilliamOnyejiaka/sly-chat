@@ -16,12 +16,7 @@ export default class Chat {
 
     public static sendMedia(resourceType: ResourceType, folder: CdnFolders) {
         return async (req: Request, res: Response) => {
-            const validationErrors = validationResult(req);
-
-            if (!validationErrors.isEmpty()) {
-                Controller.handleValidationErrors(res, validationErrors);
-                return;
-            }
+            Controller.handleValidationError(req, res);
 
             const userId = Number(res.locals.data.id);
             const userType = res.locals.userType;
@@ -31,11 +26,11 @@ export default class Chat {
             let {
                 recipientId,
                 productId,
-                text,
-                storeId
+                text
             } = req.body;
 
             recipientId = Number(recipientId);
+            productId = Number(productId);
             const { customerId, vendorId } = userIds(userId, recipientId, userType);
             const recipientType = (userType === UserType.Customer ? UserType.Vendor : UserType.Customer).toUpperCase();
 
@@ -43,7 +38,8 @@ export default class Chat {
             const usersOnlineStatusResult = await Chat.facade.getUsersOnlineStatus(Number(userId), Number(recipientId), userType);
             if (usersOnlineStatusResult.error) {
                 Controller.rawResponse(
-                    res, usersOnlineStatusResult.statusCode,
+                    res,
+                    usersOnlineStatusResult.statusCode,
                     usersOnlineStatusResult.error,
                     usersOnlineStatusResult.message
                 );
@@ -51,6 +47,15 @@ export default class Chat {
             }
 
             const { userSocketId, recipientSocketId } = usersOnlineStatusResult.data;
+            if (!userSocketId) {
+                Controller.rawResponse(
+                    res,
+                    400,
+                    true,
+                    "User must be online"
+                );
+                return;
+            }
             const recipientIsOnline = !!recipientSocketId;
 
             let newMessage: TransactionMessage = {
@@ -63,28 +68,21 @@ export default class Chat {
 
             };
 
+            const unReadData = userType === UserType.Customer ? { unReadVendorMessages: true } : { unReadCustomerMessages: true };
+
             const newChat: TransactionChat = {
-                customerId,
+                productId,
                 vendorId,
-                productId: Number(productId),
-
-            };
-            const pagination: ChatPagination = {
-                page: 1,
-                limit: 10,
-                message: {
-                    page: 1,
-                    limit: 10
-                }
+                customerId,
+                ...unReadData
             };
 
-            const facadeResult = await Chat.facade.createChatWithMedia(
+            const facadeResult = await Chat.facade.createMessageMedia(
                 newChat,
                 newMessage,
                 req.files as Express.Multer.File[],
                 resourceType,
-                folder,
-                pagination
+                folder
             );
 
             if (facadeResult.json.error) {
@@ -166,28 +164,14 @@ export default class Chat {
     }
 
     public static async getUserChats(req: Request, res: Response) {
-        const validationErrors = validationResult(req);
-
-        if (!validationErrors.isEmpty()) {
-            Controller.handleValidationErrors(res, validationErrors);
-            return;
-        }
+        Controller.handleValidationError(req, res);
 
         const userId = res.locals.data.id;
         const userType = res.locals.userType;
         const page = Number(req.query.page);
         const limit = Number(req.query.limit);
-        const messagePage = Number(req.query.messagePage);
-        const messageLimit = Number(req.query.messageLimit);
-        const pagination: ChatPagination = {
-            page: page,
-            limit: limit,
-            message: {
-                page: messagePage,
-                limit: messageLimit
-            }
-        };
-        const facadeResult = await Chat.facade.httpGetUserChats(userId, userType, pagination);
+
+        const facadeResult = await Chat.facade.chatService.getUserChats(userId, userType, page, limit) as HttpData;
         Controller.response(res, facadeResult);
     }
 
@@ -235,40 +219,22 @@ export default class Chat {
     }
 
     public static async getChat(req: Request, res: Response) {
-        const validationErrors = validationResult(req);
+        Controller.handleValidationError(req, res);
 
-        if (!validationErrors.isEmpty()) {
-            Controller.handleValidationErrors(res, validationErrors);
-            return;
-        }
-
+        const userType = res.locals.userType as UserType;
+        const userId = Number(res.locals.data.id);
+        const participantId = Number(req.params.participantId);
         const productId = Number(req.params.productId);
-        const customerId = Number(req.params.customerId);
-        const vendorId = Number(req.params.vendorId);
-        const page = Number(req.query.page);
-        const limit = Number(req.query.limit);
-        const messagePage = Number(req.query.messagePage);
-        const messageLimit = Number(req.query.messageLimit);
-        const pagination: ChatPagination = {
-            page: page,
-            limit: limit,
-            message: {
-                page: messagePage,
-                limit: messageLimit
-            }
-        };
 
-        const facadeResult = await Chat.facade.httpGetChatWithRoomId(productId, customerId, vendorId, pagination);
+        const [vendorId, customerId] = userType === UserType.Vendor ? [userId, participantId] : [participantId, userId];
+
+        const facadeResult = await Chat.facade.chatService.getChat({ productId, customerId, vendorId }) as HttpData;
         Controller.response(res, facadeResult);
     }
 
     public static async deleteMessage(req: Request, res: Response) {
-        const validationErrors = validationResult(req);
+        Controller.handleValidationError(req, res);
 
-        if (!validationErrors.isEmpty()) {
-            Controller.handleValidationErrors(res, validationErrors);
-            return;
-        }
         const userType = res.locals.userType as string;
         const userId = Number(res.locals.data.id);
         const messageId = req.params.messageId;

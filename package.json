@@ -10,7 +10,6 @@
     "copy-views": "cp -R src/views dist/views",
     "copy-docs": "cp -R src/docs dist/docs",
     "change": "npx prisma generate",
-    "migrate": "npx prisma migrate deploy",
     "db-reset": "npx prisma migrate reset --force",
     "format": "npx prisma format",
     "cli": "ts-node src/console/index.ts",

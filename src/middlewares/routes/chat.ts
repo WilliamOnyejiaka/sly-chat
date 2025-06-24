@@ -6,11 +6,11 @@ const sendMedia = [
     validateFileUpload,
     validateBody([
         'recipientId',
-        'productId',
-        'storeId'
+        'productId'
     ]),
     bodyNumberIsValid('recipientId'),
-    bodyNumberIsValid('storeId')
+    bodyNumberIsValid('productId')
+
 ];
 
 export const sendImage = [
@@ -47,6 +47,5 @@ export const recentMessages = [
 ];
 
 export const getChat = [
-    paramNumberIsValid('vendorId'),
-    paramNumberIsValid('customerId')
+    ...recentMessages
 ]

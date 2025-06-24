@@ -11,9 +11,7 @@ export default class General {
             const files: Record<string, string> = {
                 'chat': "TransactionChat.md",
                 'notification': "Notification.md",
-                'general': "General.md",
-                'sendFile': "SendFile.md",
-                'chatRoutes': "ChatRoutes.md"
+                'general': "General.md"
             };
 
             if (!(files as any)[query]) {

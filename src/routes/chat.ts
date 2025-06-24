@@ -14,8 +14,8 @@ chat.get("/messages/recent/:productId/:participantId", recentMessages, asyncHand
 chat.get("/messages/:productId/:participantId", messages, asyncHandler(Chat.messages));
 chat.delete("/message/:messageId", asyncHandler(Chat.deleteMessage));
 
-chat.get("/:productId/:vendorId/:customerId", getChat, asyncHandler(Chat.getChat));
+chat.get("/:productId/:participantId", getChat, asyncHandler(Chat.getChat));
 chat.delete("/:id", asyncHandler(Chat.deleteChat));
-chat.get("/", asyncHandler(Chat.getUserChats));
+chat.get("/", pagination, asyncHandler(Chat.getUserChats));
 
 export default chat;

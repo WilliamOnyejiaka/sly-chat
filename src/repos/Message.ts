@@ -242,10 +242,17 @@ export default class Message extends Repo<MessageDto> {
     }
 
     public async deleteMessage(id: string, userId: number, userType: string) {
-        const where = userType === UserType.Customer.toUpperCase() ? { customerId: userId } : { vendorId: userId };
-        return this.delete({
-            id: id,
-            ...where
-        });
+        try {
+            const data = await this.prisma.message.delete({
+                where: {
+                    id: id,
+                    senderId: userId,
+                    senderType: userType as any
+                }
+            });
+            return this.repoResponse(false, 200, null, data);
+        } catch (error) {
+            return super.handleDatabaseError(error);
+        }
     }
 }

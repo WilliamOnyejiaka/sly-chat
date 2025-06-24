@@ -61,6 +61,19 @@ export default class Chat extends BaseService<ChatRepo> {
         return super.responseData(dataType, 201, false, "Chats has been retrieved successfully", { items, pagination, rooms });
     }
 
+    public async getUserChats(userId: number, userType: UserType, page: number, limit: number, dataType: ServiceResultDataType = ServiceResultDataType.HTTP) {
+        const user = userType === UserType.Customer ? { customerId: userId } : { vendorId: userId };
+        const { skip, take } = this.skipAndTake(page, limit);
+
+        const repoResult = await this.repo!.getChats(user, skip, take);
+        const repoResultError = super.handleRepoError(dataType, repoResult);
+        if (repoResultError) return repoResultError;
+
+        let { items, totalRecords } = repoResult.data as any;
+        const pagination = getPagination(page, limit, totalRecords);
+        return super.responseData(dataType, 201, false, "Chats has been retrieved successfully", { items, pagination });
+    }
+
     public async joinChat(
         productId: number,
         customerId: number,
@@ -78,29 +91,6 @@ export default class Chat extends BaseService<ChatRepo> {
             item = { ...item, pagination: messagePagination }
         }
         return super.responseData(ServiceResultDataType.SOCKET, 200, false, "Chat has been retrieved successfully", item) as SocketData;
-    }
-
-    public async getChat(chatId: string, dataType: ServiceResultDataType) {
-        const repoResult = await this.repo!.getChatWithMessages({ id: chatId })
-        const repoResultError = super.handleRepoError(dataType, repoResult);
-        if (repoResultError) return repoResultError;
-
-        return super.responseData(dataType, 200, false, "Chats has been retrieved successfully", repoResult.data);
-    }
-
-    public async getUserChatsWithMessages(userId: number, userType: UserType, pagination: ChatPagination, dataType: ServiceResultDataType) {
-        const chatLimit: ChatLimit = this.chatLimit(pagination);
-        const repoResult = userType === UserType.Customer
-            ? await this.repo!.getCustomerChatsWithMessages(userId, chatLimit)
-            : await this.repo!.getVendorChatsWithMessages(userId, chatLimit);
-
-        const repoResultError = super.handleRepoError(dataType, repoResult);
-        if (repoResultError) return repoResultError;
-        const data = repoResult.data as any;
-        const totalRecords = data.totalItems;
-        const items = data.items;
-        const paginationData = getPagination(pagination.page, pagination.limit, totalRecords);
-        return super.responseData(dataType, 200, false, "Chats and messages has been retrieved successfully", { items, pagination: paginationData });
     }
 
     public async getChatId(productId: number, customerId: number, vendorId: number) {
@@ -137,6 +127,13 @@ export default class Chat extends BaseService<ChatRepo> {
         const repoResultError = super.handleRepoError(ServiceResultDataType.SOCKET, repoResult);
         if (repoResultError) return repoResultError;
         return super.responseData(ServiceResultDataType.SOCKET, 200, false, "Chats has been marked as read successfully", repoResult.data);
+    }
+
+    public async getChat(room: { productId: number, vendorId: number, customerId: number }) {
+        const repoResult = await this.repo!.findChat(room);
+        const repoResultError = super.handleRepoError(ServiceResultDataType.HTTP, repoResult);
+        if (repoResultError) return repoResultError;
+        return super.responseData(ServiceResultDataType.HTTP, 200, false, "Chat has been retrieved successfully", repoResult.data);
     }
 
     public async deleteChat(chatId: string, userId: number, userType: string, dataType: ServiceResultDataType) {

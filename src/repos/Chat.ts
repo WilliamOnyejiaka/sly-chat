@@ -96,11 +96,13 @@ export default class Chat extends Repo {
 
     public async insertChatWithMessageAndMedias(newChat: TransactionChat, newMessage: any, medias: any) {
         try {
-            const newItem = await prisma.chat.create({
+            const newItem = await this.prisma.chat.create({
                 data: {
                     vendorId: newChat.vendorId,
                     productId: newChat.productId,
                     customerId: newChat.customerId,
+                    unReadCustomerMessages: newChat.unReadCustomerMessages,
+                    unReadVendorMessages: newChat.unReadVendorMessages,
                     messages: {
                         create: {
                             text: newMessage.text,
@@ -307,22 +309,6 @@ export default class Chat extends Repo {
         }
     }
 
-    // public async getChatWithRoomId(productId: number, customerId: number, vendorId: number) {
-    //     try {
-    //         const items = await prisma.chat.findFirst({
-    //             where: { productId, customerId, vendorId },
-    //             include: {
-    //                 messages: {
-    //                     select: this.messageSelect,
-    //                     orderBy: { updatedAt: 'desc' }
-    //                 }
-    //             }
-    //         });
-    //         return this.repoResponse(false, 200, null, items);
-    //     } catch (error) {
-    //         return this.handleDatabaseError(error);
-    //     }
-    // }
     public async getCustomerChatsWithMessages(userId: number, pagination: ChatLimit) {
         try {
             // const data = await this.prisma.$transaction(async (tx): Promise<{ items: any, totalItems: number }> => {
@@ -476,6 +462,48 @@ export default class Chat extends Repo {
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') return this.repoResponse(false, 200, null, null);
             return this.handleDatabaseError(error);
+        }
+    }
+
+    public async findChatWithMessages(room: { productId: number, vendorId: number, customerId: number }, skip: number, take: number) {
+        try {
+            const data = await this.prisma.$transaction(async (tx) => {
+                const items = await tx.chat.findUnique({
+                    where: {
+                        productId_vendorId_customerId: room,
+                    },
+                    include: {
+                        messages: {
+                            skip,
+                            take,
+                            select: this.messageSelect,
+                            orderBy: { updatedAt: 'desc' }
+                        }
+                    }
+                });
+
+                let totalRecords = 0
+
+                if (items && items.messages.length > 0) {
+                    const chatId = items.messages[0].chatId;
+                    totalRecords = await tx.message.count({ where: { chatId: chatId } })
+                }
+                return { items, totalRecords };
+            });
+            return this.repoResponse(false, 200, null, data);
+        } catch (error) {
+            return super.handleDatabaseError(error);
+        }
+    }
+
+    public async findChat(room: { productId: number, vendorId: number, customerId: number }) {
+        try {
+            const data = await this.prisma.chat.findUnique({
+                where: { productId_vendorId_customerId: room }
+            });
+            return this.repoResponse(false, 200, null, data);
+        } catch (error) {
+            return super.handleDatabaseError(error);
         }
     }
 }

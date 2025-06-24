@@ -14,5 +14,3 @@ This key should be put in the `'x-api-key'` header and this key is for the route
 
 - [TransactionChat](/docs?doc=chat)
 - [Notification](/docs?doc=notification)
-- [SendFile](/docs?doc=sendFile)
-- [ChatRoutes](/docs?doc=chatRoutes)

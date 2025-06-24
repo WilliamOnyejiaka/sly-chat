@@ -59,80 +59,107 @@ This event is triggered when a user establishes a connection to the **chat names
 
 ### **Success Response (User Connected)**
 
-#### **userChats emit**
-
-```json
-{
-  "error": false,
-  "message": "Chats have been sent successfully",
-  "statusCode": 200,
-  "data": [
-    {
-      "id": "67c041dd744c61c167a18a32",
-      "productId": "12345",
-      "vendorId": 2,
-      "customerId": 2,
-      "storeId": 8,
-      "createdAt": "2025-02-27T10:43:41.905Z",
-      "lastMessageAt": "2025-02-27T10:43:41.905Z",
-      "messages": [
-        {
-          "senderId": 2,
-          "text": "Are you crazy?",
-          "timestamp": "2025-02-27T10:43:41.905Z",
-          "read": false,
-          "recipientOnline": true,
-          "chatId": "67c041dd744c61c167a18a32",
-          "senderType": "CUSTOMER",
-          "messageMedia": []
-        }
-      ]
-    },
-    "vendor": {
-      "id": "680f9806bc5c3ba5f87ffff2",
-      "userId": 4,
-      "firstName": "William",
-      "lastName": "Lock 7",
-      "profilePictureUrl": null,
-      "email": "williamonyejiakddda2021@gmail.com",
-      "verified": false,
-      "phoneNumber": "sdxlkkshhjbdjhddfdfnfss",
-      "active": true,
-      "createdAt": "2025-04-28T15:00:20.655Z",
-      "updatedAt": "2025-04-28T15:00:20.655Z",
-      "store": [{
-        "id": "680f98fac7fe6cd09231fe63",
-        "name": "Wonderds",
-        "vendorId": 4,
-        "storeId": 7,
-        "storeLogoUrl": null,
-        "createdAt": "2025-04-28T15:04:26.541Z",
-        "updatedAt": "2025-04-28T15:04:26.541Z"
-      }]
-    }
-  ]
-}
-```
-
-#### **offlineMessages emit**
+#### ** offlineMessages emit**
 
 ```json
 {
   "statusCode": 200,
   "error": false,
   "message": "Offline messages has been sent successfully",
-  "data": [
-    {
-      "senderId": 2,
-      "text": "Are you crazy?",
-      "timestamp": "2025-02-27T10:43:41.905Z",
-      "read": false,
-      "recipientOnline": true,
-      "chatId": "67c041dd744c61c167a18a32",
-      "senderType": "CUSTOMER",
-      "messageImages": []
+  "data": {
+    "items": [
+      {
+        "id": "685aba2ab276ec25a711e6c0",
+        "senderId": 5,
+        "senderType": "VENDOR",
+        "recipientId": 1,
+        "recipientType": "CUSTOMER",
+        "text": "Hi Customer",
+        "timestamp": "2025-06-24T14:46:02.473Z",
+        "recipientOnline": true,
+        "chatId": "685aba25b276ec25a711e6be",
+        "createdAt": "2025-06-24T14:46:02.473Z",
+        "updatedAt": "2025-06-24T14:46:02.473Z",
+        "supportChatId": null,
+        "chat": {
+          "id": "685aba25b276ec25a711e6be",
+          "productId": 12345,
+          "vendorId": 5,
+          "customerId": 1,
+          "lastMessageAt": "2025-06-24T14:46:03.713Z",
+          "createdAt": "2025-06-24T14:45:57.164Z",
+          "unReadCustomerMessages": true,
+          "unReadVendorMessages": false
+        }
+      },
+      {
+        "id": "685aba25b276ec25a711e6bf",
+        "senderId": 5,
+        "senderType": "VENDOR",
+        "recipientId": 1,
+        "recipientType": "CUSTOMER",
+        "text": "Hi Customer",
+        "timestamp": "2025-06-24T14:45:57.164Z",
+        "recipientOnline": true,
+        "chatId": "685aba25b276ec25a711e6be",
+        "createdAt": "2025-06-24T14:45:57.164Z",
+        "updatedAt": "2025-06-24T14:45:57.164Z",
+        "supportChatId": null,
+        "chat": {
+          "id": "685aba25b276ec25a711e6be",
+          "productId": 12345,
+          "vendorId": 5,
+          "customerId": 1,
+          "lastMessageAt": "2025-06-24T14:46:03.713Z",
+          "createdAt": "2025-06-24T14:45:57.164Z",
+          "unReadCustomerMessages": true,
+          "unReadVendorMessages": false
+        }
+      }
+    ],
+    "pagination": {
+      "currentPage": 1,
+      "nextPage": null,
+      "prevPage": null,
+      "hasNext": false,
+      "hasPrev": false,
+      "totalPages": 1,
+      "totalRecords": 2
     }
-  ]
+  }
+}
+```
+
+#### **userChats emit**
+
+```json
+{
+  "statusCode": 200,
+  "error": false,
+  "message": "Chats have been sent successfully",
+  "data": {
+    "items": [
+      {
+        "id": "685aba25b276ec25a711e6be",
+        "productId": 12345,
+        "vendorId": 5,
+        "customerId": 1,
+        "lastMessageAt": "2025-06-24T14:46:03.713Z",
+        "createdAt": "2025-06-24T14:45:57.164Z",
+        "unReadCustomerMessages": true,
+        "unReadVendorMessages": false
+      }
+    ],
+    "pagination": {
+      "currentPage": 1,
+      "nextPage": null,
+      "prevPage": null,
+      "hasNext": false,
+      "hasPrev": false,
+      "totalPages": 1,
+      "totalRecords": 1
+    }
+  }
 }
 ```
 
@@ -154,7 +181,8 @@ A user joins a chat room with another user. This allows them to receive real-tim
 
 ```json
 {
-  "chatId": "67c04c9f108c8c9aa29b1d11"
+  "productId": 12345,
+  "recipientId": 5
 }
 ```
 
@@ -162,7 +190,7 @@ A user joins a chat room with another user. This allows them to receive real-tim
 
 - Fetch the chat from the database.
 - Mark previous unread messages as **read**.
-- Emit **"loadMessages"** to the user with chat history.
+- Emit **"loadChat"** to the user with chat history.
 
 ### **Example Response:**
 
@@ -172,73 +200,46 @@ A user joins a chat room with another user. This allows them to receive real-tim
 {
   "statusCode": 200,
   "error": false,
-  "message": "Chats has been loaded",
+  "message": "Chat has been loaded",
   "data": {
-    "id": "67c782b71fdd817ba74f45a2",
-    "productId": "12345",
-    "vendorId": 2,
-    "customerId": 2,
-    "storeId": 8,
-    "lastMessageAt": "2025-03-04T23:01:23.308Z",
-    "createdAt": "2025-03-04T22:46:15.111Z",
+    "id": "685aba25b276ec25a711e6be",
+    "productId": 12345,
+    "vendorId": 5,
+    "customerId": 1,
+    "lastMessageAt": "2025-06-24T14:46:03.713Z",
+    "createdAt": "2025-06-24T14:45:57.164Z",
+    "unReadCustomerMessages": true,
+    "unReadVendorMessages": false,
     "messages": [
       {
-        "senderId": 2,
-        "text": "Hi Socket",
-        "timestamp": "2025-03-04T22:48:33.962Z",
-        "read": true,
+        "id": "685aba25b276ec25a711e6bf",
+        "senderId": 5,
+        "text": "Hi Customer",
+        "timestamp": "2025-06-24T14:45:57.164Z",
         "recipientOnline": true,
-        "chatId": "67c782b71fdd817ba74f45a2",
+        "chatId": "685aba25b276ec25a711e6be",
         "senderType": "VENDOR",
         "messageMedias": []
       },
       {
-        "senderId": 2,
-        "text": null,
-        "timestamp": "2025-03-04T22:46:15.111Z",
-        "read": true,
+        "id": "685aba2ab276ec25a711e6c0",
+        "senderId": 5,
+        "text": "Hi Customer",
+        "timestamp": "2025-06-24T14:46:02.473Z",
         "recipientOnline": true,
-        "chatId": "67c782b71fdd817ba74f45a2",
-        "senderType": "CUSTOMER",
-        "messageMedias": [
-          {
-            "id": "67c782b71fdd817ba74f45a4",
-            "imageUrl": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741128374/chat-cdn/chat-pdfs/yddnfa9zysjqyjpmf9ax",
-            "size": "4067",
-            "mimeType": "application/pdf"
-          }
-        ]
-      },
-      {
-        "senderId": 2,
-        "text": null,
-        "timestamp": "2025-03-04T22:46:45.502Z",
-        "read": true,
-        "recipientOnline": true,
-        "chatId": "67c782b71fdd817ba74f45a2",
-        "senderType": "CUSTOMER",
-        "messageMedias": [
-          {
-            "id": "67c782d51fdd817ba74f45a6",
-            "imageUrl": "http://res.cloudinary.com/dyjhe7cg2/raw/upload/v1741128405/chat-cdn/chat-pdfs/raudlbqxopthsnbb0egl",
-            "size": "4067",
-            "mimeType": "application/pdf"
-          }
-        ]
+        "chatId": "685aba25b276ec25a711e6be",
+        "senderType": "VENDOR",
+        "messageMedias": []
       }
     ],
-    "customer": {
-      "id": "680f9806bc5c3ba5f87ffff2",
-      "userId": 4,
-      "firstName": "William",
-      "lastName": "Lock 7",
-      "profilePictureUrl": null,
-      "email": "williamonyejiakddda2021@gmail.com",
-      "verified": false,
-      "phoneNumber": "sdxlkkshhjbdjhddfdfnfss",
-      "active": true,
-      "createdAt": "2025-04-28T15:00:20.655Z",
-      "updatedAt": "2025-04-28T15:00:20.655Z"
+    "pagination": {
+      "currentPage": 1,
+      "nextPage": null,
+      "prevPage": null,
+      "hasNext": false,
+      "hasPrev": false,
+      "totalPages": 1,
+      "totalRecords": 2
     }
   }
 }
@@ -247,6 +248,8 @@ A user joins a chat room with another user. This allows them to receive real-tim
 ---
 
 # **3. Join Rooms**
+
+### ** Leave For Now **
 
 ### **Event Name:** `joinRooms`
 
@@ -397,7 +400,6 @@ Sends a message to another user. If there is no existing chat, a new one is crea
 {
   "productId": 12345,
   "text": "Are you crazy?",
-  "storeId": 2,
   "recipientId": 2
 }
 ```
@@ -405,9 +407,8 @@ Sends a message to another user. If there is no existing chat, a new one is crea
 ### **Server Actions:**
 
 1. If the recipient is **online**, it emits `newChat`.
-2. If the recipient is **offline**, mark the message as **unread**.
-3. If the chat does not exist, and the recipient is online ,the server emits `receiveMessage`, the productId and recipientId are required.
-4. If a chat already exists or not it emits `receiveMessage`.The recipient with not get this event if the chat is new.
+2. If the chat does not exist, and the recipient is online ,the server emits `receiveMessage`, the productId and recipientId are required.
+3. If a chat already exists or not it emits `receiveMessage`.The recipient with not get this event if the chat is new.
 
 ### **Example Response:**
 
@@ -422,9 +423,10 @@ Sends a message to another user. If there is no existing chat, a new one is crea
     "productId": "1234589679",
     "vendorId": 2,
     "customerId": 2,
-    "storeId": 3,
     "lastMessageAt": "2025-03-05T00:43:41.523Z",
     "createdAt": "2025-03-05T00:43:41.523Z",
+    "unReadCustomerMessages": true,
+    "unReadVendorMessages": false,
     "messages": [
       {
         "senderId": 2,
@@ -450,8 +452,7 @@ Sends a message to another user. If there is no existing chat, a new one is crea
       "createdAt": "2025-04-28T15:00:20.655Z",
       "updatedAt": "2025-04-28T15:00:20.655Z"
     }
-  },
-  "data": {}
+  }
 }
 ```
 
@@ -495,8 +496,29 @@ Marks all messages in a chat as read.
 
 ```json
 {
-  "productId": 3234352,
-  "recipientId": 2
+  "statusCode": 200,
+  "error": false,
+  "message": {
+    "id": "67c79e3def5676c3f6bed3be",
+    "productId": "1234589679",
+    "vendorId": 2,
+    "customerId": 2,
+    "lastMessageAt": "2025-03-05T00:43:41.523Z",
+    "createdAt": "2025-03-05T00:43:41.523Z",
+    "unReadCustomerMessages": true,
+    "unReadVendorMessages": false,
+    "messages": [
+      {
+        "senderId": 2,
+        "text": "Finally",
+        "timestamp": "2025-03-05T00:43:41.523Z",
+        "read": false,
+        "recipientOnline": true,
+        "chatId": "67c79e3def5676c3f6bed3be",
+        "senderType": "CUSTOMER",
+        "messageMedias": []
+      }
+    ],
 }
 ```
 
@@ -521,6 +543,8 @@ Marks all messages in a chat as read.
 ---
 
 # **6. Delete Message**
+
+### ** Leave For Now **
 
 ### **Event Name:** `deleteMessage`
 
@@ -599,6 +623,8 @@ Notifies the recipient that the sender is typing.
 
 # **8. Get User Chats**
 
+### ** Leave For Now **
+
 ### **Event Name:** `getUserChats`
 
 ### **Emitted By:** Client
@@ -642,27 +668,29 @@ Fetches all chat conversations for the user.
         }
       ],
       "vendor": {
-      "id": "680f9806bc5c3ba5f87ffff2",
-      "userId": 4,
-      "firstName": "William",
-      "lastName": "Lock 7",
-      "profilePictureUrl": null,
-      "email": "williamonyejiakddda2021@gmail.com",
-      "verified": false,
-      "phoneNumber": "sdxlkkshhjbdjhddfdfnfss",
-      "active": true,
-      "createdAt": "2025-04-28T15:00:20.655Z",
-      "updatedAt": "2025-04-28T15:00:20.655Z",
-      "store": [{
-        "id": "680f98fac7fe6cd09231fe63",
-        "name": "Wonderds",
-        "vendorId": 4,
-        "storeId": 7,
-        "storeLogoUrl": null,
-        "createdAt": "2025-04-28T15:04:26.541Z",
-        "updatedAt": "2025-04-28T15:04:26.541Z"
-      }]
-    }
+        "id": "680f9806bc5c3ba5f87ffff2",
+        "userId": 4,
+        "firstName": "William",
+        "lastName": "Lock 7",
+        "profilePictureUrl": null,
+        "email": "williamonyejiakddda2021@gmail.com",
+        "verified": false,
+        "phoneNumber": "sdxlkkshhjbdjhddfdfnfss",
+        "active": true,
+        "createdAt": "2025-04-28T15:00:20.655Z",
+        "updatedAt": "2025-04-28T15:00:20.655Z",
+        "store": [
+          {
+            "id": "680f98fac7fe6cd09231fe63",
+            "name": "Wonderds",
+            "vendorId": 4,
+            "storeId": 7,
+            "storeLogoUrl": null,
+            "createdAt": "2025-04-28T15:04:26.541Z",
+            "updatedAt": "2025-04-28T15:04:26.541Z"
+          }
+        ]
+      }
     }
   ]
 }
@@ -671,6 +699,8 @@ Fetches all chat conversations for the user.
 ---
 
 # **9. Stopped Typing**
+
+### ** Leave For Now **
 
 ### **Event Name:** `stoppedTyping`
 

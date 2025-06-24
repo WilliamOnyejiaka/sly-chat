@@ -89,29 +89,29 @@ export default class ChatHandler {
         }
     }
 
-    public static async joinRooms(io: Server, socket: ISocket, data: any) {
-        const userId = socket.locals.data.id;
-        const userType = socket.locals.userType;
-        const pagination: ChatPagination = {
-            page: 1,
-            limit: 10,
-            message: {
-                page: 1,
-                limit: 10
-            }
-        };
+    // public static async joinRooms(io: Server, socket: ISocket, data: any) {
+    //     const userId = socket.locals.data.id;
+    //     const userType = socket.locals.userType;
+    //     const pagination: ChatPagination = {
+    //         page: 1,
+    //         limit: 10,
+    //         message: {
+    //             page: 1,
+    //             limit: 10
+    //         }
+    //     };
 
-        const facadeResult = await ChatHandler.facade.socketGetUserChats(Number(userId), userType, pagination);
-        if (facadeResult.error) {
-            socket.emit('appError', facadeResult);
-            return;
-        }
+    //     const facadeResult = await ChatHandler.facade.socketGetUserChats(Number(userId), userType, pagination);
+    //     if (facadeResult.error) {
+    //         socket.emit('appError', facadeResult);
+    //         return;
+    //     }
 
-        const chats = facadeResult.data;
-        const rooms = chats.map((item: any) => `chat_${item.productId}_${item.vendorId}_${item.customerId}`);
-        if (rooms.length > 0) socket.join(rooms);
-        socket.emit('userChats', Handler.responseData(200, false, "Chats has been sent successfully", chats));
-    }
+    //     const chats = facadeResult.data;
+    //     const rooms = chats.map((item: any) => `chat_${item.productId}_${item.vendorId}_${item.customerId}`);
+    //     if (rooms.length > 0) socket.join(rooms);
+    //     socket.emit('userChats', Handler.responseData(200, false, "Chats has been sent successfully", chats));
+    // }
 
     public static async joinChat(io: Server, socket: ISocket, data: any) {
         const userId = socket.locals.data.id;
@@ -303,7 +303,7 @@ export default class ChatHandler {
             socket.to(room).emit('updateReadReceipts', chat);
             console.log(`✅ Messages marked as read in room ${room}`);
         } else {
-            console.log(`⚠️ No chat found for room ${room} to mark as read`)
+            console.log(`⚠️ No chat found for room ${room} to mark as read`);
         }
     }
 
@@ -349,39 +349,39 @@ export default class ChatHandler {
         socket.to(room).emit('stoppedTyping', Handler.responseData(200, false, "User has stopped typing"));
     }
 
-    public static async getUserChats(io: Server, socket: ISocket, data: any) {
-        const userId = Number(socket.locals.data.id);
-        const userType = socket.locals.userType;
-        const { page, limit, messagePage, messageLimit } = data;
-        const arr = [page, limit, messagePage, messageLimit];
-        const isValid = arr.every(item => typeof item === "number" && item !== undefined);
-        if (!isValid) {
-            socket.emit(Events.APP_ERROR, {
-                error: true,
-                message: "All values are required and all must be integers",
-                data: {}
-            });
-            return;
-        }
+    // public static async getUserChats(io: Server, socket: ISocket, data: any) {
+    //     const userId = Number(socket.locals.data.id);
+    //     const userType = socket.locals.userType;
+    //     const { page, limit, messagePage, messageLimit } = data;
+    //     const arr = [page, limit, messagePage, messageLimit];
+    //     const isValid = arr.every(item => typeof item === "number" && item !== undefined);
+    //     if (!isValid) {
+    //         socket.emit(Events.APP_ERROR, {
+    //             error: true,
+    //             message: "All values are required and all must be integers",
+    //             data: {}
+    //         });
+    //         return;
+    //     }
 
-        const message = "Chats has been sent successfully";
-        const pagination: ChatPagination = {
-            page: page,
-            limit: limit,
-            message: {
-                page: messagePage,
-                limit: messageLimit
-            }
-        };
+    //     const message = "Chats has been sent successfully";
+    //     const pagination: ChatPagination = {
+    //         page: page,
+    //         limit: limit,
+    //         message: {
+    //             page: messagePage,
+    //             limit: messageLimit
+    //         }
+    //     };
 
-        const facadeResult = await ChatHandler.facade.socketGetUserChats(userId, userType, pagination);
-        if (facadeResult.error) {
-            socket.emit('appError', facadeResult);
-            return;
-        }
+    //     const facadeResult = await ChatHandler.facade.socketGetUserChats(userId, userType, pagination);
+    //     if (facadeResult.error) {
+    //         socket.emit('appError', facadeResult);
+    //         return;
+    //     }
 
-        socket.emit('userChats', Handler.responseData(200, false, message, facadeResult.data));
-    }
+    //     socket.emit('userChats', Handler.responseData(200, false, message, facadeResult.data));
+    // }
 
     public static async editMessage(io: Server, socket: ISocket, data: any) {
 
